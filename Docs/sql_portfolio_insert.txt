@@ -1,16 +1,20 @@
-insert into "Assets"
+﻿insert into "Assets"
 ("Id","TypeId","CountryId", "Name")
 values
-('RUB',2,1,'?'),
-('USD',2,2,'$'),
-('EUR',2,5,'�')
+('RUB',2,1,'Ruble'),
+('USD',2,2,'Dollar'),
+('EUR',2,5,'Euro'),
+('BTC',6,7,'Bitcoin'),
+('ETH',6,6,'Etherium')
 
 insert into "Derivatives"
 ("Id","Code","AssetId","AssetTypeId","Balance","UpdateTime")
 values
-('RUB','RUB','RUB',2,0, NOW()),
-('USD','USD','USD',2,0, NOW()),
-('EUR','EUR','EUR',2,0, NOW()),
+('RUB','₽','RUB',2,0, NOW()),
+('USD','$','USD',2,0, NOW()),
+('EUR','€','EUR',2,0, NOW()),
+('BTC','₿','BTC',6,0, NOW()),
+('ETH','Ξ','ETH',6,0, NOW()),
 ('US30303M1027','FB','FB',3,0, NOW()),
 ('US50155Q1004','KD_US','KD',3,0, NOW()),
 ('US25470F3029','DISCK','DISCK',3,0, NOW()),

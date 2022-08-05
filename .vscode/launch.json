@@ -1,0 +1,92 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "datasetter",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build_datasetter",
+      "program": "${workspaceFolder}/src/Services/DataSetter/bin/Debug/net6.0/DataSetter.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/DataSetter",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "market",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build_market",
+      "program": "${workspaceFolder}/src/Services/IM.Service.Market/bin/Debug/net6.0/IM.Service.Market.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/IM.Service.Market",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "portfolio",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build_portfolio",
+      "program": "${workspaceFolder}/src/Services/IM.Service.Portfolio/bin/Debug/net6.0/IM.Service.Portfolio.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/IM.Service.Portfolio",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "recommendations",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build_recommendations",
+      "program": "${workspaceFolder}/src/Services/IM.Service.Recommendations/bin/Debug/net6.0/IM.Service.Recommendations.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/IM.Service.Recommendations",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "identity",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build_identity",
+      "program": "${workspaceFolder}/src/Services/IM.Service.Identity/bin/Debug/net6.0/IM.Service.Identity.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/IM.Service.Identity",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": ".NET Core Attach",
+      "type": "coreclr",
+      "request": "attach",
+      "preLaunchTask": "build",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}

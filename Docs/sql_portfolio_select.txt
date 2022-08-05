@@ -22,17 +22,22 @@ left join "Assets" as "aout" on "aout"."Id" = "derout"."AssetId"
 order by "d"."Date" desc ,"ain"."Name"
 
 select 
---"Date"
-ROUND(sum("Value"),2)
---, "DerivativeCode"
-, "TypeId"
-, "Info"
-from "Events"
-where "DerivativeCode" = 'RUB' and "TypeId" in (3,6,7)
-group by  "TypeId", "Info"
-order by "TypeId", "Info"
+"e"."Date"
+,ROUND("e"."Value",2)
+,"d"."Code"
+,"et"."Name"
+,"et"."Description"
+,"e"."Info"
+from "Events" as "e" 
+left join "EventTypes" as "et" on "et"."Id" = "e"."TypeId"
+left join "Derivatives" as "d" on "d"."Id" = "e"."DerivativeId" and "d"."Code" = "e"."DerivativeCode"
+left join "Assets" as "a" on "a"."Id" = "d"."AssetId"
+order by "e"."Date" desc ,"a"."Name"
 
-select sum("Value"), "DerivativeCode" from "Events" where "TypeId" = 4 group by "DerivativeCode"
+select "et"."Description" from "Events" as "e" join "EventTypes" as "et" on "e"."TypeId" = "et"."Id" group by "et"."Description"
+
+--налоги на дивиденды
+select sum("Value"), "DerivativeCode" from "Events" where "TypeId" = 17 group by "DerivativeCode"
 
 select
 "a"."Name"
