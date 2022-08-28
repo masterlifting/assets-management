@@ -19,7 +19,7 @@ public class Account
     public string UserId { get; init; } = null!;
 
     public virtual Provider Provider { get; init; } = null!;
-    public int ProviderId { get; init; } = (int) Enums.Providers.Default;
+    public int ProviderId { get; init; }
 
     public DateOnly DateCreate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
 

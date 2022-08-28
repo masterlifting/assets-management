@@ -1,8 +1,9 @@
-﻿using System;
+﻿using AM.Services.Portfolio.Domain.Entities.Catalogs;
+
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AM.Services.Portfolio.Domain.Entities.Catalogs;
-using static AM.Services.Portfolio.Enums;
+
 using static AM.Services.Common.Contracts.Enums;
 
 namespace AM.Services.Portfolio.Domain.Entities;
@@ -30,7 +31,7 @@ public class Deal
     public string UserId { get; set; } = null!;
 
     public virtual Provider Provider { get; set; } = null!;
-    public int ProviderId { get; set; } = (int)Providers.Default;
+    public int ProviderId { get; set; }
 
     public virtual Exchange Exchange { get; set; } = null!;
     public byte ExchangeId { get; set; } = (byte)Exchanges.Default;

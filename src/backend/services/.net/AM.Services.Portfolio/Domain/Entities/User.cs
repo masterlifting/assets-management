@@ -12,6 +12,8 @@ public class User
     public string Name { get; set; } = null!;
 
     [JsonIgnore]
+    public virtual IEnumerable<ReportFile>? ReportFiles { get; set; }
+    [JsonIgnore]
     public virtual IEnumerable<Account>? Accounts { get; set; } = null!;
     [JsonIgnore]
     public virtual IEnumerable<Deal>? Deals { get; set; }

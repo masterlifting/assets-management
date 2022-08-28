@@ -34,7 +34,7 @@ public class Event
     public string UserId { get; set; } = null!;
 
     public virtual Provider Provider { get; set; } = null!;
-    public int ProviderId { get; set; } = (int)Providers.Default;
+    public int ProviderId { get; set; }
 
     public virtual Exchange Exchange { get; set; } = null!;
     public byte ExchangeId { get; set; } = (byte) Exchanges.Default;

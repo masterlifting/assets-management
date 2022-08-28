@@ -25,5 +25,5 @@ public class Provider
     [JsonIgnore]
     public virtual IEnumerable<Account>? Accounts { get; set; }
     [JsonIgnore]
-    public virtual IEnumerable<Report>? Reports { get; set; }
+    public virtual IEnumerable<ReportFile>? ReportFiles { get; set; }
 }

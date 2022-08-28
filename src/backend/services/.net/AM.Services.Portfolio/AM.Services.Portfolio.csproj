@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\.net\Shared.Infrastructure\Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\common\AM.Services.Common.Contracts\AM.Services.Common.Contracts.csproj" />
   </ItemGroup>
 

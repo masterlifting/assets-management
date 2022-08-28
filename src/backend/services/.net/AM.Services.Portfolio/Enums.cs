@@ -4,7 +4,6 @@ public static class Enums
 {
     public enum Providers
     {
-        Default = int.MaxValue-1,
         Safe = 1,
         BCS = 2,
         Tinkoff = 3,
@@ -46,5 +45,9 @@ public static class Enums
         TaxIncome = 17,
         TaxProvider = 18,
         TaxDepositary = 19
+    }
+    public enum Steps : byte
+    {
+        Parsing
     }
 }

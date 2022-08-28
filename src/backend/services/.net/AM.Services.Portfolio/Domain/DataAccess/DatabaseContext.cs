@@ -2,6 +2,7 @@
 using AM.Services.Portfolio.Domain.Entities;
 using AM.Services.Portfolio.Domain.Entities.Catalogs;
 using Microsoft.EntityFrameworkCore;
+using Shared.Contracts.Domains.Entities;
 
 namespace AM.Services.Portfolio.Domain.DataAccess;
 
@@ -23,10 +24,13 @@ public sealed class DatabaseContext : DbContext
     public DbSet<Event> Events { get; set; } = null!;
 
     public DbSet<Report> Reports { get; set; } = null!;
+    public DbSet<ReportFile> ReportFiles { get; set; } = null!;
 
     public DbSet<Provider> Providers { get; set; } = null!;
     public DbSet<Exchange> Exchanges { get; set; } = null!;
     public DbSet<Country> Countries { get; set; } = null!;
+
+    public DbSet<LongId> LongIds { get; set; } = null!;
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
@@ -43,12 +47,11 @@ public sealed class DatabaseContext : DbContext
 
         builder.Entity<Exchange>().HasData(Catalogs.Exchanges);
 
-        builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
-        builder.Entity<Report>().HasKey(x => new { x.Id, x.ProviderId, x.AccountId });
         builder.Entity<Derivative>().HasKey(x => new { x.Id, x.Code });
+        builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
+        builder.Entity<ReportFile>().HasIndex(x => new {x.Name, x.UserId, x.ProviderId}).IsUnique();
 
         builder.Entity<Provider>().HasData(
-            new() { Id = (int)Enums.Providers.Default, Name = nameof(Enums.Providers.Default), Description = "Не определено" },
             new() { Id = (int)Enums.Providers.Safe, Name = nameof(Enums.Providers.Safe), Description = "Приватное хранение" },
             new() { Id = (int)Enums.Providers.BCS, Name = "БКС", Description = "Брокер-банк" },
             new() { Id = (int)Enums.Providers.Tinkoff, Name = "Тинкофф", Description = "Банк-брокер" },

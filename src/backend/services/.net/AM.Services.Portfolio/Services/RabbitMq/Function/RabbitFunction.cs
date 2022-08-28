@@ -26,7 +26,6 @@ public class RabbitFunction : IRabbitAction
             QueueEntities.Events => serviceProvider.GetRequiredService<EventProcess>().ProcessRangeAsync(action, JsonHelper.Deserialize<Event[]>(data)),
             QueueEntities.Derivative => serviceProvider.GetRequiredService<DerivativeProcess>().ProcessAsync(action, JsonHelper.Deserialize<Derivative>(data)),
             QueueEntities.Derivatives => serviceProvider.GetRequiredService<DerivativeProcess>().ProcessRangeAsync(action, JsonHelper.Deserialize<Derivative[]>(data)),
-            QueueEntities.Report => serviceProvider.GetRequiredService<ReportProcess>().ProcessAsync(action, JsonHelper.Deserialize<ProviderReportDto>(data)),
             _ => serviceProvider.GetRequiredService<ILogger<RabbitFunction>>().LogDefaultTask($"{action} {entity}")
         };
     }

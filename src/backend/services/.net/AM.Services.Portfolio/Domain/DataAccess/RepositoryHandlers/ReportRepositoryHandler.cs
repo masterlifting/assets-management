@@ -1,17 +1,18 @@
-﻿using System;
+﻿using AM.Services.Common.Contracts.SqlAccess;
+using AM.Services.Portfolio.Domain.Entities;
+
+using Microsoft.EntityFrameworkCore;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AM.Services.Common.Contracts.SqlAccess;
-using AM.Services.Portfolio.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace AM.Services.Portfolio.Domain.DataAccess.RepositoryHandlers;
 
 public class ReportRepositoryHandler : RepositoryHandler<Report>
 {
-    private readonly DatabaseContext context;
-    public ReportRepositoryHandler(DatabaseContext context) => this.context = context;
+    private readonly DatabaseContext _context;
+    public ReportRepositoryHandler(DatabaseContext context) => _context = context;
 
     public override async Task<IEnumerable<Report>> RunUpdateRangeHandlerAsync(IReadOnlyCollection<Report> entities)
     {
@@ -19,18 +20,15 @@ public class ReportRepositoryHandler : RepositoryHandler<Report>
 
         var result = existEntities
             .Join(entities,
-                x => (x.Id, x.ProviderId, x.AccountId),
-                y => (y.Id, y.ProviderId, y.AccountId),
+                x => (x.ReportFileId, x.AccountId),
+                y => (y.ReportFileId, y.AccountId),
                 (x, y) => (Old: x, New: y))
             .ToArray();
 
-        foreach (var (Old, New) in result)
+        foreach (var (oldEntity, newEntity) in result)
         {
-            Old.UpdateTime = DateTime.UtcNow;
-            Old.DateStart = New.DateStart;
-            Old.DateEnd = New.DateEnd;
-            Old.ContentType = New.ContentType;
-            Old.Payload = New.Payload;
+            oldEntity.DateStart = newEntity.DateStart;
+            oldEntity.DateEnd = newEntity.DateEnd;
         }
 
         return result.Select(x => x.Old);
@@ -39,16 +37,13 @@ public class ReportRepositoryHandler : RepositoryHandler<Report>
     {
         entities = entities.ToArray();
 
-        var ids = entities
-            .GroupBy(x => x.Id)
-            .Select(x => x.Key);
-        var providerIds = entities
-            .GroupBy(x => x.ProviderId)
+        var reportFileIds = entities
+            .GroupBy(x => x.ReportFileId)
             .Select(x => x.Key);
         var accountIds = entities
             .GroupBy(x => x.AccountId)
             .Select(x => x.Key);
 
-        return context.Reports.Where(x => ids.Contains(x.Id) && providerIds.Contains(x.ProviderId) && accountIds.Contains(x.AccountId));
+        return _context.Reports.Where(x => reportFileIds.Contains(x.ReportFileId)&& accountIds.Contains(x.AccountId));
     }
 }
