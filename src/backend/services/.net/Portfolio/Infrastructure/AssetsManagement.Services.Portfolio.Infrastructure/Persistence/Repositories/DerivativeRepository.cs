@@ -1,0 +1,27 @@
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Repositories.Implementation;
+
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
+
+public class DerivativeRepository<TContext> : EntityStateRepository<Derivative, TContext>, IDerivativeRepository
+    where TContext : DbContext, IEntityStateDbContext
+{
+    protected DerivativeRepository(ILogger<Derivative> logger, TContext context) : base(logger, context)
+    {
+    }
+
+    public async Task<Dictionary<string, string[]>> GetGroupedDerivativesAsync(CancellationToken cToken)
+    {
+        var derivatives = await DbSet.Select(x => ValueTuple.Create(x.Id, x.Code)).ToArrayAsync(cToken);
+
+        return derivatives
+            .GroupBy(x => x.Item1)
+            .ToDictionary(x => x.Key, x => x.Select(y => y.Item2).ToArray());
+    }
+}

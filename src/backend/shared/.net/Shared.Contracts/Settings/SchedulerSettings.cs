@@ -2,26 +2,17 @@
 
 public class SchedulerSettings
 {
-    private List<DayOfWeek> _workDays;
-    public SchedulerSettings() => _workDays = new()
-        {
-            DayOfWeek.Monday,
-            DayOfWeek.Tuesday,
-            DayOfWeek.Wednesday,
-            DayOfWeek.Thursday,
-            DayOfWeek.Friday,
-            DayOfWeek.Saturday,
-            DayOfWeek.Sunday
-        };
+    private bool _isOnce;
+    private List<int> _workDays;
+    public SchedulerSettings() => _workDays = new() { 1, 2, 3, 4, 5, 6, 7 };
 
-    public bool IsEnable { get; set; }
+    public bool IsEnable { get; set; } = false;
     public bool IsOnce { get; set; } = false;
-    public string? WorkDays { get; set; }
-    public string WorkTime { get; set; } = null!;
-    public uint RetryMinutes { get; set; }
+    public string WorkDays { get; set; } = "1,2,3,4,5,6,7";
+    public string WorkTime { get; set; } = "00:10:00";
 
-    public DateTime DateStart { get; set; } = DateTime.UtcNow;
-    public DateTime? DateStop { get; set; }
+    public DateTime DateTimeStart { get; set; } = DateTime.UtcNow;
+    public DateTime? DateTimeStop { get; set; }
 
     public bool IsReady(out string info)
     {
@@ -29,51 +20,61 @@ public class SchedulerSettings
         var now = DateTime.UtcNow;
 
         if (!IsEnable)
-            return false;
-
-        if (DateStart.Date > now.Date)
         {
-            info = $"Дата старта задачи '{nameof(DateStart)}' еще не наступила";
-            return false;
-        }
-
-        if (DateStop.HasValue && DateStop.Value < now)
-        {
-            info = $"Дата и время остановки задачи '{nameof(DateStop)}' уже наступили";
+            info = $"Задача выключена настройкой '{nameof(IsEnable)}'";
             return false;
         }
 
         if (!string.IsNullOrWhiteSpace(WorkDays))
         {
             var workDays = WorkDays.Split(",");
-            _workDays = new List<DayOfWeek>(workDays.Length);
+            _workDays = new List<int>(workDays.Length);
 
             foreach (var number in workDays)
-                if (Enum.TryParse<DayOfWeek>(number.Trim(), true, out var workDay))
+                if (int.TryParse(number.Trim(), out var workDay))
                     _workDays.Add(workDay);
         }
 
-        if (!_workDays.Contains(now.DayOfWeek))
+        var dayNowNumber = now.DayOfWeek == 0 ? 7 : (int)now.DayOfWeek;
+        if (!_workDays.Contains(dayNowNumber))
         {
             info = $"Текущего дня недели нет в списке '{nameof(WorkDays)}'";
             return false;
         }
 
-        if (!IsOnce)
-            return true;
+        return true;
+    }
+    public bool IsStart(out string info)
+    {
+        info = string.Empty;
+        var now = DateTime.UtcNow;
 
-        var workTime = TimeOnly.Parse(WorkTime);
-        var currentTime = TimeOnly.FromDateTime(now);
-
-        if (workTime.Hour == currentTime.Hour
-            && (workTime.Minute <= 0 || workTime.Minute == currentTime.Minute)
-            && (workTime.Second <= 0 || workTime.Second == currentTime.Second))
+        if (DateTimeStart > now)
         {
-            WorkTime = workTime.AddMinutes(RetryMinutes).ToShortTimeString();
+            info = $"Дата старта задачи '{nameof(DateTimeStart)}: {DateTimeStart: yyyy-MM-dd HH:mm:ss}' еще не наступила";
+            return false;
+        }
+
+        return true;
+    }
+    public bool IsStop(out string info)
+    {
+        info = string.Empty;
+        var now = DateTime.UtcNow;
+
+        if (DateTimeStop.HasValue && DateTimeStop.Value < now)
+        {
+            info = $"Дата и время остановки задачи указанные в настройке '{nameof(DateTimeStop)}: {DateTimeStop: yyyy-MM-dd HH:mm:ss}' наступили";
             return true;
         }
 
-        info = $"Установленное время выполнения задачи c включенной настройкой '{nameof(IsOnce)}' не совпало";
+        if (IsOnce && _isOnce)
+        {
+            info = $"Однократный запуск задачи установлен настройкой '{nameof(IsOnce)}'";
+            return true;
+        }
+
         return false;
     }
+    public void SetOnce() => _isOnce = true;
 }

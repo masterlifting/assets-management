@@ -1,0 +1,19 @@
+version: '3.4'
+
+networks:
+  default:
+    name: depint
+services:
+  depint-adapter-cftb-host:
+    container_name: depint-adapter-cftb-host
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MS_PROPERTIES_INFOSYSTEMCODE=ZFR
+      - MS_PROPERTIES_INFOSYSTEMID=838
+      - MS_PROPERTIES_APP_TYPE=JAVA
+    ports:
+      - 5080:8080
+      # - 5043:443
+    volumes:
+      - ./../.docker/data/kafka/.cert/st_new_dc:/cert:ro

@@ -1,0 +1,9 @@
+version: '3.4'
+
+services:
+  depint-adapter-cftb-host:
+    image: ${REGISTRY:-depint}/adapter-cftb-host:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: ../
+      dockerfile: src/Depint.Adapter.Cftb.Host/Dockerfile
+

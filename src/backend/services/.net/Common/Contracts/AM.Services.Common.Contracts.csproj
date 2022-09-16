@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\shared\.net\Shared.Attributes\Shared.Attributes.csproj" />
+	  <ProjectReference Include="..\..\..\..\shared\.net\Shared.Infrastructure.Persistense\Shared.Infrastructure.Persistense.csproj" />
+	</ItemGroup>
+
+</Project>

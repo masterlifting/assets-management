@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\EntityStateService\Steps\Parsing\Reports\ReportFileTask.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.Infrastructure.Mq\Shared.Infrastructure.Mq.csproj" />
+    <ProjectReference Include="..\..\..\Common\Contracts\AM.Services.Common.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

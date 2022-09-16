@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.Infrastructure.Web\Shared.Infrastructure.Web.csproj" />
+    <ProjectReference Include="..\..\Core\AssetsManagement.Services.Portfolio.Core\AM.Services.Portfolio.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Persistence\UnitOfWorks\" />
+  </ItemGroup>
+
+</Project>
