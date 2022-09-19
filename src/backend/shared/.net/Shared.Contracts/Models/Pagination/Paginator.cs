@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Shared.Data;
+namespace Shared.Contracts.Models.Pagination;
 
 public class Paginator<T> where T : class
 {

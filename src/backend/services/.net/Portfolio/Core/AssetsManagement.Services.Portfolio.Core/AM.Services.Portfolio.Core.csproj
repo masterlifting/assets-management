@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.Exceptions\Shared.Exceptions.csproj" />
     <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.Data\Shared.Data.csproj" />
     <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.MessagesQueue\Shared.MessagesQueue.csproj" />
     <ProjectReference Include="..\..\..\Common\Contracts\AM.Services.Common.Contracts.csproj" />

@@ -1,4 +1,4 @@
-namespace Shared.Contracts.Dto;
+namespace Shared.Contracts.Models.Pagination;
 
 public record Paginated<T> where T : class
 {

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 using Shared.Persistense.Handlers;
 using Shared.Background.Abstractions.EntityState;
 using Shared.Background.Settings;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
+using AM.Services.Portfolio.Host.Exceptions;
+using System.Linq;
+using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks;
 
@@ -20,16 +24,28 @@ public class ReportBackgroundTask : IEntityStateBackgroundTask
         Name = taskName;
         _scopeFactory = scopeFactory;
     }
-    public async Task StartAsync(BackgroundTaskSettings settings, CancellationToken cToken)
+    public async Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var pipeline = scope.ServiceProvider.GetRequiredService<EntityStatePipeline<Report>>();
+        var serviceProvider = scope.ServiceProvider;
+        
+        var stepRepository = serviceProvider.GetRequiredService<ICatalogRepository<Step>>();
+        var dbSteps = await stepRepository.GetAsync();
+        var steps = SetQueueSteps(dbSteps);
 
-        var steps = new Queue<int>(new[]
-        {
-            (int)Steps.Parsing
-        });
-
-        await pipeline.StartAsync(settings, steps, cToken);
+        var pipeline = serviceProvider.GetRequiredService<EntityStatePipeline<Report>>();
+        await pipeline.StartAsync(count, settings, steps, cToken);
+    }
+    private Queue<Step> SetQueueSteps(IReadOnlyCollection<Step> steps)
+    {
+        var result = new Queue<Step>(steps.Count);
+        
+        var calculatingStep = steps.FirstOrDefault(x => x.Id == (int) Steps.Parsing);
+        
+        if (calculatingStep is null)
+            throw new PortfolioHostException(Name, $"Добавление в очередь шага обработки: {nameof(Steps.Parsing)}", "Отсутствует в базе данных");
+        
+        result.Enqueue(calculatingStep);
+        return result;
     }
 }

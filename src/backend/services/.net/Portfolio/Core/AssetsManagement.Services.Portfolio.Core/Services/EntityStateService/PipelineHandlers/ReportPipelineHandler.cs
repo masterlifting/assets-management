@@ -4,6 +4,7 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Repor
 
 using Microsoft.Extensions.Logging;
 
+using Shared.Persistense.Abstractions.Entities.State;
 using Shared.Persistense.Abstractions.Entities.State.Handle;
 using Shared.Persistense.Exceptions;
 
@@ -32,7 +33,7 @@ public class ReportPipelineHandler : IEntityStatePipelineHandler<Report>
                 , eventRepository)}
         };
     }
-    public Task HandleDataAsync(int stepId, IEnumerable<Report> data, CancellationToken cToken) => _handlers.ContainsKey(stepId)
-        ? _handlers[stepId].HandleAsync(data, cToken)
-        : throw new PersistenseEntityStateException("", "", "");
+    public Task HandleDataAsync(IEntityStep step, IEnumerable<Report> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+        ? _handlers[step.Id].HandleAsync(data, cToken)
+        : throw new SharedPersistenseEntityStateException("", "", "");
 }

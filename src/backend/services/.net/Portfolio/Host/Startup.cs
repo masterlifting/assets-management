@@ -22,6 +22,8 @@ using Shared.Persistense.Handlers;
 using Shared.Persistense.Abstractions.Entities.State.Handle;
 using Shared.MessagesQueue.Implementations.RabbitMq.Registration;
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
+using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Host;
 
@@ -32,6 +34,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.Configure<BackgroundTaskSection>(Configuration.GetSection(BackgroundTaskSection.Name));
         services.Configure<DatabaseConnectionSection>(Configuration.GetSection(DatabaseConnectionSection.Name));
         services.Configure<WebclientConnectionSection>(Configuration.GetSection(WebclientConnectionSection.Name));
 
@@ -56,7 +59,7 @@ public class Startup
 
         services.AddRabbitMq(Configuration);
 
-
+        services.AddTransient<ICatalogRepository<Step>, CatalogRepository<Step, DatabaseContext>>();
         services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
         services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
 

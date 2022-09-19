@@ -8,10 +8,10 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class ExpenseRepository<TContext> : Repository<Expense, TContext>, IExpenseRepository
+public sealed class ExpenseRepository<TContext> : Repository<Expense, TContext>, IExpenseRepository
     where TContext : DbContext
 {
-    protected ExpenseRepository(ILogger<Expense> logger, TContext context) : base(logger, context)
+    public ExpenseRepository(ILogger<Expense> logger, TContext context) : base(logger, context)
     {
     }
 }

@@ -3,8 +3,12 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
+using AM.Services.Portfolio.Host.Exceptions;
 using Shared.Persistense.Handlers;
 using Shared.Background.Abstractions.EntityState;
 using Shared.Background.Settings;
@@ -20,17 +24,36 @@ public class AssetBackgroundTask : IEntityStateBackgroundTask
         Name = taskName;
         _scopeFactory = scopeFactory;
     }
-    public async Task StartAsync(BackgroundTaskSettings settings, CancellationToken cToken)
+    public async Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var pipeline = scope.ServiceProvider.GetRequiredService<EntityStatePipeline<Asset>>();
+        var serviceProvider = scope.ServiceProvider;
+        
+        var stepRepository = serviceProvider.GetRequiredService<ICatalogRepository<Step>>();
+        var dbSteps = await stepRepository.GetAsync();
+        var steps = SetQueueSteps(dbSteps);
 
-        var steps = new Queue<int>(new[]
-        {
-            (int)Steps.Calculating,
-            (int)Steps.Sending
-        });
+        var pipeline = serviceProvider.GetRequiredService<EntityStatePipeline<Asset>>();
+        await pipeline.StartAsync(count, settings, steps, cToken);
+    }
 
-        await pipeline.StartAsync(settings, steps, cToken);
+    private Queue<Step> SetQueueSteps(IReadOnlyCollection<Step> steps)
+    {
+        var result = new Queue<Step>(steps.Count);
+        
+        var calculatingStep = steps.FirstOrDefault(x => x.Id == (int) Steps.Calculating);
+        
+        if (calculatingStep is null)
+            throw new PortfolioHostException(Name, $"Добавление в очередь шага обработки: {nameof(Steps.Calculating)}", "Отсутствует в базе данных");
+        
+        result.Enqueue(calculatingStep);
+
+        var sendingStep = steps.FirstOrDefault(x => x.Id == (int) Steps.Sending);
+        if (sendingStep is null)
+            throw new PortfolioHostException(Name, $"Добавление в очередь шага обработки: {nameof(Steps.Sending)}", "Отсутствует в базе данных");
+
+        result.Enqueue(sendingStep);
+
+        return result;
     }
 }

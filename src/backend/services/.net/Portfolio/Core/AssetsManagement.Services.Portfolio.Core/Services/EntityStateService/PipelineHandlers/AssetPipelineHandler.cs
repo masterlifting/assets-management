@@ -4,7 +4,7 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.A
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Sending.Assets;
 
 using Microsoft.Extensions.Logging;
-
+using Shared.Persistense.Abstractions.Entities.State;
 using Shared.Persistense.Abstractions.Entities.State.Handle;
 using Shared.Persistense.Exceptions;
 
@@ -28,7 +28,7 @@ public class AssetPipelineHandler : IEntityStatePipelineHandler<Asset>
             {(int)Domain.Persistense.Entities.Enums.Steps.Sending, new AssetSender()}
         };
     }
-    public Task HandleDataAsync(int stepId, IEnumerable<Asset> data, CancellationToken cToken) => _handlers.ContainsKey(stepId)
-        ? _handlers[stepId].HandleAsync(data, cToken)
-        : throw new PersistenseEntityStateException("", "", "");
+    public Task HandleDataAsync(IEntityStep step, IEnumerable<Asset> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+        ? _handlers[step.Id].HandleAsync(data, cToken)
+        : throw new SharedPersistenseEntityStateException("", "", "");
 }

@@ -10,14 +10,14 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class EventRepository<TContext> : EntityStateRepository<Event, TContext>, IEventRepository
+public sealed class EventRepository<TContext> : EntityStateRepository<Event, TContext>, IEventRepository
     where TContext : DbContext, IEntityStateDbContext
 {
-    protected EventRepository(ILogger<Event> logger, TContext context) : base(logger, context)
+    public EventRepository(ILogger<Event> logger, TContext context) : base(logger, context)
     {
     }
 
-    public override Task CreateRangeAsync(IReadOnlyCollection<Event> entities, CancellationToken? ctToken = null)
+    public override Task CreateRangeAsync(IReadOnlyCollection<Event> entities, CancellationToken? cToken = null)
     {
         foreach (var item in entities)
         {
@@ -25,6 +25,6 @@ public class EventRepository<TContext> : EntityStateRepository<Event, TContext>,
             item.StepId = (int)Core.Domain.Persistense.Entities.Enums.Steps.Calculating;
         }
 
-        return base.CreateRangeAsync(entities, ctToken);
+        return base.CreateRangeAsync(entities, cToken);
     }
 }

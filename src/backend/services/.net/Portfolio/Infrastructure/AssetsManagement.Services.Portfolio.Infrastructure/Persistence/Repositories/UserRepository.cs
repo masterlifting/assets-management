@@ -8,10 +8,10 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class UserRepository<TContext> : Repository<User, TContext> , IUserRepository
+public sealed class UserRepository<TContext> : Repository<User, TContext> , IUserRepository
     where TContext : DbContext
 {
-    protected UserRepository(ILogger<User> logger, TContext context) : base(logger, context)
+    public UserRepository(ILogger<User> logger, TContext context) : base(logger, context)
     {
     }
 }

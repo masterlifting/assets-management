@@ -5,13 +5,18 @@ using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities.State;
 using Shared.Persistense.Abstractions.Entities.State.Handle;
 using Shared.Persistense.Abstractions.Repositories;
+using Shared.Persistense.Entities;
 using Shared.Persistense.Enums;
 using Shared.Persistense.Exceptions;
 
 namespace Shared.Persistense.Handlers;
 
-public class EntityStatePipeline<TEntity> where TEntity : class, IEntityState
+public sealed class EntityStatePipeline<TEntity> where TEntity : class, IEntityState
 {
+    private const string Start = "Запущено";
+    private const string Success = "Успешно";
+    private readonly string _initiator = $"{typeof(TEntity).Name} state";
+
     private readonly ILogger<EntityStatePipeline<TEntity>> _logger;
     private readonly IEntityStateRepository<TEntity> _repository;
     private readonly IEntityStatePipelineHandler<TEntity> _handler;
@@ -26,66 +31,67 @@ public class EntityStatePipeline<TEntity> where TEntity : class, IEntityState
         _handler = handler;
     }
 
-    public async Task StartAsync(BackgroundTaskSettings settings, Queue<int> steps, CancellationToken cToken)
+    public async Task StartAsync<TStep>(int count, BackgroundTaskSettings settings, Queue<TStep> steps, CancellationToken cToken)
+        where TStep : Catalog, IEntityStep
     {
-        _logger.LogDebug("", "", "");
+        _logger.LogDebug(_initiator, "Запуск шагов обработки", steps.Count);
 
         for (var i = 0; i < steps.Count; i++)
         {
-            var stepId = steps.Dequeue();
+            var step = steps.Dequeue();
+            var action = step.Description ?? step.Name;
 
             string[] ids;
             try
             {
-                if (settings.Retry is null)
-                {
-                    _logger.LogTrace("", "", "");
-                    ids = await _repository.PrepareDataAsync(stepId, settings.Limit, cToken);
-                    _logger.LogDebug("", "", "");
-                }
-                else
-                {
-                    var dateNow = DateTime.UtcNow;
-                    var retryTime = TimeSpan.FromMinutes(settings.Retry!.Minutes);
-                    var retryDate = dateNow.Add(-retryTime);
+                _logger.LogTrace(_initiator, action + ". Подготовка новых данных", Start);
+                ids = await _repository.PrepareDataAsync(step, settings.Limit, cToken);
 
-                    _logger.LogTrace("", "", "");
-                    ids = await _repository.PrepareRetryDataAsync(stepId, settings.Limit, retryDate, settings.Retry.MaxAttempts, cToken);
-                    _logger.LogDebug("", "", "");
+                if ((decimal)(count % settings.Retry.Skip) == 0)
+                {
+                    _logger.LogTrace(_initiator, action + ". Подготовка необработанных данных", Start);
+
+                    var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * 3;
+                    var retryDate = DateTime.UtcNow.Add(-retryTime);
+                    var retryIds = await _repository.PrepareRetryDataAsync(step, settings.Limit, retryDate, settings.Retry.Attempts, cToken);
+
+                    ids = ids.Concat(retryIds).ToArray();
                 }
             }
             catch (Exception exception)
             {
-                throw new PersistenseEntityStateException("", "", exception);
+                throw new SharedPersistenseEntityStateException(_initiator, action, exception);
             }
 
             if (!ids.Any())
             {
-                _logger.LogTrace("", "", "");
+                _logger.LogTrace(_initiator, action + ". Подготовка данных", "Не найдено");
                 continue;
             }
+
+            _logger.LogDebug(_initiator, action + ". Подготовка данных", Success, ids.Length);
 
             TEntity[] entities;
             try
             {
-                _logger.LogTrace("", "", "");
-                entities = await _repository.GetDataAsync(stepId, ids, cToken);
-                _logger.LogDebug("", "", "");
+                _logger.LogTrace(_initiator, action + ". Получение данных", Start);
+                entities = await _repository.GetDataAsync(step, ids, cToken);
+                _logger.LogDebug(_initiator, action + ". Получение данных", Success);
             }
             catch (Exception exception)
             {
-                throw new PersistenseEntityStateException("", "", exception);
+                throw new SharedPersistenseEntityStateException(_initiator, action, exception);
             }
 
             try
             {
-                _logger.LogTrace("", "", "");
-                await _handler.HandleDataAsync(stepId, entities, cToken);
+                _logger.LogTrace(_initiator, action + ". Обработка данных", Start);
+                await _handler.HandleDataAsync(step, entities, cToken);
 
                 foreach (var entity in entities)
                     entity.StateId = (int)States.Processed;
 
-                _logger.LogDebug("", "", "");
+                _logger.LogDebug(_initiator, action + ". Обработка данных", Success);
             }
             catch (Exception exception)
             {
@@ -95,19 +101,19 @@ public class EntityStatePipeline<TEntity> where TEntity : class, IEntityState
                     entity.Info = exception.Message;
                 }
 
-                _logger.LogError("", "", exception);
+                _logger.LogError(new SharedPersistenseEntityStateException(_initiator, action + ". Обработка данных", exception));
             }
 
-            var nextStepId = steps.Peek();
+            var nextStep = steps.Peek();
             try
             {
-                _logger.LogTrace("", "", "");
-                await _repository.SaveResultAsync(nextStepId, entities, cToken);
-                _logger.LogDebug("", "", "");
+                _logger.LogTrace(_initiator, action + ". Обновление данных", Start);
+                await _repository.SaveResultAsync(nextStep, entities, cToken);
+                _logger.LogDebug(_initiator, action + ". Обновление данных", Success);
             }
             catch (Exception exception)
             {
-                throw new PersistenseEntityStateException("", "", exception);
+                throw new SharedPersistenseEntityStateException(_initiator, action + ". Обновление данных", exception);
             }
         }
     }

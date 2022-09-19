@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Shared.Background.Exceptions;
 using Shared.Background.Settings;
 using Shared.Background.Settings.Sections;
 using Shared.Extensions.Logging;
@@ -10,8 +11,9 @@ namespace Shared.Background.Abstractions.EntityState;
 
 public abstract class EntityStateBackgroundService : BackgroundService
 {
+    private int _count;
     private const int Limit = 10_000;
-    private const string Action = "Обработка сущностей с состоянием";
+    private const string Action = "Обработка объектов с состоянием";
     private Dictionary<string, BackgroundTaskSettings>? _tasks;
 
     private readonly ILogger _logger;
@@ -63,6 +65,11 @@ public abstract class EntityStateBackgroundService : BackgroundService
 
             try
             {
+                if (_count == int.MaxValue)
+                    _count = 0;
+                
+                _count++;
+
                 _logger.LogTrace(_task.Name, Action, "Запущено");
 
                 if (settings.Limit > Limit)
@@ -72,13 +79,13 @@ public abstract class EntityStateBackgroundService : BackgroundService
                     _logger.LogWarn(_task.Name, Action, "Достигнут максимальный размер пакета", $"Значение конфигурации '{nameof(settings.Limit)}' установлено: {Limit}");
                 }
 
-                await _task.StartAsync(settings, cToken);
+                await _task.StartAsync(_count, settings, cToken);
 
                 _logger.LogTrace(_task.Name, Action, "Выполнено");
             }
             catch (Exception exception)
             {
-                _logger.LogError(_task.Name, Action, exception);
+                _logger.LogError(new SharedBackgroundException(_task.Name, Action, exception));
             }
             finally
             {

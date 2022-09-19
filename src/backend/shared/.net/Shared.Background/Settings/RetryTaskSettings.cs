@@ -2,6 +2,6 @@
 
 public class RetryTaskSettings
 {
-    public int Minutes { get; set; } = 30;
-    public int MaxAttempts { get; set; } = 10;
+    public int Skip { get; set; } = 5;
+    public int Attempts { get; set; } = 10;
 }

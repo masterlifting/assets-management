@@ -1,16 +1,18 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
-using Shared.Extensions.Logging;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
+using Shared.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Exceptions;
+
+using PortfolioCoreException = AM.Services.Portfolio.Host.Exceptions.PortfolioHostException;
 
 namespace AM.Services.Portfolio.Host.Controllers;
 
@@ -48,22 +50,18 @@ public class ReportController : ControllerBase
                 var payload = new byte[file.Length];
                 await using var stream = file.OpenReadStream();
                 var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
-                
-                try
+
+                var createdResult = await _reportRepository.TryCreateAsync(new()
                 {
-                    await _reportRepository.CreateAsync(new()
-                    {
-                        UserId = userId,
-                        ProviderId = GetProviderId(file.FileName),
-                        Name = file.FileName,
-                        ContentType = file.ContentType,
-                        Payload = payload
-                    });
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError($"{nameof(ReportController)}.{nameof(Post)}",$"Сохранение {file.FileName}", exception);
-                }
+                    UserId = userId,
+                    ProviderId = GetProviderId(file.FileName),
+                    Name = file.FileName,
+                    ContentType = file.ContentType,
+                    Payload = payload
+                });
+
+                if (!createdResult.IsSuccess)
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportController), $"Сохранение файла отчета: {file.FileName}", createdResult.Error!));
             }
 
             return Ok();

@@ -6,6 +6,7 @@ using RabbitMQ.Client;
 
 using Shared.Extensions.Logging;
 using Shared.Extensions.Serialization;
+using Shared.MessagesQueue.Exceptions;
 using Shared.MessagesQueue.Implementations.RabbitMq.Domain;
 using Shared.MessagesQueue.Interfaces;
 
@@ -40,7 +41,7 @@ internal sealed class RabbitMqProducer : IMqProducer
         }
         catch (Exception exception)
         {
-            _logger.LogError(_initiator, Constants.Post, exception);
+            _logger.LogError(new SharedMessagesQueueException("", Constants.Post, exception));
 
             return false;
         }

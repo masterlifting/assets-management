@@ -10,14 +10,14 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, IDealRepository
+public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, IDealRepository
     where TContext : DbContext, IEntityStateDbContext
 {
-    protected DealRepository(ILogger<Deal> logger, TContext context) : base(logger, context)
+    public DealRepository(ILogger<Deal> logger, TContext context) : base(logger, context)
     {
     }
 
-    public override Task CreateRangeAsync(IReadOnlyCollection<Deal> entities, CancellationToken? ctToken = null)
+    public override Task CreateRangeAsync(IReadOnlyCollection<Deal> entities, CancellationToken? cToken = null)
     {
         foreach (var item in entities)
         {
@@ -25,7 +25,7 @@ public class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, I
             item.StepId = (int)Core.Domain.Persistense.Entities.Enums.Steps.Calculating;
         }
 
-        return base.CreateRangeAsync(entities, ctToken);
+        return base.CreateRangeAsync(entities, cToken);
     }
     public Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives)
     {

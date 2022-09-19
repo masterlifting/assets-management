@@ -2,6 +2,6 @@
 
 public class BackgroundTaskSection
 {
-    public const string SectionName = "Background";
+    public const string Name = "Background";
     public Dictionary<string, BackgroundTaskSettings>? Tasks { get; set; }
 }

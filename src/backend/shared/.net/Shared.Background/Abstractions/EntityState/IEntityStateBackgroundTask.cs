@@ -4,5 +4,5 @@ namespace Shared.Background.Abstractions.EntityState;
 
 public interface IEntityStateBackgroundTask : IBackgroundTask
 {
-    Task StartAsync(BackgroundTaskSettings settings, CancellationToken cToken);
+    Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken);
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Shared.Contracts.Models.Results;
 using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities;
 using Shared.Persistense.Abstractions.Repositories;
@@ -43,7 +44,19 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
 
         _logger.LogDebug(_initiator, Constants.Create, Constants.Success);
     }
-    public virtual async Task CreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null)
+    public virtual async Task<Result> TryCreateAsync(TEntity entity, CancellationToken? cToken = null)
+    {
+        try
+        {
+            await CreateAsync(entity, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+    public virtual async Task CreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
         if (!entities.Any())
         {
@@ -52,24 +65,36 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         }
 
         int result;
-        if (!ctToken.HasValue)
+        if (!cToken.HasValue)
         {
             await DbSet.AddRangeAsync(entities).ConfigureAwait(false);
             result = await _context.SaveChangesAsync().ConfigureAwait(false);
         }
         else
         {
-            await DbSet.AddRangeAsync(entities, ctToken.Value).ConfigureAwait(false);
-            result = await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+            await DbSet.AddRangeAsync(entities, cToken.Value).ConfigureAwait(false);
+            result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
         _logger.LogDebug(_initiator, Constants.Create, Constants.Success, result);
+    }
+    public virtual async Task<Result> TryCreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
+    {
+        try
+        {
+            await CreateRangeAsync(entities, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
     }
 
     public virtual async Task UpdateAsync(object[] id, TEntity entity, CancellationToken? ctToken = null)
     {
         if (await DbSet.FindAsync(id) is null)
-            throw new PersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
 
         if (!ctToken.HasValue)
         {
@@ -84,7 +109,19 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
 
         _logger.LogDebug(_initiator, Constants.Update, Constants.Success);
     }
-    public virtual async Task UpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null)
+    public virtual async Task<Result> TryUpdateAsync(object[] id, TEntity entity, CancellationToken? cToken = null)
+    {
+        try
+        {
+            await UpdateAsync(id, entity, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+    public virtual async Task UpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
         if (!entities.Any())
         {
@@ -93,7 +130,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         }
 
         int result;
-        if (!ctToken.HasValue)
+        if (!cToken.HasValue)
         {
             DbSet.UpdateRange(entities);
             result = await _context.SaveChangesAsync().ConfigureAwait(false);
@@ -101,20 +138,32 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         else
         {
             DbSet.UpdateRange(entities);
-            result = await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+            result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
         _logger.LogDebug(_initiator, Constants.Update, Constants.Success, result);
     }
+    public virtual async Task<Result> TryUpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
+    {
+        try
+        {
+            await UpdateRangeAsync(entities, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
 
-    public virtual async Task<TEntity> DeleteAsync(object[] id, CancellationToken? ctToken = null)
+    public virtual async Task<TEntity> DeleteAsync(object[] id, CancellationToken? cToken = null)
     {
         var entity = await DbSet.FindAsync(id);
 
         if (entity is null)
-            throw new PersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
 
-        if (!ctToken.HasValue)
+        if (!cToken.HasValue)
         {
             DbSet.Remove(entity);
             await _context.SaveChangesAsync().ConfigureAwait(false);
@@ -122,14 +171,26 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         else
         {
             DbSet.Remove(entity);
-            await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+            await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
         _logger.LogDebug(_initiator, Constants.Delete, Constants.Success);
 
         return entity;
     }
-    public virtual async Task DeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null)
+    public virtual async Task<ResultData<TEntity>> TryDeleteAsync(object[] id, CancellationToken? cToken = null)
+    {
+        try
+        {
+            var entity = await DeleteAsync(id, cToken);
+            return new ResultData<TEntity>(new(true), entity);
+        }
+        catch (Exception exception)
+        {
+            return new ResultData<TEntity>(new(false, exception.InnerException?.Message ?? exception.Message), null);
+        }
+    }
+    public virtual async Task DeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
         if (!entities.Any())
         {
@@ -138,7 +199,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         }
 
         int result;
-        if (!ctToken.HasValue)
+        if (!cToken.HasValue)
         {
             DbSet.RemoveRange(entities);
             result = await _context.SaveChangesAsync().ConfigureAwait(false);
@@ -146,48 +207,21 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         else
         {
             DbSet.RemoveRange(entities);
-            result = await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+            result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
         _logger.LogDebug(_initiator, Constants.Delete, Constants.Success, result);
     }
-
-    public Task<bool> TryCreateAsync(TEntity entity, CancellationToken? ctToken = null, out string error)
+    public virtual async Task<Result> TryDeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
-        error = string.Empty;
         try
         {
-            return Task.FromResult(CreateAsync(entity, ctToken).IsCompletedSuccessfully);
+            await DeleteRangeAsync(entities, cToken);
+            return new Result(true);
         }
         catch (Exception exception)
         {
-            error = exception.InnerException?.Message ?? exception.Message;
-            return Task.FromResult(false);
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
         }
-    }
-
-    public Task<bool> TryCreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null, out string error)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> TryUpdateAsync(object[] id, TEntity entity, CancellationToken? ctToken = null, out string error)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> TryUpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null, out string error)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> TryDeleteAsync(object[] id, CancellationToken? ctToken = null, out string error)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> TryDeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? ctToken = null, out string error)
-    {
-        throw new NotImplementedException();
     }
 }

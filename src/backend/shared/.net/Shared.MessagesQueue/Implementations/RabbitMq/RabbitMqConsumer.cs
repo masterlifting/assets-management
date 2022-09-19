@@ -8,6 +8,7 @@ using Shared.MessagesQueue.Implementations.RabbitMq.Domain;
 using Shared.MessagesQueue.Interfaces;
 
 using System.Text;
+using Shared.MessagesQueue.Exceptions;
 
 namespace Shared.MessagesQueue.Implementations.RabbitMq;
 
@@ -88,7 +89,7 @@ public sealed class RabbitMqConsumer : IMqConsumer
         }
         catch (Exception exception)
         {
-            _logger.LogError(_initiator, "Обработка полученых сообщений", exception);
+            _logger.LogError(new SharedMessagesQueueException(_initiator, "Обработка полученных сообщений", exception));
         }
         finally
         {

@@ -24,7 +24,7 @@ public sealed class ReportRepository<TContext> : EntityStateRepository<Report, T
 
         return base.CreateAsync(entity, ctToken);
     }
-    public override Task CreateRangeAsync(IReadOnlyCollection<Report> entities, CancellationToken? ctToken = null)
+    public override Task CreateRangeAsync(IReadOnlyCollection<Report> entities, CancellationToken? cToken = null)
     {
         foreach (var entity in entities)
         {
@@ -32,7 +32,7 @@ public sealed class ReportRepository<TContext> : EntityStateRepository<Report, T
             entity.StepId = (int)Steps.Parsing;
         }
 
-        return base.CreateRangeAsync(entities, ctToken);
+        return base.CreateRangeAsync(entities, cToken);
     }
 
     public async Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportDatesAsync(int accountId, ProviderId providerId, DateOnly dateStart, CancellationToken cToken) => await DbSet

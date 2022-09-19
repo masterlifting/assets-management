@@ -9,10 +9,10 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class DerivativeRepository<TContext> : EntityStateRepository<Derivative, TContext>, IDerivativeRepository
+public sealed class DerivativeRepository<TContext> : EntityStateRepository<Derivative, TContext>, IDerivativeRepository
     where TContext : DbContext, IEntityStateDbContext
 {
-    protected DerivativeRepository(ILogger<Derivative> logger, TContext context) : base(logger, context)
+    public DerivativeRepository(ILogger<Derivative> logger, TContext context) : base(logger, context)
     {
     }
 

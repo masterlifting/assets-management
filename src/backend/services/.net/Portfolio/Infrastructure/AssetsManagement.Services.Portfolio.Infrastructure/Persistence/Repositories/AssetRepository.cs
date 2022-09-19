@@ -10,10 +10,10 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public class AssetRepository<TContext> : EntityStateRepository<Asset, TContext>, IAssetRepository
+public sealed class AssetRepository<TContext> : EntityStateRepository<Asset, TContext>, IAssetRepository
     where TContext : DbContext, IEntityStateDbContext
 {
-    protected AssetRepository(ILogger<Asset> logger, TContext context) : base(logger, context)
+    public AssetRepository(ILogger<Asset> logger, TContext context) : base(logger, context)
     {
     }
 

@@ -1,8 +1,9 @@
 ﻿using AM.Services.Common.Contracts.Dto;
 using AM.Services.Portfolio.Core.Abstractions.External.Webclients;
-using AM.Services.Portfolio.Core.Abstractions.Persistense.UnitOfWorks;
+using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using AM.Services.Portfolio.Core.Exceptions;
 
 using Microsoft.Extensions.Logging;
 
@@ -15,14 +16,20 @@ public class AssetService
     private const string Initiator = "Добавление активов";
 
     private readonly ILogger<AssetService> _logger;
-    private readonly IUnitOfWorkRepository _unitOfWork;
     private readonly IMoexWebclient _moexWebclient;
+    private readonly IAssetRepository _assetRepository;
+    private readonly IDerivativeRepository _derivativeRepository;
 
-    public AssetService(ILogger<AssetService> logger, IMoexWebclient moexWebclient, IUnitOfWorkRepository unitOfWork)
+    public AssetService(
+        ILogger<AssetService> logger
+        , IMoexWebclient moexWebclient
+        , IAssetRepository assetRepository
+        , IDerivativeRepository derivativeRepository)
     {
         _logger = logger;
         _moexWebclient = moexWebclient;
-        _unitOfWork = unitOfWork;
+        _assetRepository = assetRepository;
+        _derivativeRepository = derivativeRepository;
     }
 
     public async Task SetAssetAndDerivativeAsync(AssetDto dto)
@@ -36,7 +43,7 @@ public class AssetService
         var isinIndex = countryId.AsEnum == Common.Contracts.Entities.Enums.Countries.Rus ? 19 : 18;
 
         var isin = moexData.Securities.Data[0][isinIndex].ToString();
-        
+
         var derivativeId = new DerivativeId(isin);
         var derivativeCode = new DerivativeCode(dto.AssetId);
 
@@ -44,22 +51,22 @@ public class AssetService
 
         try
         {
-            await _unitOfWork.Asset.CreateAsync(assetModel.GetEntity());
+            await _assetRepository.CreateAsync(assetModel.GetEntity());
         }
         catch (Exception exception)
         {
-            _logger.LogError(Initiator, "Создание актива", exception);
+            _logger.LogError(new PortfolioCoreException(Initiator, "Создание актива", exception));
         }
 
         var derivativeModel = new DerivativeModel(derivativeId, derivativeCode, assetId, assetTypeId, 0);
 
         try
         {
-            await _unitOfWork.Derivative.CreateAsync(derivativeModel.GetEntity());
+            await _derivativeRepository.CreateAsync(derivativeModel.GetEntity());
         }
         catch (Exception exception)
         {
-            _logger.LogError(Initiator, "Создание дериватива", exception);
+            _logger.LogError(new PortfolioCoreException(Initiator, "Создание дериватива", exception));
         }
     }
     public async Task SetAssetsAndDerivativesAsync(IEnumerable<AssetDto> dtos)
@@ -73,10 +80,10 @@ public class AssetService
                 , null))
             .ToArray();
 
-        var assets = await _unitOfWork.Asset.GetNewAssetsAsync(assetModels);
+        var assets = await _assetRepository.GetNewAssetsAsync(assetModels);
 
         if (assets.Any())
-            await _unitOfWork.Asset.CreateRangeAsync(assets);
+            await _assetRepository.CreateRangeAsync(assets);
         else
             return;
 
@@ -110,7 +117,7 @@ public class AssetService
             {
                 if (string.IsNullOrWhiteSpace(isin) || isin.Equals("0"))
                 {
-                    _logger.LogWarn(Initiator, "Определение ISIN для дериватива", "Не расопзнано", ticker);
+                    _logger.LogWarn(Initiator, "Определение ISIN для дериватива", "Не распознано", ticker);
                     continue;
                 }
 
@@ -120,6 +127,6 @@ public class AssetService
         }
 
         if (derivativeModels.Any())
-            await _unitOfWork.Derivative.CreateRangeAsync(derivativeModels.Select(x => x.GetEntity()).ToArray());
+            await _derivativeRepository.CreateRangeAsync(derivativeModels.Select(x => x.GetEntity()).ToArray());
     }
 }

@@ -11,5 +11,5 @@ public abstract class SharedException : Exception
         _action = action;
     }
 
-    public override string Message => $"Инициатор: {_initiator}; Действие: {_action}: Описание: ";
+    public override string Message => $"Инициатор: {_initiator}; Действие: {_action}; Описание: ";
 }
