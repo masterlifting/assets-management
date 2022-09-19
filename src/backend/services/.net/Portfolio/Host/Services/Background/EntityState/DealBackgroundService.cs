@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Shared.Infrastructure.Background.Abstractions.EntityState;
-using Shared.Infrastructure.Background.Settings.Sections;
+using Shared.Background.Abstractions.EntityState;
+using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 

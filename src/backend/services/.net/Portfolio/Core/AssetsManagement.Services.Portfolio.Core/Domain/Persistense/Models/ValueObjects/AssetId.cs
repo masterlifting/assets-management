@@ -1,4 +1,6 @@
-﻿namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+﻿using AM.Services.Portfolio.Core.Exceptions;
+
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 public record AssetId
 {
@@ -7,7 +9,7 @@ public record AssetId
     public AssetId(string value)
     {
         if (value.Length > 5)
-            throw new SharedCastException("", "", $"Не удалось установить идентификатор активу по значению: {value}");
+            throw new PortfolioCoreException("", "", $"Не удалось установить идентификатор активу по значению: {value}");
 
         AsString = value.ToUpper();
     }

@@ -1,6 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
-
-using Shared.Exceptions;
+using AM.Services.Portfolio.Core.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
@@ -12,7 +11,7 @@ public record ProviderId
     public ProviderId(int value)
     {
         if (!Enum.TryParse<Providers>(value.ToString(), true, out var enumResult))
-            throw new SharedCastException("", "", "Не удалось определить состояние объекта");
+            throw new PortfolioCoreException("", "", "Не удалось определить состояние объекта");
 
         AsInt = value;
         AsEnum = enumResult;

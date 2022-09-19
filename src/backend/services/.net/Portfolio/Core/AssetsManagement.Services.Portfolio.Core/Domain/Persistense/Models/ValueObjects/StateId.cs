@@ -1,5 +1,6 @@
-﻿using Shared.Exceptions;
-using Shared.Infrastructure.Persistense.Enums;
+﻿using AM.Services.Portfolio.Core.Exceptions;
+
+using Shared.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
@@ -11,7 +12,7 @@ public record StateId
     public StateId(int value)
     {
         if (!Enum.TryParse<States>(value.ToString(), true, out var enumResult))
-            throw new SharedCastException("", "", "Не удалось определить состояние объекта");
+            throw new PortfolioCoreException("", "", "Не удалось определить состояние объекта");
 
         AsInt = value;
         AsEnum = enumResult;

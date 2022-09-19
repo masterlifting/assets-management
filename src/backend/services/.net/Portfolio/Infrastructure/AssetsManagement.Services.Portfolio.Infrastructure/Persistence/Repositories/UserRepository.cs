@@ -1,9 +1,10 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Infrastructure.Persistense.Repositories;
+
+using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 

@@ -1,17 +1,16 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
 using Shared.Extensions.Logging;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using Shared.Exceptions;
-
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Exceptions;
 
 namespace AM.Services.Portfolio.Host.Controllers;
 
@@ -85,7 +84,7 @@ public class ReportController : ControllerBase
                 return providerId;
         }
 
-        throw new SharedCastException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
+        throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
     }
     private async Task CreateUserAsync(string userId)
     {

@@ -1,10 +1,11 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports.Bcs;
 
 using Microsoft.Extensions.Logging;
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
+
+using Shared.Persistense.Abstractions.Entities.State.Handle;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports;
 

@@ -2,7 +2,7 @@
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State;
+using Shared.Persistense.Abstractions.Entities.State;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

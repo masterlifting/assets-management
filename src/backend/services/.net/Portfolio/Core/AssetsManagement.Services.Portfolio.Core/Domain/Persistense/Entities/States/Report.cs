@@ -1,6 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using System.ComponentModel.DataAnnotations;
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State;
+using Shared.Persistense.Abstractions.Entities.State;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

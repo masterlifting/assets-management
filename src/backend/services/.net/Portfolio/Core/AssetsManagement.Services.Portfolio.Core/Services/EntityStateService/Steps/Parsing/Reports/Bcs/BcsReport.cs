@@ -1,14 +1,17 @@
-using System.Globalization;
 using AM.Services.Common.Contracts.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports.Bcs.Models;
+
 using Microsoft.Extensions.Logging;
-using Shared.Exceptions;
-using Shared.Infrastructure.Data.Excel;
+
+using Shared.Data.Excel;
+
+using System.Globalization;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports.Bcs;
 
@@ -42,7 +45,7 @@ public sealed class BcsReport
         }
         catch (Exception exception)
         {
-            throw new SharedProcessException("разбор отчета БКС", "получение excel таблицы отчета", exception.Message);
+            throw new PortfolioCoreException("разбор отчета БКС", "получение excel таблицы отчета", exception.Message);
         }
 
         _logger = logger;

@@ -1,6 +1,8 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using Shared.Infrastructure.Persistense.Abstractions.Entities;
+
+using Shared.Persistense.Abstractions.Entities;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;

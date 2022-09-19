@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Persistense.ConnectionSettings;
+﻿using Shared.Persistense.ConnectionSettings;
 
 namespace AM.Services.Portfolio.Infrastructure.Settings;
 

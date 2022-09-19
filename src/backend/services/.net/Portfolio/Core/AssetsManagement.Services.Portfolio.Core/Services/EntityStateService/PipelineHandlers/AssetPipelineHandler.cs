@@ -1,12 +1,12 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.Assets;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Sending.Assets;
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
-using Shared.Infrastructure.Persistense.Exceptions;
+using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
 

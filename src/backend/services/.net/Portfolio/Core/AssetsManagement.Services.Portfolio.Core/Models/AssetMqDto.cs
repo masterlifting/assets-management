@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Mq.Interfaces;
+﻿using Shared.MessagesQueue.Interfaces;
 
 namespace AM.Services.Portfolio.Core.Models;
 

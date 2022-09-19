@@ -2,13 +2,12 @@
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using Shared.Infrastructure.Background.Abstractions.EntityState;
-using Shared.Infrastructure.Background.Settings;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Shared.Infrastructure.Persistense.Handlers;
+using Shared.Persistense.Handlers;
+using Shared.Background.Abstractions.EntityState;
+using Shared.Background.Settings;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks;
 

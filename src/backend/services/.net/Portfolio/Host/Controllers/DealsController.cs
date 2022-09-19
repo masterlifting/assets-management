@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Services.ControllersApi;
+
 using Microsoft.AspNetCore.Mvc;
-using Shared.Infrastructure.Data;
+
+using Shared.Data;
 
 namespace AM.Services.Portfolio.Host.Controllers;
 

@@ -1,20 +1,20 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Entities;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 
-using Shared.Attributes.Validation;
+using Shared.Persistense.Abstractions.Entities.State;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.Entities;
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 public class Derivative : IEntityState, IBalance
 {
-    [StringLength(20, MinimumLength = 1), Upper]
+    [StringLength(20, MinimumLength = 1)]
     public string Id { get; init; } = null!;
-    [StringLength(50, MinimumLength = 1), Upper]
+    [StringLength(50, MinimumLength = 1)]
     public string Code { get; init; } = null!;
 
     public virtual Asset Asset { get; set; } = null!;

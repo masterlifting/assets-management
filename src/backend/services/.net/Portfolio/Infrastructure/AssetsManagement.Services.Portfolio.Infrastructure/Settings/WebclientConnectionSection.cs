@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Web.Connections;
+﻿using Shared.Web.Connections;
 
 namespace AM.Services.Portfolio.Infrastructure.Settings;
 

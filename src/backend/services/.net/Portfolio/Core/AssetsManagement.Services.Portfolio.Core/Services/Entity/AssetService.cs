@@ -1,8 +1,8 @@
 ﻿using AM.Services.Common.Contracts.Dto;
+using AM.Services.Portfolio.Core.Abstractions.External.Webclients;
+using AM.Services.Portfolio.Core.Abstractions.Persistense.UnitOfWorks;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-using AM.Services.Portfolio.Core.Interfaces.External.Webclients;
-using AM.Services.Portfolio.Core.Interfaces.Persistense.UnitOfWorks;
 
 using Microsoft.Extensions.Logging;
 

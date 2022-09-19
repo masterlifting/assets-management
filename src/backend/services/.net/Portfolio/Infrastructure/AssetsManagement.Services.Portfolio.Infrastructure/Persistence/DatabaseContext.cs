@@ -5,8 +5,10 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 using Microsoft.EntityFrameworkCore;
-using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
-using Shared.Infrastructure.Persistense.Entities;
+
+using Shared.Persistense;
+using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Entities;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence;
 
@@ -50,7 +52,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
         builder.Entity<AssetType>().HasData(Catalogs.AssetTypes);
         builder.Entity<Country>().HasData(Catalogs.Countries);
         builder.Entity<Exchange>().HasData(Catalogs.Exchanges);
-        builder.Entity<State>().HasData(Shared.Infrastructure.Persistense.Constants.States);
+        builder.Entity<State>().HasData(Constants.States);
         
         builder.Entity<EventType>().HasData(
             new()
