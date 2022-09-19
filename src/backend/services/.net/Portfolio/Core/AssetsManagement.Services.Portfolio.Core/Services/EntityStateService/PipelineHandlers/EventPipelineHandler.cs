@@ -4,8 +4,8 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.E
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Exceptions;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Infrastructure.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
 
@@ -28,5 +28,5 @@ public class EventPipelineHandler : IEntityStatePipelineHandler<Event>
     }
     public Task HandleDataAsync(int stepId, IEnumerable<Event> data, CancellationToken cToken) => _handlers.ContainsKey(stepId)
         ? _handlers[stepId].HandleAsync(data, cToken)
-        : throw new SharedProcessException("", "", "");
+        : throw new PersistenseEntityStateException("", "", "");
 }

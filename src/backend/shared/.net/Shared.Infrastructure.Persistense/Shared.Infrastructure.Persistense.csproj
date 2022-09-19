@@ -13,10 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared.Contracts\Shared.Contracts.csproj" />
     <ProjectReference Include="..\Shared.Exceptions\Shared.Exceptions.csproj" />
-    <ProjectReference Include="..\Shared.Extensions\Shared.Extensions.csproj" />
-    <ProjectReference Include="..\Shared.Infrastructure.Data\Shared.Infrastructure.Data.csproj" />
+    <ProjectReference Include="..\Shared.Infrastructure.Background\Shared.Infrastructure.Background.csproj" />
   </ItemGroup>
 
 </Project>

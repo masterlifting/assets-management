@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.Deals;
 

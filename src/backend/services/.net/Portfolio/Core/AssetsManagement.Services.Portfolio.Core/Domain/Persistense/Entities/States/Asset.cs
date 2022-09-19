@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using AM.Services.Common.Contracts.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Interfaces.Persistense.Entities;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

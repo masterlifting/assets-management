@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Persistense.Entities;
+﻿using Shared.Infrastructure.Persistense.Abstractions.Entities;
 
 namespace AM.Services.Common.Contracts.Entities;
 

@@ -2,12 +2,11 @@
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 
 using Shared.Attributes.Validation;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using AM.Services.Portfolio.Core.Interfaces.Persistense.Entities;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

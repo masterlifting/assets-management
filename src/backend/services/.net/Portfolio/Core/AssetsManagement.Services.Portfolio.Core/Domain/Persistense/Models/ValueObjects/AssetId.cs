@@ -1,6 +1,4 @@
-﻿using Shared.Exceptions;
-
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+﻿namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 public record AssetId
 {

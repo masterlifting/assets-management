@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Persistense.Entities.EntityCatalog;
+﻿using Shared.Infrastructure.Persistense.Entities;
 
 namespace Shared.Infrastructure.Persistense;
 

@@ -4,8 +4,7 @@ using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
-using Shared.Infrastructure.Persistense.Repositories.Implementation;
+using Shared.Infrastructure.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 

@@ -5,8 +5,8 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
 using Shared.Infrastructure.Persistense.Entities;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence;
 

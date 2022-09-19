@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Shared.Infrastructure.Persistense.Entities.EntityCatalog;
+using Shared.Infrastructure.Persistense.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 

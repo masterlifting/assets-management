@@ -4,8 +4,8 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Repor
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Exceptions;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Infrastructure.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
 
@@ -34,5 +34,5 @@ public class ReportPipelineHandler : IEntityStatePipelineHandler<Report>
     }
     public Task HandleDataAsync(int stepId, IEnumerable<Report> data, CancellationToken cToken) => _handlers.ContainsKey(stepId)
         ? _handlers[stepId].HandleAsync(data, cToken)
-        : throw new SharedProcessException("", "", "");
+        : throw new PersistenseEntityStateException("", "", "");
 }

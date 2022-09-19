@@ -1,7 +1,7 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Microsoft.Extensions.Logging;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.Events;
 
@@ -121,7 +121,7 @@ public class EventCalculator : IEntityStateStepHandler<Event>
                 result.Add(derivative);
             }
             else
-                Logger.LogWarning("Up derivative balances", key.DerivativeCode, "not found");
+                Logger<>.LogWarning("Up derivative balances", key.DerivativeCode, "not found");
 
         await _derivativeRepo.UpdateRangeAsync(result, "down balances");
     }
@@ -150,7 +150,7 @@ public class EventCalculator : IEntityStateStepHandler<Event>
                 result.Add(derivative);
             }
             else
-                Logger.LogWarning("Update derivative balances", key.DerivativeCode, "not found");
+                Logger<>.LogWarning("Update derivative balances", key.DerivativeCode, "not found");
 
         await _derivativeRepo.UpdateRangeAsync(result, "update balances");
     }

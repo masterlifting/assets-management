@@ -1,6 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-using Shared.Infrastructure.Persistense.Repositories.Interface;
+using Shared.Infrastructure.Persistense.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
 

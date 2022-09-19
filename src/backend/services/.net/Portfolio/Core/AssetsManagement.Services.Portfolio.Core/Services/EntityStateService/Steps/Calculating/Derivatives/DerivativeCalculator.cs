@@ -4,11 +4,10 @@ using AM.Services.Portfolio.Core.Models;
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Exceptions;
 using Shared.Extensions.Logging;
 using Shared.Extensions.Serialization;
 using Shared.Infrastructure.Mq.Implementations.RabbitMq.Domain;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.Derivatives;
 

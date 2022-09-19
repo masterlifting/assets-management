@@ -1,4 +1,4 @@
-﻿using Shared.Infrastructure.Persistense.Entities.EntityCatalog;
+﻿using Shared.Infrastructure.Persistense.Entities;
 
 namespace AM.Services.Common.Contracts.Entities;
 

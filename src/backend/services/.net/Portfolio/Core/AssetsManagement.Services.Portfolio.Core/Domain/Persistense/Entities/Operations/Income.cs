@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using Shared.Infrastructure.Persistense.Entities;
+using Shared.Infrastructure.Persistense.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
 

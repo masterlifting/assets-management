@@ -18,8 +18,10 @@ using System;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Interfaces.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
+using AM.Services.Portfolio.Host.Services.Background.EntityState;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
-using Shared.Infrastructure.Persistense.Entities.EntityState;
+using Shared.Infrastructure.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Infrastructure.Persistense.Handlers;
 
 namespace AM.Services.Portfolio.Host;
 
@@ -66,10 +68,11 @@ public class Startup
         services.AddTransient<IEntityStatePipelineHandler<Event>, EventPipelineHandler>();
         services.AddTransient<IEntityStatePipelineHandler<Report>, ReportPipelineHandler>();
 
-        //services.AddScoped<AssetService>();
-        //services.AddScoped<DealService>();
-        //services.AddScoped<EventService>();
-        //services.AddScoped<AssetTask>();
+        services.AddHostedService<AssetBackgroundService>();
+        services.AddHostedService<DerivativeBackgroundService>();
+        services.AddHostedService<DealBackgroundService>();
+        services.AddHostedService<EventBackgroundService>();
+        services.AddHostedService<ReportBackgroundService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

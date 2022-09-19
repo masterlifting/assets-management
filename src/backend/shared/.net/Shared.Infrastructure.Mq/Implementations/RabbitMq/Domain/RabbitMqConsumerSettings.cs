@@ -1,4 +1,4 @@
-﻿using Shared.Contracts.Settings;
+﻿using Shared.Infrastructure.Background.Settings;
 using Shared.Infrastructure.Mq.Interfaces;
 
 namespace Shared.Infrastructure.Mq.Implementations.RabbitMq.Domain;
