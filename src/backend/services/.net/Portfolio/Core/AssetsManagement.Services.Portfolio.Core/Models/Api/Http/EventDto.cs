@@ -1,6 +1,6 @@
 ﻿namespace AM.Services.Portfolio.Core.Models.Api.Http;
 
-public record EventGetDto
+public sealed record EventGetDto
 {
     public string Event { get; init; } = null!;
     public string Account { get; init; } = null!;

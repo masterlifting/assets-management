@@ -1,6 +1,6 @@
 ﻿namespace Shared.MessagesQueue.Settings.RabbitMq;
 
-public class RabbitMqClientSettings
+public sealed class RabbitMqClientSettings
 {
     public string Host { get; set; } = null!;
     public string User { get; set; } = null!;

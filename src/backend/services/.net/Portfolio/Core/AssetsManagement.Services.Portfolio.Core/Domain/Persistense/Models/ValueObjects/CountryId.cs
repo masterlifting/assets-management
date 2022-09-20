@@ -4,10 +4,11 @@ using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record CountryId
+public sealed record CountryId
 {
     public int AsInt { get; }
     public Countries AsEnum { get; }
+    public string AsString { get; }
 
     public CountryId(int value)
     {
@@ -16,5 +17,6 @@ public record CountryId
 
         AsInt = value;
         AsEnum = enumResult;
+        AsString = enumResult.ToString().ToUpper();
     }
 }

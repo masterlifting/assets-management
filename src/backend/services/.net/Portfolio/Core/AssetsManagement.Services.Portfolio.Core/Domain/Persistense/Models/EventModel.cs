@@ -3,7 +3,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
-public record EventModel
+public sealed record EventModel
 {
     public EntityStateId EntityStateId { get; init; } = null!;
 

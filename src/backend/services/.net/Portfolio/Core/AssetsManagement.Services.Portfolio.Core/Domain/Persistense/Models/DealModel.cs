@@ -3,7 +3,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
-public record DealModel(EntityStateId EntityStateId, IncomeModel Income, ExpenseModel Expense)
+public sealed record DealModel(EntityStateId EntityStateId, IncomeModel Income, ExpenseModel Expense)
 {
     public DateOnly Date { get; init; }
     public decimal Cost { get; init; }

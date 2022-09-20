@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Domain.RabbitMq;
 
-public class RabbitMqQueue : IMqQueue
+public sealed class RabbitMqQueue : IMqQueue
 {
     public string Name { get; set; } = null!;
     public bool IsDurable { get; set; }

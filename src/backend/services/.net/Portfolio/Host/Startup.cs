@@ -1,11 +1,12 @@
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Abstractions.Web;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
+using AM.Services.Portfolio.Core.Services.EntityStateService.Handlers;
 using AM.Services.Portfolio.Host.Services.Background.EntityState;
-using AM.Services.Portfolio.Infrastructure.External.Webclients;
 using AM.Services.Portfolio.Infrastructure.Persistence;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 using AM.Services.Portfolio.Infrastructure.Settings;
+using AM.Services.Portfolio.Infrastructure.Web;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,15 +21,13 @@ using Shared.Background.Settings.Sections;
 using Shared.Extensions.Serialization;
 using Shared.MessagesQueue;
 using Shared.Persistense.Abstractions.Handling.EntityState;
-using Shared.Persistense.Entities.EntityState;
 using Shared.Persistense.Handling.EntityState;
 
 using System;
 
-
 namespace AM.Services.Portfolio.Host;
 
-public class Startup
+public sealed class Startup
 {
     private IConfiguration Configuration { get; }
     public Startup(IConfiguration configuration) => Configuration = configuration;
@@ -44,11 +43,10 @@ public class Startup
         services.AddDbContext<DatabaseContext>(provider =>
         {
             var dbConnections = Configuration.GetValue<DatabaseConnectionSection>(DatabaseConnectionSection.Name);
-            provider.UseLazyLoadingProxies();
             provider.UseNpgsql(dbConnections.Postgres.GetConnectionString());
         });
 
-        services.AddHttpClient<MoexWebclient>()
+        services.AddHttpClient<IMoexWebclient, MoexWebclient>()
             .AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
             .AddTransientHttpErrorPolicy(policy => policy.CircuitBreakerAsync(3, TimeSpan.FromSeconds(30)));
 
@@ -60,23 +58,31 @@ public class Startup
 
         services.AddRabbitMq(Configuration);
 
-        services.AddTransient<ICatalogRepository<Step>, CatalogRepository<Step, DatabaseContext>>();
-        services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
+        services.AddTransient(typeof(CatalogRepository<,>));
         services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
+        services.AddTransient<IAccountRepository, AccountRepository<DatabaseContext>>();
+        services.AddTransient<IAssetRepository, AssetRepository<DatabaseContext>>();
+        services.AddTransient<IDerivativeRepository, DerivativeRepository<DatabaseContext>>();
+        services.AddTransient<IDealRepository, DealRepository<DatabaseContext>>();
+        services.AddTransient<IEventRepository, EventRepository<DatabaseContext>>();
+        services.AddTransient<IExpenseRepository, ExpenseRepository<DatabaseContext>>();
+        services.AddTransient<IIncomeRepository, IncomeRepository<DatabaseContext>>();
+        services.AddTransient<IReportFileRepository, ReportFileRepository<DatabaseContext>>();
+        services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
 
         services.AddTransient(typeof(EntityStateHandler<>));
 
-        services.AddTransient<IEntityStatePipelineHandler<Asset>, AssetPipelineHandler>();
-        services.AddTransient<IEntityStatePipelineHandler<Derivative>, DerivativePipelineHandler>();
-        services.AddTransient<IEntityStatePipelineHandler<Deal>, DealPipelineHandler>();
-        services.AddTransient<IEntityStatePipelineHandler<Event>, EventPipelineHandler>();
-        services.AddTransient<IEntityStatePipelineHandler<Report>, ReportPipelineHandler>();
+        services.AddTransient<IEntityStateHandler<Asset>, AssetStateHandler>();
+        services.AddTransient<IEntityStateHandler<Derivative>, DerivativeStateHandler>();
+        services.AddTransient<IEntityStateHandler<Deal>, DealStateHandler>();
+        services.AddTransient<IEntityStateHandler<Event>, EventStateHandler>();
+        services.AddTransient<IEntityStateHandler<ReportFile>, ReportFileStateHandler>();
 
         services.AddHostedService<AssetBackgroundService>();
         services.AddHostedService<DerivativeBackgroundService>();
         services.AddHostedService<DealBackgroundService>();
         services.AddHostedService<EventBackgroundService>();
-        services.AddHostedService<ReportBackgroundService>();
+        services.AddHostedService<ReportFileBackgroundService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

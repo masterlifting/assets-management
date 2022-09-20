@@ -23,7 +23,7 @@ public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TCont
         foreach (var item in entities)
         {
             item.StateId = (int)States.Ready;
-            item.StepId = (int)Steps.Calculating;
+            item.StepId = (int)Steps.Computing;
         }
 
         return base.CreateRangeAsync(entities, cToken);

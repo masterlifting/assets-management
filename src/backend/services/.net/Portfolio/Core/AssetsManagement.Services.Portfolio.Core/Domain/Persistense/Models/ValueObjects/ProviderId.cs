@@ -4,7 +4,7 @@ using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record ProviderId
+public sealed record ProviderId
 {
     public int AsInt { get; }
     public Providers AsEnum { get; }

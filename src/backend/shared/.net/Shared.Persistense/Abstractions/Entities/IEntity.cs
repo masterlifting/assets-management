@@ -2,5 +2,6 @@
 
 public interface IEntity
 {
-    public DateTime UpdateTime { get; set; }
+    DateTime UpdateTime { get; set; }
+    string? Info { get; set; }
 }

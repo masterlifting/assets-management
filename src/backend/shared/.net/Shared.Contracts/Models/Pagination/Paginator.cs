@@ -2,7 +2,7 @@
 
 namespace Shared.Contracts.Models.Pagination;
 
-public class Paginator<T> where T : class
+public sealed class Paginator<T> where T : class
 {
     private const int Max = 500;
 

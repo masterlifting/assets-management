@@ -4,7 +4,7 @@ using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record AssetTypeId
+public sealed record AssetTypeId
 {
     public int AsInt { get; }
     public AssetTypes AsEnum { get; }

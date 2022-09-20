@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Domain.RabbitMq;
 
-public class RabbitMqExchange
+public sealed class RabbitMqExchange
 {
     public ExchangeTypes Type { get; set; }
     public ExchangeNames Name { get; set; }

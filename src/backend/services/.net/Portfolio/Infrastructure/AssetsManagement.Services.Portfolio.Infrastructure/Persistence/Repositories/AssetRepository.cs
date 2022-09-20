@@ -4,6 +4,8 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
+using Shared.Persistense;
 using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Repositories;
 
@@ -14,6 +16,19 @@ public sealed class AssetRepository<TContext> : EntityStateRepository<Asset, TCo
 {
     public AssetRepository(ILogger<Asset> logger, TContext context) : base(logger, context)
     {
+    }
+
+    public override Task CreateAsync(Asset entity, CancellationToken? ctToken = null)
+    {
+        entity.StepId = (int)Constants.Enums.Steps.Loading;
+        return base.CreateAsync(entity, ctToken);
+    }
+    public override Task CreateRangeAsync(IReadOnlyCollection<Asset> entities, CancellationToken? cToken = null)
+    {
+        foreach (var entity in entities)
+            entity.StepId = (int)Constants.Enums.Steps.Loading;
+
+        return base.CreateRangeAsync(entities, cToken);
     }
 
     public async Task<Asset[]> GetNewAssetsAsync(IEnumerable<AssetModel> models)

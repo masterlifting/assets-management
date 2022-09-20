@@ -1,6 +1,6 @@
 ﻿namespace Shared.Background.Settings;
 
-public class BackgroundTaskSettings
+public sealed class BackgroundTaskSettings
 {
     public int Limit { get; set; }
     public SchedulerSettings Scheduler { get; set; } = new();

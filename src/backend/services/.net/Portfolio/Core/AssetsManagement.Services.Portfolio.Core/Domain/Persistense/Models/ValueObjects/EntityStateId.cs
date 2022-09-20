@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record EntityStateId
+public sealed record EntityStateId
 {
     public string AsString { get; }
 

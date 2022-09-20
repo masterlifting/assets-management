@@ -8,11 +8,11 @@ using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 
-public class EventType : Catalog
+public sealed class EventType : Catalog
 {
-    public virtual OperationType OperationType { get; set; } = null!;
+    public OperationType OperationType { get; set; } = null!;
     public int OperationTypeId { get; set; } = (int)OperationTypes.Default;
 
     [JsonIgnore]
-    public virtual IEnumerable<Event>? Events { get; set; }
+    public IEnumerable<Event>? Events { get; set; }
 }

@@ -2,7 +2,7 @@
 
 namespace Shared.Persistense.Exceptions;
 
-public class SharedPersistenseEntityException : SharedException
+public sealed class SharedPersistenseEntityException : SharedException
 {
     private readonly string _message;
     public SharedPersistenseEntityException(string initiator, string action, string message)

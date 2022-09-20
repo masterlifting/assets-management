@@ -4,7 +4,7 @@ using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record EventTypeId
+public sealed record EventTypeId
 {
     public int AsInt { get; }
     public EventTypes AsEnum { get; }

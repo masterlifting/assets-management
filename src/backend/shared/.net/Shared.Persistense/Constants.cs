@@ -35,9 +35,15 @@ public static class Constants
         }
         public enum Steps
         {
+            Loading,
             Parsing,
-            Calculating,
+            Computing,
             Sending
+        }
+        public enum ContentTypes
+        {
+            Excel,
+            Html
         }
         public enum Comparisons
         {
@@ -45,27 +51,32 @@ public static class Constants
             More,
             Less
         }
-        public enum ContentTypes
-        {
-            Excel,
-            Html
-        }
     }
     public static class Catalogs
     {
         public static readonly Catalog[] States =
         {
-        new() {Id = (int) Enums.States.Ready, Name = nameof(Enums.States.Ready), Description = "Готов к обработке" },
-        new() {Id = (int) Enums.States.Processing, Name = nameof(Enums.States.Processing), Description = "Обрабатывается" },
-        new() {Id = (int) Enums.States.Processed, Name = nameof(Enums.States.Processed), Description = "Обработан" },
-        new() {Id = (int) Enums.States.Error, Name = nameof(Enums.States.Error), Description = "Ошибка" },
-    };
+            new() {Id = (int) Enums.States.Ready, Name = nameof(Enums.States.Ready), Info = "Готов к обработке" },
+            new() {Id = (int) Enums.States.Processing, Name = nameof(Enums.States.Processing), Info = "Обрабатывается" },
+            new() {Id = (int) Enums.States.Processed, Name = nameof(Enums.States.Processed), Info = "Обработан" },
+            new() {Id = (int) Enums.States.Error, Name = nameof(Enums.States.Error), Info = "Ошибка обработки" }
+        };
         public static readonly Catalog[] Steps =
         {
-        new() {Id = (int) Enums.States.Ready, Name = nameof(Enums.States.Ready), Description = "Готов к обработке" },
-        new() {Id = (int) Enums.States.Processing, Name = nameof(Enums.States.Processing), Description = "Обрабатывается" },
-        new() {Id = (int) Enums.States.Processed, Name = nameof(Enums.States.Processed), Description = "Обработан" },
-        new() {Id = (int) Enums.States.Error, Name = nameof(Enums.States.Error), Description = "Ошибка" },
+            new() {Id = (int) Enums.Steps.Loading, Name = nameof(Enums.Steps.Loading), Info = "Загрузка" },
+            new() {Id = (int) Enums.Steps.Parsing, Name = nameof(Enums.Steps.Parsing), Info = "Парсинг" },
+            new() {Id = (int) Enums.Steps.Computing, Name = nameof(Enums.Steps.Computing), Info = "Вычисления" },
+            new() {Id = (int) Enums.Steps.Sending, Name = nameof(Enums.Steps.Sending), Info = "Отправка" }
+        };
+        public static readonly Catalog[] ContentTypes =
+        {
+            new() {Id = (int) Enums.ContentTypes.Excel, Name = nameof(Enums.ContentTypes.Excel), Info = "Excel файл" },
+            new() {Id = (int) Enums.ContentTypes.Html, Name = nameof(Enums.ContentTypes.Html), Info = "HTML страница" }
+        };
+
+        public static readonly Dictionary<string, Enums.ContentTypes> ContentTypeDictionary = new()
+        {
+            {"", Enums.ContentTypes.Excel}
         };
     }
 }

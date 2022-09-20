@@ -3,7 +3,7 @@ using Shared.MessagesQueue.Abstractions.Settings;
 
 namespace AM.Services.Portfolio.Core.Models;
 
-public class AssetMqDto : IMqProducerMessage<string>
+public sealed class AssetMqDto : IMqProducerMessage<string>
 {
     public string Payload { get; set; } = null!;
     public IDictionary<string, string> Headers { get; init; } = null!;

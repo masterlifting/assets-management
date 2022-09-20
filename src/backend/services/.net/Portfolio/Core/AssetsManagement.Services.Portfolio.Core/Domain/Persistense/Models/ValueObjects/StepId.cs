@@ -4,7 +4,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record StepId
+public sealed record StepId
 {
     public int AsInt { get; }
     public Steps AsEnum { get; }

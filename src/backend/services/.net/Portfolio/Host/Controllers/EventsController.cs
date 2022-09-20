@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace AM.Services.Portfolio.Host.Controllers;
 
 [ApiController, Route("[controller]")]
-public class EventsController : ControllerBase
+public sealed class EventsController : ControllerBase
 {
     private readonly EventApi api;
     public EventsController(EventApi api) => this.api = api;

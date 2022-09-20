@@ -2,6 +2,6 @@
 
 namespace Shared.Persistense.Entities.EntityState;
 
-public sealed class State : Catalog, IEntityStateCatalog
+public sealed class State : Catalog, IEntityStateType
 {
 }

@@ -7,7 +7,7 @@ using Shared.Persistense.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public class User : IEntity
+public sealed class User : IEntity
 {
     [Key, StringLength(40)]
     public string Id { get; init; } = null!;
@@ -16,13 +16,14 @@ public class User : IEntity
     public string Name { get; set; } = null!;
 
     [JsonIgnore]
-    public virtual IEnumerable<Report>? ReportFiles { get; set; }
+    public IEnumerable<Report>? ReportFiles { get; set; }
     [JsonIgnore]
-    public virtual IEnumerable<Account>? Accounts { get; set; } = null!;
+    public IEnumerable<Account>? Accounts { get; set; } = null!;
     [JsonIgnore]
-    public virtual IEnumerable<Deal>? Deals { get; set; }
+    public IEnumerable<Deal>? Deals { get; set; }
     [JsonIgnore]
-    public virtual IEnumerable<Event>? Events { get; set; }
+    public IEnumerable<Event>? Events { get; set; }
 
     public DateTime UpdateTime { get; set; } = DateTime.UtcNow;
+    public string? Info { get; set; }
 }

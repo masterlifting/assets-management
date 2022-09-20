@@ -2,7 +2,7 @@
 
 namespace Shared.Data.Excel;
 
-public class ExcelHandler
+public sealed class ExcelHandler
 {
     public int RowsCount { get; }
     private readonly DataTable _table;

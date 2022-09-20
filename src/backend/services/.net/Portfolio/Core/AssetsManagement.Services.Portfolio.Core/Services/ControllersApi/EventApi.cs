@@ -5,7 +5,7 @@ using Shared.Contracts.Models.Pagination;
 
 namespace AM.Services.Portfolio.Core.Services.ControllersApi;
 
-public class EventApi
+public sealed class EventApi
 {
     public Task<PaginatedResult<EventGetDto>> GetAsync(string companyId, Paginator<Event> paginator)
     {

@@ -1,6 +1,6 @@
 ﻿namespace Shared.Background.Settings;
 
-public class SchedulerSettings
+public sealed class SchedulerSettings
 {
     private bool _isOnce;
     private List<int> _workDays;

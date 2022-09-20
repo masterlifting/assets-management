@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Settings.RabbitMq;
 
-public class RabbitMqSection
+public sealed class RabbitMqSection
 {
     public const string Name = "RabbitMq";
     public RabbitMqClient Client { get; set; } = null!;

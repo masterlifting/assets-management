@@ -1,11 +1,10 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 using Shared.Persistense.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 
-public interface IReportRepository : IEntityStateRepository<Report>
+public interface IReportRepository : IRepository<Report>
 {
-    Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportDatesAsync(int accountId, ProviderId providerId, DateOnly dateStart, CancellationToken cToken);
+    Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportsDatesAsync(int accountId, DateOnly dateStart, CancellationToken cToken);
 }

@@ -1,6 +1,6 @@
 ﻿namespace AM.Services.Portfolio.Core.Models.Api.Http;
 
-public record DealGetDto
+public sealed record DealGetDto
 {
     public string DerivativeCode { get; init; } = null!;
     public string DerivativeId { get; init; } = null!;

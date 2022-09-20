@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

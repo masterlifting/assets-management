@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
 using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Abstractions.Repositories;
@@ -20,7 +21,22 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
         _tableName = context.Model.FindEntityType(typeof(TEntity))?.ShortName() ?? throw new SharedPersistenseEntityStateException("", "", "Не удалось определить название таблицы");
     }
 
-    public async Task<string[]> PrepareDataAsync(IEntityStepCatalog step, int limit, CancellationToken cToken)
+    public override Task CreateAsync(TEntity entity, CancellationToken? ctToken = null)
+    {
+        entity.StateId = (int)Constants.Enums.States.Ready;
+
+        return base.CreateAsync(entity, ctToken);
+    }
+
+    public override Task CreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
+    {
+        foreach (var entity in entities)
+            entity.StateId = (int)Constants.Enums.States.Ready;
+
+        return base.CreateRangeAsync(entities, cToken);
+    }
+
+    public async Task<string[]> PrepareDataAsync(IEntityStepType step, int limit, CancellationToken cToken)
     {
         var query = @$"
                 DECLARE @StepId INT = {step}, @Limit INT = {limit}
@@ -37,7 +53,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
 
         return await result.Select(x => x.Id).ToArrayAsync(cToken);
     }
-    public async Task<string[]> PrepareRetryDataAsync(IEntityStepCatalog step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken)
+    public async Task<string[]> PrepareRetryDataAsync(IEntityStepType step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken)
     {
         var query = @$"
                 DECLARE @StepId INT = {step}, @Limit INT = {limit}, @UpdateTime DATETIME2 = {updateTime}, @MaxAttempts INT = {maxAttempts}
@@ -57,9 +73,9 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
 
         return await result.Select(x => x.Id).ToArrayAsync(cToken);
     }
-    public Task<TEntity[]> GetDataAsync(IEntityStepCatalog step, IEnumerable<string> ids, CancellationToken cToken) =>
+    public Task<TEntity[]> GetDataAsync(IEntityStepType step, IEnumerable<string> ids, CancellationToken cToken) =>
         _context.Set<TEntity>().Where(x => x.StepId == step.Id && ids.Contains(x.Id)).ToArrayAsync(cToken);
-    public Task SaveResultAsync(IEntityStepCatalog? step, IEnumerable<TEntity> entities, CancellationToken cToken)
+    public Task SaveResultAsync(IEntityStepType? step, IEnumerable<TEntity> entities, CancellationToken cToken)
     {
         var array = entities.ToArray();
 

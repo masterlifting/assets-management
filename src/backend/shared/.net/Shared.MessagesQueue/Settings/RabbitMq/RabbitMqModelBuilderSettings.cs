@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Settings.RabbitMq;
 
-public class RabbitMqModelBuilderSettings
+public sealed class RabbitMqModelBuilderSettings
 {
     public RabbitMqExchange Exchange { get; set; } = null!;
     public RabbitMqQueue Queue { get; set; } = null!;

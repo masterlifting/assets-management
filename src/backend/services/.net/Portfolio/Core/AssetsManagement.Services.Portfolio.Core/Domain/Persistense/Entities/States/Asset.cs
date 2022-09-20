@@ -10,13 +10,13 @@ using Shared.Persistense.Entities.EntityState;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
-public class Asset : IAsset, IEntityState, IBalance
+public sealed class Asset : IAsset, IEntityState, IBalance
 {
     public string Id { get; init; } = null!;
-    public virtual AssetType AssetType { get; set; } = null!;
+    public AssetType AssetType { get; set; } = null!;
     public int AssetTypeId { get; init; }
 
-    public virtual Country Country { get; set; } = null!;
+    public Country Country { get; set; } = null!;
     public int CountryId { get; set; }
 
     [Column(TypeName = "Decimal(18,10)")]
@@ -31,13 +31,13 @@ public class Asset : IAsset, IEntityState, IBalance
 
     public DateTime UpdateTime { get; set; } = DateTime.UtcNow;
     public int StateId { get; set; }
-    public virtual State State { get; set; } = null!;
+    public State State { get; set; } = null!;
     public int StepId { get; set; }
-    public virtual Step Step { get; set; } = null!;
+    public Step Step { get; set; } = null!;
     public byte Attempt { get; set; }
     public string? Info { get; set; }
 
 
     [JsonIgnore]
-    public virtual IEnumerable<Derivative>? Derivatives { get; set; }
+    public IEnumerable<Derivative>? Derivatives { get; set; }
 }

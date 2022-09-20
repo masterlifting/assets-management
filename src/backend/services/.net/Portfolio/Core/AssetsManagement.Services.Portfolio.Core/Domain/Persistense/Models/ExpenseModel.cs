@@ -1,9 +1,9 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
-public class ExpenseModel
+public sealed class ExpenseModel
 {
     public ExpenseModel(EntityStateId dealId, DerivativeId derivativeId, DerivativeCode derivativeCode, decimal value, DateOnly date)
     {

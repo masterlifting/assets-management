@@ -2,7 +2,7 @@
 
 namespace Shared.Attributes.Validation;
 
-public class MoreZeroAttribute : ValidationAttribute
+public sealed class MoreZeroAttribute : ValidationAttribute
 {
     private readonly string _property;
     public MoreZeroAttribute(string property) => _property = property;

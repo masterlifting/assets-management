@@ -20,7 +20,7 @@ public static class JsonExtensions
     }
     public static string SerializeToString<T>(this T data) where T : class => data as string ?? JsonSerializer.Serialize(data, Options);
 
-    public class DateOnlyConverter : JsonConverter<DateOnly>
+    public sealed class DateOnlyConverter : JsonConverter<DateOnly>
     {
         private readonly string _serializationFormat;
         public DateOnlyConverter() : this(null) { }
@@ -35,7 +35,7 @@ public static class JsonExtensions
         public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options) =>
             writer.WriteStringValue(value.ToString(_serializationFormat));
     }
-    public class TimeOnlyConverter : JsonConverter<TimeOnly>
+    public sealed class TimeOnlyConverter : JsonConverter<TimeOnly>
     {
         private readonly string _serializationFormat;
         public TimeOnlyConverter() : this(null) { }

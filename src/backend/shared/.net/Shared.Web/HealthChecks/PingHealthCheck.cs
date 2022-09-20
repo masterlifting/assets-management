@@ -4,7 +4,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Shared.Web.HealthChecks;
 
-public class HealthCheck : IHealthCheck
+public sealed class HealthCheck : IHealthCheck
 {
     private readonly string _host;
     protected HealthCheck(string host) => _host = host;

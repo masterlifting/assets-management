@@ -6,7 +6,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Filters.EntityPeriod;
 
-public class EntityTimeFilter<T> : IEntityFilter<T> where T : class, IEntityTime
+public sealed class EntityTimeFilter<T> : IEntityFilter<T> where T : class, IEntityTime
 {
     public int Hour { get; }
     public int Minute { get; }

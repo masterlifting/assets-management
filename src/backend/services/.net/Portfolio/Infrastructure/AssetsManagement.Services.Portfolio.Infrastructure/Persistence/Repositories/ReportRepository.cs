@@ -1,6 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,40 +7,15 @@ using Microsoft.Extensions.Logging;
 using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Repositories;
 
-using static Shared.Persistense.Constants.Enums;
-
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class ReportRepository<TContext> : EntityStateRepository<Report, TContext>, IReportRepository
+public sealed class ReportRepository<TContext> : Repository<Report, TContext>, IReportRepository
     where TContext : DbContext, IEntityStateDbContext
 {
     public ReportRepository(ILogger<Report> logger, TContext context) : base(logger, context) { }
 
-    public override Task CreateAsync(Report entity, CancellationToken? ctToken = null)
-    {
-        entity.StateId = (int)States.Ready;
-        entity.StepId = (int)Steps.Parsing;
-
-        return base.CreateAsync(entity, ctToken);
-    }
-    public override Task CreateRangeAsync(IReadOnlyCollection<Report> entities, CancellationToken? cToken = null)
-    {
-        foreach (var entity in entities)
-        {
-            entity.StateId = (int)States.Ready;
-            entity.StepId = (int)Steps.Parsing;
-        }
-
-        return base.CreateRangeAsync(entities, cToken);
-    }
-
-    public async Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportDatesAsync(int accountId, ProviderId providerId, DateOnly dateStart, CancellationToken cToken) => await DbSet
-        .Where(x =>
-            x.AccountId == accountId
-            && x.ProviderId == providerId.AsInt
-            && x.DateStart.HasValue
-            && x.DateEnd.HasValue
-            && x.DateStart >= dateStart)
-        .Select(x => ValueTuple.Create(x.DateStart!.Value, x.DateEnd!.Value))
+    public async Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportsDatesAsync(int accountId, DateOnly dateStart, CancellationToken cToken) => await DbSet
+        .Where(x => x.AccountId == accountId && x.DateStart >= dateStart)
+        .Select(x => ValueTuple.Create(x.DateStart, x.DateEnd))
         .ToArrayAsync(cToken);
 }

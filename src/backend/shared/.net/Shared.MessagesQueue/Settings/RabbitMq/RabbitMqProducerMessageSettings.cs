@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Settings.RabbitMq;
 
-public class RabbitMqProducerMessageSettings : IMqProducerMessageSettings
+public sealed class RabbitMqProducerMessageSettings : IMqProducerMessageSettings
 {
 
 }

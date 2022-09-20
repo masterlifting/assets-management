@@ -2,6 +2,6 @@
 
 namespace Shared.Persistense.Entities.EntityState;
 
-public sealed class Step : Catalog, IEntityStepCatalog
+public sealed class Step : Catalog, IEntityStepType
 {
 }

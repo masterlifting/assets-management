@@ -2,7 +2,7 @@
 
 namespace Shared.MessagesQueue.Domain.RabbitMq;
 
-public class RabbitMqConsumerMessage : IMqConsumerMessage<string>
+public sealed class RabbitMqConsumerMessage : IMqConsumerMessage<string>
 {
     public string Payload { get; set; } = null!;
     public IDictionary<string, string> Headers { get; init; } = null!;

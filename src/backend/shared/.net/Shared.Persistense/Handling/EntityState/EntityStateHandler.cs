@@ -18,12 +18,12 @@ public sealed class EntityStateHandler<TEntity> where TEntity : class, IEntitySt
 
     private readonly ILogger<EntityStateHandler<TEntity>> _logger;
     private readonly IEntityStateRepository<TEntity> _repository;
-    private readonly IEntityStatePipelineHandler<TEntity> _handler;
+    private readonly IEntityStateHandler<TEntity> _handler;
 
     public EntityStateHandler(
         ILogger<EntityStateHandler<TEntity>> logger
         , IEntityStateRepository<TEntity> repository
-        , IEntityStatePipelineHandler<TEntity> handler)
+        , IEntityStateHandler<TEntity> handler)
     {
         _logger = logger;
         _repository = repository;
@@ -31,14 +31,14 @@ public sealed class EntityStateHandler<TEntity> where TEntity : class, IEntitySt
     }
 
     public async Task StartAsync<TStep>(int count, BackgroundTaskSettings settings, Queue<TStep> steps, CancellationToken cToken)
-        where TStep : Catalog, IEntityStepCatalog
+        where TStep : Catalog, IEntityStepType
     {
         _logger.LogDebug(_initiator, "Запуск шагов обработки", steps.Count);
 
         for (var i = 0; i < steps.Count; i++)
         {
             var step = steps.Dequeue();
-            var action = step.Description ?? step.Name;
+            var action = step.Info ?? step.Name;
 
             string[] ids;
             try

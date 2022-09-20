@@ -9,7 +9,7 @@ using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
-public class EventBackgroundService : EntityStateBackgroundService
+public sealed class EventBackgroundService : EntityStateBackgroundService
 {
     public EventBackgroundService(
         IServiceScopeFactory scopeFactory

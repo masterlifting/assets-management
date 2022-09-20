@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record UserId
+public sealed record UserId
 {
     public string AsString { get; }
 

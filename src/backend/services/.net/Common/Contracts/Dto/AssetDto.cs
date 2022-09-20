@@ -1,6 +1,6 @@
 ﻿namespace AM.Services.Common.Contracts.Dto;
 
-public class AssetDto
+public sealed class AssetDto
 {
     public string AssetId { get; }
     public int AssetTypeId { get; }

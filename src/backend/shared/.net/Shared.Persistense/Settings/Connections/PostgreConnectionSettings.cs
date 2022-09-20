@@ -1,6 +1,6 @@
 ﻿namespace Shared.Persistense.Settings.Connections;
 
-public class PostgreConnectionSettings
+public sealed class PostgreConnectionSettings
 {
     public string Host { get; set; } = null!;
     public int Port { get; set; }

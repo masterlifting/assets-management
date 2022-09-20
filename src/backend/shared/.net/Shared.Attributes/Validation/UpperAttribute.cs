@@ -3,7 +3,7 @@
 namespace Shared.Attributes.Validation;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class UpperAttribute : ValidationAttribute
+public sealed class UpperAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)
     {

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Shared.Exceptions\Shared.Exceptions.csproj" />
     <ProjectReference Include="..\Shared.Frameworks\Shared.Frameworks.csproj" />
   </ItemGroup>
 

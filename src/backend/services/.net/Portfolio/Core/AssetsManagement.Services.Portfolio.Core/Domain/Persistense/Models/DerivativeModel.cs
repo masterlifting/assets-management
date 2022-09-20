@@ -3,7 +3,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
-public record DerivativeModel
+public sealed record DerivativeModel
 {
     public DerivativeModel(DerivativeId derivativeId, DerivativeCode derivativeCode, AssetId assetId, AssetTypeId assetTypeId, decimal balance)
     {

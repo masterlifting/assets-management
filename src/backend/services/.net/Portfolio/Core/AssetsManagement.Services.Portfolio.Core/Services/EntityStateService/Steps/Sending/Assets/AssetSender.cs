@@ -3,7 +3,7 @@ using Shared.Persistense.Abstractions.Handling.EntityState;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Sending.Assets;
 
-public class AssetSender : IEntityStateStepHandler<Asset>
+public sealed class AssetSender : IEntityStepHandler<Asset>
 {
     //public AssetSender()
     //{

@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record DerivativeCode
+public sealed record DerivativeCode
 {
     public string AsString { get; }
 

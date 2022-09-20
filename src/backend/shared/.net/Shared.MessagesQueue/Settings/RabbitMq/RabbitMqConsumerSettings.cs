@@ -3,7 +3,7 @@ using Shared.MessagesQueue.Abstractions.Settings;
 
 namespace Shared.MessagesQueue.Settings.RabbitMq;
 
-public class RabbitMqConsumerSettings : IMqConsumerSettings
+public sealed class RabbitMqConsumerSettings : IMqConsumerSettings
 {
     public string Queue { get; set; } = null!;
     public int Limit { get; set; }

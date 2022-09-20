@@ -4,7 +4,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
-public record StateId
+public sealed record StateId
 {
     public int AsInt { get; }
     public States AsEnum { get; }

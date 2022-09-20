@@ -9,7 +9,7 @@ using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
-public class DealBackgroundService : EntityStateBackgroundService
+public sealed class DealBackgroundService : EntityStateBackgroundService
 {
     public DealBackgroundService(
         IServiceScopeFactory scopeFactory

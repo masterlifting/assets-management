@@ -9,7 +9,7 @@ using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
-public class DerivativeBackgroundService : EntityStateBackgroundService
+public sealed class DerivativeBackgroundService : EntityStateBackgroundService
 {
     public DerivativeBackgroundService(
         IServiceScopeFactory scopeFactory

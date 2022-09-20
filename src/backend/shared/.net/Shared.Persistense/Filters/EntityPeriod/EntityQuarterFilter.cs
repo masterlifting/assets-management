@@ -6,7 +6,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Filters.EntityPeriod;
 
-public class EntityQuarterFilter<T> : IEntityFilter<T> where T : class, IEntityQuarter
+public sealed class EntityQuarterFilter<T> : IEntityFilter<T> where T : class, IEntityQuarter
 {
     public int Year { get; }
     public byte Quarter { get; }

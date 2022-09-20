@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace AM.Services.Portfolio.Host.Controllers;
 
 [ApiController, Route("[controller]")]
-public class DealsController : ControllerBase
+public sealed class DealsController : ControllerBase
 {
     private readonly DealApi api;
     public DealsController(DealApi api) => this.api = api;
