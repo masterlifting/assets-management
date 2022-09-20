@@ -1,5 +1,6 @@
-﻿using AM.Services.Common.Contracts.Entities.Enums;
-using AM.Services.Portfolio.Core.Models.Clients;
+﻿using AM.Services.Portfolio.Core.Models.Clients;
+
+using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Abstractions.External.Webclients;
 

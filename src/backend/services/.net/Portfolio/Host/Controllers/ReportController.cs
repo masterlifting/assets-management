@@ -1,5 +1,4 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 using PortfolioCoreException = AM.Services.Portfolio.Host.Exceptions.PortfolioHostException;
 
@@ -24,9 +25,9 @@ public class ReportController : ControllerBase
     private readonly IUserRepository _userRepository;
 
     private static readonly Dictionary<string, int> ProviderPatterns = new()
-    {
-        { "^B_k-(.+)_ALL(.+).xls$", (int)Providers.Bcs }
-    };
+{
+    { "^B_k-(.+)_ALL(.+).xls$", (int)Providers.Bcs }
+};
     public ReportController(
         ILogger<ReportController> logger
         , IReportRepository reportRepository

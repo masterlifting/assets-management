@@ -4,8 +4,8 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Repor
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Persistense.Abstractions.Entities.State;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Entities.EntityState;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
@@ -23,17 +23,17 @@ public class ReportPipelineHandler : IEntityStatePipelineHandler<Report>
         , IEventRepository eventRepository)
     {
         _handlers = new()
-        {
-            {(int)Domain.Persistense.Entities.Enums.Steps.Parsing, new ReportParser(
-                logger
-                , accountRepository
-                , derivativeRepository
-                , reportRepository
-                , dealRepository
-                , eventRepository)}
-        };
+    {
+        {(int)Shared.Persistense.Constants.Enums.Steps.Parsing, new ReportParser(
+            logger
+            , accountRepository
+            , derivativeRepository
+            , reportRepository
+            , dealRepository
+            , eventRepository)}
+    };
     }
-    public Task HandleDataAsync(IEntityStep step, IEnumerable<Report> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+    public Task HandleDataAsync(IEntityStepCatalog step, IEnumerable<Report> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
         ? _handlers[step.Id].HandleAsync(data, cToken)
         : throw new SharedPersistenseEntityStateException("", "", "");
 }

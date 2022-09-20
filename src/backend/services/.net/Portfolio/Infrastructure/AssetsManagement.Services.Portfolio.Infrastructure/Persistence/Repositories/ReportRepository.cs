@@ -1,14 +1,14 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using Shared.Persistense.Abstractions.Entities.State.Handle;
-using Shared.Persistense.Enums;
+using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Repositories;
+
+using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 

@@ -1,4 +1,4 @@
-﻿using AM.Services.Common.Contracts.Entities;
+﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Operations;
@@ -6,8 +6,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 using Microsoft.EntityFrameworkCore;
 
-using Shared.Persistense;
-using Shared.Persistense.Abstractions.Handling.EntityState;
+using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Entities;
 using Shared.Persistense.Entities.EntityState;
 
@@ -50,170 +49,170 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
         builder.UseSerialColumns();
 
         #region Catalogs
-        builder.Entity<State>().HasData(Constants.Catalogs.States);
-        builder.Entity<Step>().HasData(Constants.Catalogs.Steps);
+        builder.Entity<State>().HasData(Shared.Persistense.Constants.Catalogs.States);
+        builder.Entity<Step>().HasData(Shared.Persistense.Constants.Catalogs.Steps);
 
-        builder.Entity<AssetType>().HasData(Catalogs.AssetTypes);
-        builder.Entity<Country>().HasData(Catalogs.Countries);
-        builder.Entity<Exchange>().HasData(Catalogs.Exchanges);
+        builder.Entity<AssetType>().HasData(Common.Contracts.Constants.Persistense.Catalogs.AssetTypes);
+        builder.Entity<Country>().HasData(Common.Contracts.Constants.Persistense.Catalogs.Countries);
+        builder.Entity<Exchange>().HasData(Common.Contracts.Constants.Persistense.Catalogs.Exchanges);
 
         builder.Entity<EventType>().HasData(
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Default,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Default,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Default),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Default,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Default,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Default),
                 Description = "Не определено"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Increase,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Increase),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Increase,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Increase),
                 Description = "Увеличение баланса актива"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Decrease,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Decrease),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Decrease,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Decrease),
                 Description = "Уменьшение баланса актива"
             },
 
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.BankInvestments,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.BankInvestments),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.BankInvestments,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.BankInvestments),
                 Description = "Ивестиции в банковские продукты"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.CrowdfundingInvestments,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.CrowdfundingInvestments),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.CrowdfundingInvestments,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.CrowdfundingInvestments),
                 Description = "Инвестиции в краудфандинг"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.CrowdlendingInvestments,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.CrowdlendingInvestments),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.CrowdlendingInvestments,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.CrowdlendingInvestments),
                 Description = "Инвестиции в краудлендинг"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.VentureInvestments,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.VentureInvestments),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.VentureInvestments,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.VentureInvestments),
                 Description = "Венчурные инвестиции"
             },
 
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.InterestIncome,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.InterestIncome),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.InterestIncome,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.InterestIncome),
                 Description = "Процентная прибыль"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.InvestmentIncome,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.InvestmentIncome),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.InvestmentIncome,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.InvestmentIncome),
                 Description = "Инвестиционная прибыль"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.InvestmentBody,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.InvestmentBody),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.InvestmentBody,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.InvestmentBody),
                 Description = "Возврат тела инвестиции"
             },
 
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Split,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Split),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Split,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Split),
                 Description = "Увеличение актива за счет его диления"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Coupon,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Coupon),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Coupon,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Coupon),
                 Description = "Купоны по активу"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Dividend,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Dividend),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Dividend,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Dividend),
                 Description = "Дивиденды по активу"
             },
 
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Delisting,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Delisting),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Delisting,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Delisting),
                 Description = "Исключение актива из списка"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Loss,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Loss),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Loss,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Loss),
                 Description = "Регистрация убытка"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.TaxIncome,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.TaxIncome),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.TaxIncome,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.TaxIncome),
                 Description = "Налог на доход по активу"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Ndfl,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.Ndfl),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.Ndfl,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.Ndfl),
                 Description = "НДФЛ"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.TaxDeal,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.TaxDeal),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.TaxDeal,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.TaxDeal),
                 Description = "Комиссия за проведение сделки"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.TaxProvider,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.TaxProvider),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.TaxProvider,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.TaxProvider),
                 Description = "Комиссия поставщику актива"
             },
             new()
             {
-                Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.TaxDepositary,
-                OperationTypeId = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense,
-                Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.TaxDepositary),
+                Id = (int)Core.Constants.Persistense.Enums.EventTypes.TaxDepositary,
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Name = nameof(Core.Constants.Persistense.Enums.EventTypes.TaxDepositary),
                 Description = "Комиссия депозитарию актива"
             });
         builder.Entity<OperationType>().HasData(
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Default, Name = nameof(Core.Domain.Persistense.Entities.Enums.OperationTypes.Default), Description = "Не определено" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Income, Name = nameof(Core.Domain.Persistense.Entities.Enums.OperationTypes.Income), Description = "Приход" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense, Name = nameof(Core.Domain.Persistense.Entities.Enums.OperationTypes.Expense), Description = "Расход" });
+            new() { Id = (int)Core.Constants.Persistense.Enums.OperationTypes.Default, Name = nameof(Core.Constants.Persistense.Enums.OperationTypes.Default), Description = "Не определено" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.OperationTypes.Income, Name = nameof(Core.Constants.Persistense.Enums.OperationTypes.Income), Description = "Приход" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense, Name = nameof(Core.Constants.Persistense.Enums.OperationTypes.Expense), Description = "Расход" });
         builder.Entity<Provider>().HasData(
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Safe, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.Safe), Description = "Приватное хранение" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Bcs, Name = "БКС", Description = "Брокер-банк" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Tinkoff, Name = "Тинкофф", Description = "Банк-брокер" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Vtb, Name = "ВТБ", Description = "Банк-брокер" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Bitokk, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.Bitokk), Description = "Криптообменник https://bitokk.biz/" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.XChange, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.XChange), Description = "Криптообменник https://xchange.cash/" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.JetLend, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.JetLend), Description = "Краудлендинговая платформа https://jetlend.ru/" });
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.Safe, Name = nameof(Core.Constants.Persistense.Enums.Providers.Safe), Description = "Приватное хранение" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.Bcs, Name = "БКС", Description = "Брокер-банк" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.Tinkoff, Name = "Тинкофф", Description = "Банк-брокер" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.Vtb, Name = "ВТБ", Description = "Банк-брокер" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.Bitokk, Name = nameof(Core.Constants.Persistense.Enums.Providers.Bitokk), Description = "Криптообменник https://bitokk.biz/" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.XChange, Name = nameof(Core.Constants.Persistense.Enums.Providers.XChange), Description = "Криптообменник https://xchange.cash/" },
+            new() { Id = (int)Core.Constants.Persistense.Enums.Providers.JetLend, Name = nameof(Core.Constants.Persistense.Enums.Providers.JetLend), Description = "Краудлендинговая платформа https://jetlend.ru/" });
         #endregion
 
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();

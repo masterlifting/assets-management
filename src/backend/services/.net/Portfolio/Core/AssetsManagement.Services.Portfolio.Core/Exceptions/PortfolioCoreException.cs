@@ -1,6 +1,7 @@
 ﻿using Shared.Exceptions.Abstractions;
 
 namespace AM.Services.Portfolio.Core.Exceptions;
+
 public sealed class PortfolioCoreException : SharedException
 {
     private readonly string _message;

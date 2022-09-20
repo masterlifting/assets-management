@@ -4,8 +4,9 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.A
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Sending.Assets;
 
 using Microsoft.Extensions.Logging;
-using Shared.Persistense.Abstractions.Entities.State;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+
+using Shared.Persistense.Abstractions.Entities.EntityState;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
@@ -23,12 +24,12 @@ public class AssetPipelineHandler : IEntityStatePipelineHandler<Asset>
         , IEventRepository eventRepository)
     {
         _handlers = new()
-        {
-            {(int)Domain.Persistense.Entities.Enums.Steps.Calculating, new AssetCalculator()},
-            {(int)Domain.Persistense.Entities.Enums.Steps.Sending, new AssetSender()}
-        };
+    {
+        {(int)Shared.Persistense.Constants.Enums.Steps.Calculating, new AssetCalculator()},
+        {(int)Shared.Persistense.Constants.Enums.Steps.Sending, new AssetSender()}
+    };
     }
-    public Task HandleDataAsync(IEntityStep step, IEnumerable<Asset> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+    public Task HandleDataAsync(IEntityStepCatalog step, IEnumerable<Asset> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
         ? _handlers[step.Id].HandleAsync(data, cToken)
         : throw new SharedPersistenseEntityStateException("", "", "");
 }

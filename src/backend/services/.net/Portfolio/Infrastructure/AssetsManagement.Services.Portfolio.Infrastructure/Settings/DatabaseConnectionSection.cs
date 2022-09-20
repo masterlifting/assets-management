@@ -1,9 +1,9 @@
-﻿using Shared.Persistense.ConnectionSettings;
+﻿using Shared.Persistense.Settings.Connections;
 
 namespace AM.Services.Portfolio.Infrastructure.Settings;
 
 public class DatabaseConnectionSection
 {
     public const string Name = "DatabaseConnections";
-    public PostgresConnectionSettings Postgres { get; set; } = null!;
+    public PostgreConnectionSettings Postgres { get; set; } = null!;
 }

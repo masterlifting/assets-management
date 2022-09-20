@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-using AM.Services.Common.Contracts.Entities;
+using AM.Services.Common.Contracts.Abstractions.Persistense.Entities;
+using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 
 using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Entities.EntityState;

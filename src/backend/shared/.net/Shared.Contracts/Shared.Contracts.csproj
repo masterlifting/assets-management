@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dto\" />
-    <Folder Include="Entities\" />
+    <Compile Remove="Dto\**" />
+    <Compile Remove="Entities\**" />
+    <EmbeddedResource Remove="Dto\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <None Remove="Dto\**" />
+    <None Remove="Entities\**" />
   </ItemGroup>
 
 </Project>

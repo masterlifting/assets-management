@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Services.ControllersApi;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Shared.Data;
+using Shared.Contracts.Models.Pagination;
+
+using System;
+using System.Threading.Tasks;
 
 namespace AM.Services.Portfolio.Host.Controllers;
 

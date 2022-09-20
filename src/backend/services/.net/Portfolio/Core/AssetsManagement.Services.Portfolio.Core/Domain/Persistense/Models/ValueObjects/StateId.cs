@@ -1,6 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Exceptions;
 
-using Shared.Persistense.Enums;
+using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 

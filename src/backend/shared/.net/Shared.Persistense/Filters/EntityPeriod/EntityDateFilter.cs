@@ -1,7 +1,8 @@
 ﻿using System.Linq.Expressions;
 
 using Shared.Persistense.Abstractions.Entities.EntityPeriod;
-using Shared.Persistense.Enums;
+
+using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Filters.EntityPeriod;
 

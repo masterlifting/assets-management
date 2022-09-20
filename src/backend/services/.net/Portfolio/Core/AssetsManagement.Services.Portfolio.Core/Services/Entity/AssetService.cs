@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 
 using Shared.Extensions.Logging;
 
+using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
+
 namespace AM.Services.Portfolio.Core.Services.Entity;
 
 public class AssetService
@@ -40,7 +42,7 @@ public class AssetService
 
         var moexData = await _moexWebclient.GetIsinAsync(assetId.AsString, countryId.AsEnum);
 
-        var isinIndex = countryId.AsEnum == Common.Contracts.Entities.Enums.Countries.Rus ? 19 : 18;
+        var isinIndex = countryId.AsEnum == Countries.Rus ? 19 : 18;
 
         var isin = moexData.Securities.Data[0][isinIndex].ToString();
 
@@ -95,14 +97,14 @@ public class AssetService
 
             var assetData = new Dictionary<string, AssetModel>(group.Count());
 
-            if (country == Common.Contracts.Entities.Enums.Countries.Rus)
+            if (country == Countries.Rus)
                 foreach (var item in group)
                     assetData.Add(item.AssetId.AsString, item);
             else
                 foreach (var item in group)
                     assetData.Add($"{item.AssetId.AsString}-RM", item);
 
-            var isinIndex = country == Common.Contracts.Entities.Enums.Countries.Rus ? 19 : 18;
+            var isinIndex = country == Countries.Rus ? 19 : 18;
 
             var response = await _moexWebclient.GetIsinsAsync(country);
 

@@ -4,8 +4,8 @@ using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.D
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Persistense.Abstractions.Entities.State;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Entities.EntityState;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Exceptions;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
@@ -23,11 +23,11 @@ public class DerivativePipelineHandler : IEntityStatePipelineHandler<Derivative>
         , IEventRepository eventRepository)
     {
         _handlers = new()
-        {
-            {(int)Domain.Persistense.Entities.Enums.Steps.Calculating, new DerivativeCalculator()}
-        };
+    {
+        {(int)Shared.Persistense.Constants.Enums.Steps.Calculating, new DerivativeCalculator()}
+    };
     }
-    public Task HandleDataAsync(IEntityStep step, IEnumerable<Derivative> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+    public Task HandleDataAsync(IEntityStepCatalog step, IEnumerable<Derivative> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
         ? _handlers[step.Id].HandleAsync(data, cToken)
         : throw new SharedPersistenseEntityStateException("", "", "");
 }

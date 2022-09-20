@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Shared.Persistense.Entities.EntityState;
 using Shared.Persistense.Abstractions.Entities.EntityState;
+using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

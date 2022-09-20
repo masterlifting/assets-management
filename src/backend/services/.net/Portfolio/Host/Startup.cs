@@ -1,5 +1,10 @@
+using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+using AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
+using AM.Services.Portfolio.Host.Services.Background.EntityState;
 using AM.Services.Portfolio.Infrastructure.External.Webclients;
 using AM.Services.Portfolio.Infrastructure.Persistence;
+using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
 using Microsoft.AspNetCore.Builder;
@@ -11,19 +16,15 @@ using Microsoft.Extensions.Hosting;
 
 using Polly;
 
+using Shared.Background.Settings.Sections;
 using Shared.Extensions.Serialization;
+using Shared.MessagesQueue;
+using Shared.Persistense.Abstractions.Handling.EntityState;
+using Shared.Persistense.Entities.EntityState;
+using Shared.Persistense.Handling.EntityState;
 
 using System;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-using AM.Services.Portfolio.Core.Services.EntityStateService.PipelineHandlers;
-using AM.Services.Portfolio.Host.Services.Background.EntityState;
-using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
-using Shared.Persistense.Handlers;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
-using Shared.MessagesQueue.Implementations.RabbitMq.Registration;
-using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
-using Shared.Background.Settings.Sections;
+
 
 namespace AM.Services.Portfolio.Host;
 
@@ -63,7 +64,7 @@ public class Startup
         services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
         services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
 
-        services.AddTransient(typeof(EntityStatePipeline<>));
+        services.AddTransient(typeof(EntityStateHandler<>));
 
         services.AddTransient<IEntityStatePipelineHandler<Asset>, AssetPipelineHandler>();
         services.AddTransient<IEntityStatePipelineHandler<Derivative>, DerivativePipelineHandler>();

@@ -1,5 +1,6 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
-using AM.Services.Portfolio.Core.Exceptions;
+﻿using AM.Services.Portfolio.Core.Exceptions;
+
+using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 

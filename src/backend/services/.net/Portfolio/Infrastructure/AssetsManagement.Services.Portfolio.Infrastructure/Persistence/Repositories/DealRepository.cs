@@ -4,9 +4,10 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using Shared.Persistense.Abstractions.Entities.State.Handle;
-using Shared.Persistense.Enums;
+using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Repositories;
+
+using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
@@ -21,8 +22,8 @@ public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TCont
     {
         foreach (var item in entities)
         {
-            item.StateId = (int)States.Ready; 
-            item.StepId = (int)Core.Domain.Persistense.Entities.Enums.Steps.Calculating;
+            item.StateId = (int)States.Ready;
+            item.StepId = (int)Steps.Calculating;
         }
 
         return base.CreateRangeAsync(entities, cToken);

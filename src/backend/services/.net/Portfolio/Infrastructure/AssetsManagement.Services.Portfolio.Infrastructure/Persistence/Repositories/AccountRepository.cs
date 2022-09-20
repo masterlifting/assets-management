@@ -9,7 +9,7 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class AccountRepository<TContext> : Repository<Account, TContext> , IAccountRepository
+public sealed class AccountRepository<TContext> : Repository<Account, TContext>, IAccountRepository
     where TContext : DbContext
 {
     public AccountRepository(ILogger<Account> logger, TContext context) : base(logger, context)

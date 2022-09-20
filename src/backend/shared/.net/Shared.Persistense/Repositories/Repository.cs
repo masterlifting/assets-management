@@ -42,7 +42,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Create, Constants.Success);
+        _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryCreateAsync(TEntity entity, CancellationToken? cToken = null)
     {
@@ -60,7 +60,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
     {
         if (!entities.Any())
         {
-            _logger.LogDebug(_initiator, Constants.Create, Constants.NoData);
+            _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
             return;
         }
 
@@ -76,7 +76,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Create, Constants.Success, result);
+        _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryCreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
@@ -94,7 +94,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
     public virtual async Task UpdateAsync(object[] id, TEntity entity, CancellationToken? ctToken = null)
     {
         if (await DbSet.FindAsync(id) is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
 
         if (!ctToken.HasValue)
         {
@@ -107,7 +107,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Update, Constants.Success);
+        _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryUpdateAsync(object[] id, TEntity entity, CancellationToken? cToken = null)
     {
@@ -125,7 +125,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
     {
         if (!entities.Any())
         {
-            _logger.LogDebug(_initiator, Constants.Update, Constants.NoData);
+            _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
             return;
         }
 
@@ -141,7 +141,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Update, Constants.Success, result);
+        _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryUpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
@@ -161,7 +161,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         var entity = await DbSet.FindAsync(id);
 
         if (entity is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
 
         if (!cToken.HasValue)
         {
@@ -174,7 +174,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Delete, Constants.Success);
+        _logger.LogDebug(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
 
         return entity;
     }
@@ -194,7 +194,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
     {
         if (!entities.Any())
         {
-            _logger.LogDebug(_initiator, Constants.Update, Constants.NoData);
+            _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
             return;
         }
 
@@ -210,7 +210,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
             result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
         }
 
-        _logger.LogDebug(_initiator, Constants.Delete, Constants.Success, result);
+        _logger.LogDebug(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryDeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {

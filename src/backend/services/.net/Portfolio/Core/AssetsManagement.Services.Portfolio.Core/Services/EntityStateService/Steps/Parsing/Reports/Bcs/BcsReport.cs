@@ -1,6 +1,4 @@
-using AM.Services.Common.Contracts.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Enums;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
@@ -12,6 +10,9 @@ using Microsoft.Extensions.Logging;
 using Shared.Data.Excel;
 
 using System.Globalization;
+
+using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
+using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports.Bcs;
 
@@ -54,28 +55,28 @@ public sealed class BcsReport
         _culture = new CultureInfo("ru-RU");
         _reportPoints = new Dictionary<string, int>(BcsReportStructure.Points.Length);
         _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Дивиденды", (ParseDividend, EventTypes.Dividend) },
-            { "Урегулирование сделок", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение компании", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение за обслуживание счета депо", (ParseComission, EventTypes.TaxDepositary) },
-            { "Хранение ЦБ", (ParseComission, EventTypes.TaxDepositary) },
-            { "НДФЛ", (ParseComission, EventTypes.Ndfl) },
-            { "Приход ДС", (ParseBalance, EventTypes.Increase) },
-            { "Вывод ДС", (ParseBalance, EventTypes.Decrease) },
-            { "ISIN:", (ParseStockTransactions, EventTypes.Default) },
-            { "Сопряж. валюта:", (ParseExchangeRate, EventTypes.Default) },
-            { "Вознаграждение компании (СВОП)", (ParseComission, EventTypes.TaxProvider) },
-            { "Комиссия за займы \"овернайт ЦБ\"", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение компании (репо)", (ParseComission, EventTypes.TaxProvider) },
-            { "Комиссия Биржевой гуру", (ParseComission, EventTypes.TaxProvider) },
-            { "Оплата за вывод денежных средств", (ParseComission, EventTypes.TaxProvider) },
-            { "Доп. выпуск акций ", (ParseAdditionalStockRelease, EventTypes.Increase) },
-            { "Проценты по займам \"овернайт ЦБ\"", (ParseBalance, EventTypes.InterestIncome) },
-            { "Проценты по займам \"овернайт\"", (ParseBalance, EventTypes.InterestIncome) },
-            { "Распределение (4*)", (ParseComission, EventTypes.TaxDepositary) },
-            { "Возмещение дивидендов по сделке", (ParseBalance, EventTypes.Dividend) }
-        };
+    {
+        { "Дивиденды", (ParseDividend, EventTypes.Dividend) },
+        { "Урегулирование сделок", (ParseComission, EventTypes.TaxProvider) },
+        { "Вознаграждение компании", (ParseComission, EventTypes.TaxProvider) },
+        { "Вознаграждение за обслуживание счета депо", (ParseComission, EventTypes.TaxDepositary) },
+        { "Хранение ЦБ", (ParseComission, EventTypes.TaxDepositary) },
+        { "НДФЛ", (ParseComission, EventTypes.Ndfl) },
+        { "Приход ДС", (ParseBalance, EventTypes.Increase) },
+        { "Вывод ДС", (ParseBalance, EventTypes.Decrease) },
+        { "ISIN:", (ParseStockTransactions, EventTypes.Default) },
+        { "Сопряж. валюта:", (ParseExchangeRate, EventTypes.Default) },
+        { "Вознаграждение компании (СВОП)", (ParseComission, EventTypes.TaxProvider) },
+        { "Комиссия за займы \"овернайт ЦБ\"", (ParseComission, EventTypes.TaxProvider) },
+        { "Вознаграждение компании (репо)", (ParseComission, EventTypes.TaxProvider) },
+        { "Комиссия Биржевой гуру", (ParseComission, EventTypes.TaxProvider) },
+        { "Оплата за вывод денежных средств", (ParseComission, EventTypes.TaxProvider) },
+        { "Доп. выпуск акций ", (ParseAdditionalStockRelease, EventTypes.Increase) },
+        { "Проценты по займам \"овернайт ЦБ\"", (ParseBalance, EventTypes.InterestIncome) },
+        { "Проценты по займам \"овернайт\"", (ParseBalance, EventTypes.InterestIncome) },
+        { "Распределение (4*)", (ParseComission, EventTypes.TaxDepositary) },
+        { "Возмещение дивидендов по сделке", (ParseBalance, EventTypes.Dividend) }
+    };
     }
 
     public BcsReportHeader GetHeader()
@@ -389,7 +390,7 @@ public sealed class BcsReport
         var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
 
         var name = _excel.GetCellValue(_rowId, 1);
-        
+
         while (!_excel.TryGetCellValue(_rowId++, 1, $"Итого по {name}:", out _))
         {
             var cellBuyValue = _excel.GetCellValue(_rowId, 4);
@@ -433,7 +434,7 @@ public sealed class BcsReport
                 var incomeDerivativeId = new DerivativeId(currency.Value.ToString());
                 var incomeDerivativeCode = new DerivativeCode(_derivatives[incomeDerivativeId.AsString][0]);
                 incomeModel = new IncomeModel(dealId, incomeDerivativeId, incomeDerivativeCode, dealValue * dealCost, date);
-                
+
                 expenseModel = new ExpenseModel(dealId, derivativeId, derivativeCode, dealValue, date);
             }
 
