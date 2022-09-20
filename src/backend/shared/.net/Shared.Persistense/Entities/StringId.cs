@@ -1,6 +1,6 @@
 ﻿namespace Shared.Persistense.Entities;
 
-public class StringId
+public sealed class StringId
 {
     public string Id { get; set; } = null!;
 }

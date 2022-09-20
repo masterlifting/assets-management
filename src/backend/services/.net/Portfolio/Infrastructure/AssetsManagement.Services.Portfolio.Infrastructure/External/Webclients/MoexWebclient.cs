@@ -29,7 +29,7 @@ public class MoexWebclient : IMoexWebclient
 
         var response = await _httpClient.GetFromJsonAsync<MoexIsinData>($"{_baseUri}/{urlIsinPath}/securities/{ticker}.json");
 
-        return response ?? throw new HttpRequestException("Data not found from "+ nameof(GetIsinAsync));
+        return response ?? throw new HttpRequestException("Data not found from " + nameof(GetIsinAsync));
     }
     public async Task<MoexIsinData> GetIsinsAsync(Countries country)
     {

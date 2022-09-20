@@ -2,8 +2,7 @@
 
 using Shared.Persistense.Entities;
 
-namespace Shared.Persistense.Abstractions.Entities.State.Handle;
-
+namespace Shared.Persistense.Abstractions.Handling.EntityState;
 public interface IEntityStateDbContext
 {
     DbSet<StringId> StringIds { get; set; }

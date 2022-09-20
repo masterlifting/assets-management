@@ -2,14 +2,14 @@
 
 using Shared.Background.Settings;
 using Shared.Extensions.Logging;
-using Shared.Persistense.Abstractions.Entities.State;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Entities.EntityState;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Abstractions.Repositories;
 using Shared.Persistense.Entities;
 using Shared.Persistense.Enums;
 using Shared.Persistense.Exceptions;
 
-namespace Shared.Persistense.Handlers;
+namespace Shared.Persistense.Handling.EntityState;
 
 public sealed class EntityStatePipeline<TEntity> where TEntity : class, IEntityState
 {
@@ -32,7 +32,7 @@ public sealed class EntityStatePipeline<TEntity> where TEntity : class, IEntityS
     }
 
     public async Task StartAsync<TStep>(int count, BackgroundTaskSettings settings, Queue<TStep> steps, CancellationToken cToken)
-        where TStep : Catalog, IEntityStep
+        where TStep : Catalog, IEntityStepCatalog
     {
         _logger.LogDebug(_initiator, "Запуск шагов обработки", steps.Count);
 

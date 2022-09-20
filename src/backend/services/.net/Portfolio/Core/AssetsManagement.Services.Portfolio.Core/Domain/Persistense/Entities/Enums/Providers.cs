@@ -7,6 +7,6 @@ public enum Providers
     Tinkoff = 3,
     Vtb = 4,
     JetLend = 5,
-    Bitokk= 6,
-    XChange= 7
+    Bitokk = 6,
+    XChange = 7
 }

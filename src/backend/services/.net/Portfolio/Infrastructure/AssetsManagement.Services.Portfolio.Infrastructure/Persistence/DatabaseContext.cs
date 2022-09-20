@@ -7,8 +7,9 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using Microsoft.EntityFrameworkCore;
 
 using Shared.Persistense;
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Entities;
+using Shared.Persistense.Entities.EntityState;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence;
 
@@ -49,11 +50,13 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
         builder.UseSerialColumns();
 
         #region Catalogs
+        builder.Entity<State>().HasData(Constants.Catalogs.States);
+        builder.Entity<Step>().HasData(Constants.Catalogs.Steps);
+
         builder.Entity<AssetType>().HasData(Catalogs.AssetTypes);
         builder.Entity<Country>().HasData(Catalogs.Countries);
         builder.Entity<Exchange>().HasData(Catalogs.Exchanges);
-        builder.Entity<State>().HasData(Constants.States);
-        
+
         builder.Entity<EventType>().HasData(
             new()
             {
@@ -105,7 +108,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
                 Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.VentureInvestments),
                 Description = "Венчурные инвестиции"
             },
-            
+
             new()
             {
                 Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.InterestIncome,
@@ -127,7 +130,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
                 Name = nameof(Core.Domain.Persistense.Entities.Enums.EventTypes.InvestmentBody),
                 Description = "Возврат тела инвестиции"
             },
-            
+
             new()
             {
                 Id = (int)Core.Domain.Persistense.Entities.Enums.EventTypes.Split,
@@ -208,18 +211,14 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
             new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Bcs, Name = "БКС", Description = "Брокер-банк" },
             new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Tinkoff, Name = "Тинкофф", Description = "Банк-брокер" },
             new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Vtb, Name = "ВТБ", Description = "Банк-брокер" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Bitokk, Name =nameof(Core.Domain.Persistense.Entities.Enums.Providers.Bitokk), Description = "Криптообменник https://bitokk.biz/" },
-            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.XChange, Name =nameof(Core.Domain.Persistense.Entities.Enums.Providers.XChange), Description = "Криптообменник https://xchange.cash/" },
+            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.Bitokk, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.Bitokk), Description = "Криптообменник https://bitokk.biz/" },
+            new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.XChange, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.XChange), Description = "Криптообменник https://xchange.cash/" },
             new() { Id = (int)Core.Domain.Persistense.Entities.Enums.Providers.JetLend, Name = nameof(Core.Domain.Persistense.Entities.Enums.Providers.JetLend), Description = "Краудлендинговая платформа https://jetlend.ru/" });
-        builder.Entity<Step>().HasData(
-            new() {Id = (int) Core.Domain.Persistense.Entities.Enums.Steps.Parsing, Name = nameof(Core.Domain.Persistense.Entities.Enums.Steps.Parsing), Description = "Парсинг" },
-            new() {Id = (int) Core.Domain.Persistense.Entities.Enums.Steps.Calculating, Name = nameof(Core.Domain.Persistense.Entities.Enums.Steps.Calculating), Description = "Расчет" }, 
-            new() {Id = (int) Core.Domain.Persistense.Entities.Enums.Steps.Sending, Name = nameof(Core.Domain.Persistense.Entities.Enums.Steps.Sending), Description = "Отправка" });
         #endregion
-        
+
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
         builder.Entity<Asset>().HasKey(x => new { x.Id, x.AssetTypeId });
         builder.Entity<Derivative>().HasKey(x => new { x.Id, x.Code });
-        builder.Entity<Report>().HasIndex(x => new {x.Name, x.UserId, x.ProviderId}).IsUnique();
+        builder.Entity<Report>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
     }
 }

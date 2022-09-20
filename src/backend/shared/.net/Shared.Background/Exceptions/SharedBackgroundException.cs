@@ -1,6 +1,7 @@
 ﻿using Shared.Exceptions.Abstractions;
 
 namespace Shared.Background.Exceptions;
+
 public sealed class SharedBackgroundException : SharedException
 {
     private readonly string _message;

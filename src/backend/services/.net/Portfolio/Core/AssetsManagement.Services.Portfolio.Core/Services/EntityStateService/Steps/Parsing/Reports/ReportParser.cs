@@ -4,8 +4,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports.Bcs;
 
 using Microsoft.Extensions.Logging;
-
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports;
 
@@ -40,7 +39,7 @@ public class ReportParser : IEntityStateStepHandler<Report>
             switch (reports.Key)
             {
                 case (int)Providers.Bcs:
-                {
+                    {
                         var parser = new BcsReportParser(
                             _logger
                             , _accountRepository

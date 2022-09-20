@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 
-using Shared.Persistense.Abstractions.Entities.Period;
+using Shared.Persistense.Abstractions.Entities.EntityPeriod;
 using Shared.Persistense.Enums;
 
-namespace Shared.Persistense.Entities.Period.Filters;
+namespace Shared.Persistense.Filters.EntityPeriod;
 
 public class EntityDateFilter<T> : IEntityFilter<T> where T : class, IEntityDate
 {

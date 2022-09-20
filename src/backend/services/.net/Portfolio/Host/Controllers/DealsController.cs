@@ -5,7 +5,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 using AM.Services.Portfolio.Core.Services.ControllersApi;
 
 using Microsoft.AspNetCore.Mvc;
-using Shared.Contracts.Models.Pagination;
+
 using Shared.Data;
 
 namespace AM.Services.Portfolio.Host.Controllers;

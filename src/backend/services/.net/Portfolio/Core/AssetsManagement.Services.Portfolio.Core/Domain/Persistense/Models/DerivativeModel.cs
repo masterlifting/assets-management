@@ -28,7 +28,7 @@ public record DerivativeModel
 
         AssetId = AssetId.AsString,
         AssetTypeId = AssetTypeId.AsInt,
-        
+
         Balance = Balance,
         UpdateTime = DateTime.UtcNow
     };

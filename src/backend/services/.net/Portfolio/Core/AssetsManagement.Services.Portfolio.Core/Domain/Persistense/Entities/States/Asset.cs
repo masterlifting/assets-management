@@ -5,7 +5,8 @@ using AM.Services.Common.Contracts.Entities;
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 
-using Shared.Persistense.Abstractions.Entities.State;
+using Shared.Persistense.Abstractions.Entities.EntityState;
+using Shared.Persistense.Entities.EntityState;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 

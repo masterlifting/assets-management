@@ -2,6 +2,7 @@
 using Shared.Exceptions.Abstractions;
 
 namespace AM.Services.Portfolio.Host.Exceptions;
+
 public sealed class PortfolioHostException : SharedException
 {
     private readonly string _message;

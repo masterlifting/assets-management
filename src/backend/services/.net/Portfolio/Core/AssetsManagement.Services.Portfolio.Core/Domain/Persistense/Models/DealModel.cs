@@ -12,7 +12,7 @@ public record DealModel(EntityStateId EntityStateId, IncomeModel Income, Expense
     public UserId UserId { get; init; } = null!;
     public ProviderId ProviderId { get; init; } = null!;
     public ExchangeId ExchangeId { get; init; } = null!;
-    
+
     public StateId StateId { get; init; } = null!;
     public StepId StepId { get; init; } = null!;
     public byte Attempt { get; init; }
@@ -21,16 +21,16 @@ public record DealModel(EntityStateId EntityStateId, IncomeModel Income, Expense
     public Deal GetEntity() => new()
     {
         Id = EntityStateId.AsString,
-        
+
         Income = Income.GetEntity(),
         Expense = Expense.GetEntity(),
         Cost = Cost,
-        
+
         AccountId = AccountId,
         UserId = UserId.AsString,
         ExchangeId = ExchangeId.AsInt,
         ProviderId = ProviderId.AsInt,
-        
+
         StateId = StateId.AsInt,
         StepId = StepId.AsInt,
         Attempt = Attempt,

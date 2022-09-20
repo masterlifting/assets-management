@@ -1,4 +1,4 @@
-﻿namespace Shared.Persistense.Abstractions.Entities.State;
+﻿namespace Shared.Persistense.Abstractions.Entities.EntityState;
 
 public interface IEntityState : IEntity
 {

@@ -11,7 +11,7 @@ public class User : IEntity
 {
     [Key, StringLength(40)]
     public string Id { get; init; } = null!;
-    
+
     [Required, StringLength(500)]
     public string Name { get; set; } = null!;
 

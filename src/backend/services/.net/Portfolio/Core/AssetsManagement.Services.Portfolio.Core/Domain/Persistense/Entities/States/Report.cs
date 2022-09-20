@@ -1,12 +1,13 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using System.ComponentModel.DataAnnotations;
-using Shared.Persistense.Abstractions.Entities.State;
+using Shared.Persistense.Entities.EntityState;
+using Shared.Persistense.Abstractions.Entities.EntityState;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
 
 public class Report : IEntityState
 {
-    [Key, StringLength(40)] 
+    [Key, StringLength(40)]
     public string Id { get; init; } = null!;
 
     [Required, StringLength(200, MinimumLength = 3)]
@@ -22,7 +23,7 @@ public class Report : IEntityState
     public virtual User User { get; set; } = null!;
     public string UserId { get; init; } = null!;
 
-    public virtual Account? Account{ get; set; }
+    public virtual Account? Account { get; set; }
     public int? AccountId { get; set; }
 
     public DateOnly? DateStart { get; set; }

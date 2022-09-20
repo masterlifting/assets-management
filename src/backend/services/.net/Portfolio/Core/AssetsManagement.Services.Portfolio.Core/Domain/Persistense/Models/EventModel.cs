@@ -32,14 +32,14 @@ public record EventModel
     public Event GetEntity() => new()
     {
         Id = EntityStateId.AsString,
-        
+
         Value = Value,
-        
+
         AccountId = AccountId,
         UserId = UserId.AsString,
         ExchangeId = ExchangeId.AsInt,
         ProviderId = ProviderId.AsInt,
-        
+
         StateId = StateId.AsInt,
         StepId = StepId.AsInt,
         Attempt = Attempt,

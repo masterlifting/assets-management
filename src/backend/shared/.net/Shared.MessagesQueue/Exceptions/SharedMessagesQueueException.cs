@@ -1,6 +1,7 @@
 ﻿using Shared.Exceptions.Abstractions;
 
 namespace Shared.MessagesQueue.Exceptions;
+
 public sealed class SharedMessagesQueueException : SharedException
 {
     private readonly string _message;

@@ -1,6 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
-
-using Shared.Persistense.Abstractions.Entities.State.Handle;
+using Shared.Persistense.Abstractions.Handling.EntityState;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Calculating.Derivatives;
 
@@ -22,16 +21,16 @@ public class DerivativeCalculator : IEntityStateStepHandler<Derivative>
     //        var derivativeIds = assetDerivatives
     //            .Select(x => (x.Id, x.Code))
     //            .ToArray();
-            
+
     //        var dealIds = incomes
     //            .Where(x => derivativeIds.Contains((x.DerivativeId,x.DerivativeCode)))
     //            .Select(x => x.DealId)
     //            .ToArray();
-            
+
     //        var assetDeals = deals.Where(x => dealIds.Contains(x.Id)).ToArray();
-            
+
     //        var dto = GetAssetDtoToRecommendations(assetDerivatives.Key.AssetId, assetDerivatives.Key.AssetTypeId, assetDerivatives.ToArray(), assetDeals);
-            
+
     //        var message = new AssetMqDto
     //        {
     //            Payload = dto.SerializeToString(),

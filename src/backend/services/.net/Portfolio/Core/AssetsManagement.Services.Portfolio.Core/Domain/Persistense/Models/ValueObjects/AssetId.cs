@@ -4,7 +4,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 
 public record AssetId
 {
-    public string AsString { get;}
+    public string AsString { get; }
 
     public AssetId(string value)
     {
