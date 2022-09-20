@@ -20,7 +20,7 @@ public sealed class AssetStateHandler : IEntityStateHandler<Asset>
     private readonly Dictionary<int, IEntityStepHandler<Asset>> _handlers;
 
     public AssetStateHandler(
-        ILogger<AssetSender> logger
+        ILogger<AssetStateHandler> logger
         , IMoexWebclient moexWebclient
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository

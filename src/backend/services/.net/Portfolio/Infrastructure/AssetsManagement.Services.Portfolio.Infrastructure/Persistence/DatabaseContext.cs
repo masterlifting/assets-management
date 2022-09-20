@@ -39,7 +39,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<StringId> StringIds { get; set; } = null!;
 
-    public DatabaseContext(DbContextOptions<DbContext> options) : base(options)
+    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
         //Database.EnsureDeleted();
         //Database.EnsureCreated();

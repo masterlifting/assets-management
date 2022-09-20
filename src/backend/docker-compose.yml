@@ -1,9 +1,8 @@
 version: '3.4'
 
 services:
-  depint-adapter-cftb-host:
-    image: ${REGISTRY:-depint}/adapter-cftb-host:${PLATFORM:-linux}-${TAG:-latest}
+  am.services.portfolio.host:
+    image: ${DOCKER_REGISTRY-}amservicesportfoliohost:${PLATFORM:-linux}-${TAG:-latest}
     build:
-      context: ../
-      dockerfile: src/Depint.Adapter.Cftb.Host/Dockerfile
-
+      context: .
+      dockerfile: services/.net/Portfolio/Host/Dockerfile

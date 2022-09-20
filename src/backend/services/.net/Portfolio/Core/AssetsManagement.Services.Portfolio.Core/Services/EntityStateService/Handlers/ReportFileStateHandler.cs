@@ -13,7 +13,7 @@ public sealed class ReportFileStateHandler : IEntityStateHandler<ReportFile>
     private readonly Dictionary<int, IEntityStepHandler<ReportFile>> _handlers;
 
     public ReportFileStateHandler(
-        ILogger logger
+        ILogger<ReportFileStateHandler> logger
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository
         , IReportRepository reportRepository

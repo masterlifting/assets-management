@@ -13,7 +13,7 @@ public sealed class EventStateHandler : IEntityStateHandler<Event>
     private readonly Dictionary<int, IEntityStepHandler<Event>> _handlers;
 
     public EventStateHandler(
-        ILogger logger
+        ILogger<EventStateHandler> logger
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository
         , IReportFileRepository reportRepository

@@ -3,7 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
 	  <Nullable>enable</Nullable>
+	  <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	  <DockerfileContext>..\..\..\..</DockerfileContext>
+	  <DockerComposeProjectPath>..\..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core\AssetsManagement.Services.Portfolio.Core\AM.Services.Portfolio.Core.csproj" />

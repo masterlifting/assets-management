@@ -13,7 +13,7 @@ using Shared.MessagesQueue.Settings.RabbitMq;
 
 namespace Shared.MessagesQueue.Domain.RabbitMq.Connection;
 
-internal sealed class RabbitMqProducer : IMqProducer
+public sealed class RabbitMqProducer : IMqProducer
 {
     private readonly string _initiator;
 
@@ -21,7 +21,7 @@ internal sealed class RabbitMqProducer : IMqProducer
     private readonly RabbitMqClient _client;
     private IModel? _model;
 
-    internal RabbitMqProducer(ILogger<RabbitMqProducer> logger, RabbitMqClient client)
+    public RabbitMqProducer(ILogger<RabbitMqProducer> logger, RabbitMqClient client)
     {
         _logger = logger;
         _client = client;

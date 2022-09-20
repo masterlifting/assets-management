@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 using Shared.Extensions.Logging;
-using Shared.MessagesQueue.Domain.RabbitMq;
 using Shared.MessagesQueue.Settings.RabbitMq;
 
 namespace Shared.MessagesQueue.Domain.RabbitMq.Connection;

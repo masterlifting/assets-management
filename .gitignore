@@ -3,8 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-.env
-.docker/volumes
+src/backend/.env
+.temp/.volumes
 
 # User-specific files
 *.rsuser

@@ -13,7 +13,7 @@ public sealed class DerivativeStateHandler : IEntityStateHandler<Derivative>
     private readonly Dictionary<int, IEntityStepHandler<Derivative>> _handlers;
 
     public DerivativeStateHandler(
-        ILogger logger
+        ILogger<DerivativeStateHandler> logger
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository
         , IReportFileRepository reportRepository

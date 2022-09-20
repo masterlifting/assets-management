@@ -1,19 +1,33 @@
-version: '3.4'
+version: '3.7'
 
-networks:
-  default:
-    name: depint
 services:
-  depint-adapter-cftb-host:
-    container_name: depint-adapter-cftb-host
+  am.services.portfolio.host:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - MS_PROPERTIES_INFOSYSTEMCODE=ZFR
-      - MS_PROPERTIES_INFOSYSTEMID=838
-      - MS_PROPERTIES_APP_TYPE=JAVA
     ports:
-      - 5080:8080
-      # - 5043:443
+      - "80"
+  postgresql:
+    image: postgres:13
+    container_name: postgresql
+    restart: always
+    ports:
+      - 5431:5432
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./../.docker/data/kafka/.cert/st_new_dc:/cert:ro
+       - ${DB_DATA}:/var/lib/postgresql/data
+       - .volumes/db/data:${DB_DATA}
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${MQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${MQ_PASSWORD}
+    volumes:
+      - ${MQ_DATA}:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
+      - ${MQ_LOG}:/var/log/rabbitmq/log

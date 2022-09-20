@@ -13,7 +13,7 @@ public sealed class DealStateHandler : IEntityStateHandler<Deal>
     private readonly Dictionary<int, IEntityStepHandler<Deal>> _handlers;
 
     public DealStateHandler(
-        ILogger logger
+        ILogger<DealStateHandler> logger
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository
         , IReportFileRepository reportRepository
