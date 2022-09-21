@@ -79,8 +79,8 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
                     }
                     catch (Exception exception)
                     {
-                        bcsReport!.File.StateId = (int)States.Error;
-                        bcsReport.File.Info = exception.Message;
+                        bcsReport!.ReportData.StateId = (int)States.Error;
+                        bcsReport.ReportData.Info = exception.Message;
                     }
                 }, cToken)));
         private Task ParseBodiesAsync(IEnumerable<BcsReport?> bcsReports, IDictionary<string, int> accountDictionary, CancellationToken cToken)
@@ -96,7 +96,7 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
                             .Select(x => new Account
                             {
                                 Name = groupBcsReports.Key,
-                                UserId = x!.File.UserId,
+                                UserId = x!.ReportData.UserId,
                                 ProviderId = ProviderId.AsInt,
                             })
                             .ToArray();
@@ -117,12 +117,12 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
                     {
                         try
                         {
-                            groupBcsReport!.Body = groupBcsReport.ParseStructure(accountId);
+                            groupBcsReport!.Body = groupBcsReport.GetReportModel(accountId);
                         }
                         catch (Exception exception)
                         {
-                            groupBcsReport!.File.StateId = (int)States.Error;
-                            groupBcsReport.File.Info = exception.Message;
+                            groupBcsReport!.ReportData.StateId = (int)States.Error;
+                            groupBcsReport.ReportData.Info = exception.Message;
                         }
                     }, cToken)));
                 }, cToken)));
@@ -142,17 +142,17 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
                         AccountId = reportsGroup.Key,
                         DateStart = bcsReport!.Header!.DateStart,
                         DateEnd = bcsReport.Header.DateEnd,
-                        ReportDataId = bcsReport.File.Id
+                        ReportDataId = bcsReport.ReportData.Id
                     };
 
                     var reportCreatedResult = await _reportRepository.TryCreateAsync(report, cToken);
 
                     if (!reportCreatedResult.IsSuccess)
                     {
-                        bcsReport.File.StateId = (int)States.Error;
-                        bcsReport.File.Info = reportCreatedResult.Error;
+                        bcsReport.ReportData.StateId = (int)States.Error;
+                        bcsReport.ReportData.Info = reportCreatedResult.Error;
 
-                        _logger.LogError(new SharedPersistenseEntityStepException(nameof(BcsReportParser), $"Сохранение отчета БКС '{bcsReport.File.Name}'", reportCreatedResult.Error!));
+                        _logger.LogError(new SharedPersistenseEntityStepException(nameof(BcsReportParser), $"Сохранение отчета БКС '{bcsReport.ReportData.Name}'", reportCreatedResult.Error!));
 
                         continue;
                     }
@@ -195,10 +195,10 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
                 }
                 catch (Exception exception)
                 {
-                    foreach (var bcsReport in reportsGroup.Join(currentReports, x => x!.File.Id, y => y.ReportDataId, (x, _) => x))
+                    foreach (var bcsReport in reportsGroup.Join(currentReports, x => x!.ReportData.Id, y => y.ReportDataId, (x, _) => x))
                     {
-                        bcsReport!.File.StateId = (int)States.Error;
-                        bcsReport.File.Info = exception.Message;
+                        bcsReport!.ReportData.StateId = (int)States.Error;
+                        bcsReport.ReportData.Info = exception.Message;
                     }
                 }
             }
