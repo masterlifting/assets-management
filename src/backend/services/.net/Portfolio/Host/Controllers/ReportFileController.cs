@@ -16,84 +16,85 @@ using static Shared.Persistense.Constants.Catalogs;
 
 using PortfolioCoreException = AM.Services.Portfolio.Host.Exceptions.PortfolioHostException;
 
-namespace AM.Services.Portfolio.Host.Controllers;
-
-[ApiController, Route("[controller]")]
-public sealed class ReportFileController : ControllerBase
+namespace AM.Services.Portfolio.Host.Controllers
 {
-    private readonly ILogger<ReportFileController> _logger;
-    private readonly IReportFileRepository _reportFileRepository;
-    private readonly IUserRepository _userRepository;
+    [ApiController, Route("[controller]")]
+    public sealed class ReportFileController : ControllerBase
+    {
+        private readonly ILogger<ReportFileController> _logger;
+        private readonly IReportFileRepository _reportFileRepository;
+        private readonly IUserRepository _userRepository;
 
-    private static readonly Dictionary<string, int> ProviderPatterns = new()
+        private static readonly Dictionary<string, int> ProviderPatterns = new()
     {
         { "^B_k-(.+)_ALL(.+).xls$", (int)Providers.Bcs }
     };
-    public ReportFileController(
-        ILogger<ReportFileController> logger
-        , IReportFileRepository reportFileRepository
-        , IUserRepository userRepository)
-    {
-        _logger = logger;
-        _reportFileRepository = reportFileRepository;
-        _userRepository = userRepository;
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Post(IFormFileCollection files)
-    {
-        try
+        public ReportFileController(
+            ILogger<ReportFileController> logger
+            , IReportFileRepository reportFileRepository
+            , IUserRepository userRepository)
         {
-            const string userId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
-            await CreateUserAsync(userId);
+            _logger = logger;
+            _reportFileRepository = reportFileRepository;
+            _userRepository = userRepository;
+        }
 
-            foreach (var file in files)
+        [HttpPost]
+        public async Task<IActionResult> Post(IFormFileCollection files)
+        {
+            try
             {
-                var payload = new byte[file.Length];
-                await using var stream = file.OpenReadStream();
-                var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
+                const string userId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
+                await CreateUserAsync(userId);
 
-                var createdResult = await _reportFileRepository.TryCreateAsync(new()
+                foreach (var file in files)
                 {
-                    UserId = userId,
-                    ProviderId = GetProviderId(file.FileName),
-                    Name = file.FileName,
-                    Source = nameof(ReportFileController),
-                    ContentTypeId = (int)ContentTypeDictionary[file.ContentType],
-                    Payload = payload
-                });
+                    var payload = new byte[file.Length];
+                    await using var stream = file.OpenReadStream();
+                    var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
 
-                if (!createdResult.IsSuccess)
-                    _logger.LogError(new PortfolioCoreException(nameof(ReportFileController), $"Сохранение файла отчета: {file.FileName}", createdResult.Error!));
+                    var createdResult = await _reportFileRepository.TryCreateAsync(new()
+                    {
+                        UserId = userId,
+                        ProviderId = GetProviderId(file.FileName),
+                        Name = file.FileName,
+                        Source = nameof(ReportFileController),
+                        ContentTypeId = (int)ContentTypeDictionary[file.ContentType],
+                        Payload = payload
+                    });
+
+                    if (!createdResult.IsSuccess)
+                        _logger.LogError(new PortfolioCoreException(nameof(ReportFileController), $"Сохранение файла отчета: {file.FileName}", createdResult.Error!));
+                }
+
+                return Ok();
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
+        }
+
+        private static int GetProviderId(string fileName)
+        {
+            foreach (var (pattern, providerId) in ProviderPatterns)
+            {
+                var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
+
+                if (match.Success)
+                    return providerId;
             }
 
-            return Ok();
+            throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
         }
-        catch (Exception exception)
+        private async Task CreateUserAsync(string userId)
         {
-            return BadRequest(exception.Message);
+            if (await _userRepository.DbSet.FindAsync(userId) is null)
+                await _userRepository.CreateAsync(new()
+                {
+                    Id = userId,
+                    Name = "Пестунов Андрей"
+                });
         }
-    }
-
-    private static int GetProviderId(string fileName)
-    {
-        foreach (var (pattern, providerId) in ProviderPatterns)
-        {
-            var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
-
-            if (match.Success)
-                return providerId;
-        }
-
-        throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
-    }
-    private async Task CreateUserAsync(string userId)
-    {
-        if (await _userRepository.DbSet.FindAsync(userId) is null)
-            await _userRepository.CreateAsync(new()
-            {
-                Id = userId,
-                Name = "Пестунов Андрей"
-            });
     }
 }

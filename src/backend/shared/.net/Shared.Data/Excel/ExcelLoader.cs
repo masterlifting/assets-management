@@ -3,18 +3,19 @@ using System.Text;
 
 using ExcelDataReader;
 
-namespace Shared.Data.Excel;
-
-public sealed class ExcelLoader
+namespace Shared.Data.Excel
 {
-    public static DataTable LoadTable(byte[] data)
+    public sealed class ExcelLoader
     {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        using var stream = new MemoryStream(data);
-        using var reader = ExcelReaderFactory.CreateBinaryReader(stream);
-        var dataSet = reader.AsDataSet();
-        var table = dataSet.Tables[0];
-        stream.Close();
-        return table;
+        public static DataTable LoadTable(byte[] data)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            using var stream = new MemoryStream(data);
+            using var reader = ExcelReaderFactory.CreateBinaryReader(stream);
+            var dataSet = reader.AsDataSet();
+            var table = dataSet.Tables[0];
+            stream.Close();
+            return table;
+        }
     }
 }

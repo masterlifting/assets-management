@@ -1,9 +1,10 @@
 ﻿using Shared.MessagesQueue.Abstractions.Domain;
 
-namespace Shared.MessagesQueue.Abstractions.Connection;
-
-public interface IMqProducer : IDisposable
+namespace Shared.MessagesQueue.Abstractions.Connection
 {
-    bool TryPublish<TPayload>(IMqProducerMessage<TPayload> message, out string error) where TPayload : class;
-    void Publish<TPayload>(IMqProducerMessage<TPayload> message) where TPayload : class;
+    public interface IMqProducer : IDisposable
+    {
+        bool TryPublish<TPayload>(IMqProducerMessage<TPayload> message, out string error) where TPayload : class;
+        void Publish<TPayload>(IMqProducerMessage<TPayload> message) where TPayload : class;
+    }
 }

@@ -1,12 +1,14 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
+
 using Shared.Persistense.Abstractions.Handling.EntityState;
 
-namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Computing.Assets;
-
-public sealed class AssetComputer : IEntityStepHandler<Asset>
+namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Computing.Assets
 {
-    public Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
+    public sealed class AssetComputer : IEntityStepHandler<Asset>
     {
-        throw new NotImplementedException();
+        public Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

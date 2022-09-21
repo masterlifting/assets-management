@@ -1,10 +1,11 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 
 using Shared.Persistense.Abstractions.Repositories;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-
-public interface IDerivativeRepository : IEntityStateRepository<Derivative>
+namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
 {
-    Task<Dictionary<string, string[]>> GetGroupedDerivativesAsync(CancellationToken cToken);
+    public interface IDerivativeRepository : IEntityStateRepository<Derivative>
+    {
+        Task<Dictionary<string, string[]>> GetGroupedDerivativesAsync(CancellationToken cToken);
+    }
 }

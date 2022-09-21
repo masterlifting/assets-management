@@ -2,9 +2,10 @@
 
 using Shared.Persistense.Entities;
 
-namespace Shared.Persistense.Abstractions.Context;
-
-public interface IEntityStateDbContext
+namespace Shared.Persistense.Abstractions.Context
 {
-    DbSet<StringId> StringIds { get; set; }
+    public interface IEntityStateDbContext
+    {
+        DbSet<StringId> StringIds { get; set; }
+    }
 }

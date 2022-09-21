@@ -2,10 +2,11 @@
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Web;
-
-public interface IMoexWebclient
+namespace AM.Services.Portfolio.Core.Abstractions.Web
 {
-    Task<MoexIsinData> GetIsinAsync(string ticker, Countries country);
-    Task<MoexIsinData> GetIsinsAsync(Countries country);
+    public interface IMoexWebclient
+    {
+        Task<MoexIsinData> GetIsinAsync(string ticker, Countries country);
+        Task<MoexIsinData> GetIsinsAsync(Countries country);
+    }
 }

@@ -2,19 +2,20 @@
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-
-public sealed record StepId
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects
 {
-    public int AsInt { get; }
-    public Steps AsEnum { get; }
-
-    public StepId(int value)
+    public sealed record StepId
     {
-        if (!Enum.TryParse<Steps>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException("", "", "Не удалось определить тип актива");
+        public int AsInt { get; }
+        public Steps AsEnum { get; }
 
-        AsInt = value;
-        AsEnum = enumResult;
+        public StepId(int value)
+        {
+            if (!Enum.TryParse<Steps>(value.ToString(), true, out var enumResult))
+                throw new PortfolioCoreException("", "", "Не удалось определить тип актива");
+
+            AsInt = value;
+            AsEnum = enumResult;
+        }
     }
 }

@@ -1,20 +1,21 @@
 ﻿using AM.Services.Portfolio.Core.Exceptions;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-
-public sealed record EntityStateId
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects
 {
-    public string AsString { get; }
-
-    public EntityStateId(string? value)
+    public sealed record EntityStateId
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
-            throw new PortfolioCoreException("", "", "Не удалось определить идентификатор состояния");
+        public string AsString { get; }
 
-        AsString = value.ToUpper();
-    }
-    public EntityStateId(Guid value)
-    {
-        AsString = value.ToString().ToUpper();
+        public EntityStateId(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
+                throw new PortfolioCoreException("", "", "Не удалось определить идентификатор состояния");
+
+            AsString = value.ToUpper();
+        }
+        public EntityStateId(Guid value)
+        {
+            AsString = value.ToString().ToUpper();
+        }
     }
 }

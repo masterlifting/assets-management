@@ -2,9 +2,10 @@
 
 using Shared.Persistense.Abstractions.Repositories;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-
-public interface IReportRepository : IRepository<Report>
+namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
 {
-    Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportsDatesAsync(int accountId, DateOnly dateStart, CancellationToken cToken);
+    public interface IReportRepository : IRepository<Report>
+    {
+        Task<(DateOnly dateStart, DateOnly dateEnd)[]> GetReportsDatesAsync(int accountId, DateOnly dateStart, CancellationToken cToken);
+    }
 }

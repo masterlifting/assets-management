@@ -1,7 +1,8 @@
-﻿namespace Shared.Persistense.Abstractions.Entities.EntityPeriod;
-
-public interface IEntityQuarter : IEntityPeriod
+﻿namespace Shared.Persistense.Abstractions.Entities.EntityPeriod
 {
-    int Year { get; set; }
-    byte Quarter { get; set; }
+    public interface IEntityQuarter : IEntityPeriod
+    {
+        int Year { get; set; }
+        byte Quarter { get; set; }
+    }
 }

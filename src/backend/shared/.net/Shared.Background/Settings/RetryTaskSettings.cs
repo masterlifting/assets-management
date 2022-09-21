@@ -1,7 +1,8 @@
-﻿namespace Shared.Background.Settings;
-
-public sealed class RetryTaskSettings
+﻿namespace Shared.Background.Settings
 {
-    public int Skip { get; set; } = 5;
-    public int Attempts { get; set; } = 10;
+    public sealed class RetryTaskSettings
+    {
+        public int Skip { get; set; } = 5;
+        public int Attempts { get; set; } = 10;
+    }
 }

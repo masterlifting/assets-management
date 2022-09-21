@@ -1,16 +1,17 @@
 ﻿using AM.Services.Portfolio.Core.Exceptions;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-
-public sealed record DerivativeId
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects
 {
-    public string AsString { get; }
-
-    public DerivativeId(string? value)
+    public sealed record DerivativeId
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length > 20)
-            throw new PortfolioCoreException("", "", $"Не удалось установить идентификатор дериватива по значению: {value}");
+        public string AsString { get; }
 
-        AsString = value.ToUpper();
+        public DerivativeId(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length > 20)
+                throw new PortfolioCoreException("", "", $"Не удалось установить идентификатор дериватива по значению: {value}");
+
+            AsString = value.ToUpper();
+        }
     }
 }

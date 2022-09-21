@@ -1,6 +1,7 @@
-﻿namespace Shared.Persistense.Abstractions.Entities.EntityPeriod;
-
-public interface IEntityDate : IEntityPeriod
+﻿namespace Shared.Persistense.Abstractions.Entities.EntityPeriod
 {
-    DateOnly Date { get; set; }
+    public interface IEntityDate : IEntityPeriod
+    {
+        DateOnly Date { get; set; }
+    }
 }

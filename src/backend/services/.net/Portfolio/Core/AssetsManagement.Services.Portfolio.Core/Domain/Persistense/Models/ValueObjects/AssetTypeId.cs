@@ -2,19 +2,20 @@
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-
-public sealed record AssetTypeId
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects
 {
-    public int AsInt { get; }
-    public AssetTypes AsEnum { get; }
-
-    public AssetTypeId(int value)
+    public sealed record AssetTypeId
     {
-        if (!Enum.TryParse<AssetTypes>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException("", "", "Не удалось определить тип актива");
+        public int AsInt { get; }
+        public AssetTypes AsEnum { get; }
 
-        AsInt = value;
-        AsEnum = enumResult;
+        public AssetTypeId(int value)
+        {
+            if (!Enum.TryParse<AssetTypes>(value.ToString(), true, out var enumResult))
+                throw new PortfolioCoreException("", "", "Не удалось определить тип актива");
+
+            AsInt = value;
+            AsEnum = enumResult;
+        }
     }
 }

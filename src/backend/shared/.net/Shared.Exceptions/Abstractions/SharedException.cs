@@ -1,15 +1,16 @@
-﻿namespace Shared.Exceptions.Abstractions;
-
-public abstract class SharedException : Exception
+﻿namespace Shared.Exceptions.Abstractions
 {
-    private readonly string _initiator;
-    private readonly string _action;
-
-    protected SharedException(string initiator, string action)
+    public abstract class SharedException : Exception
     {
-        _initiator = initiator;
-        _action = action;
-    }
+        private readonly string _initiator;
+        private readonly string _action;
 
-    public override string Message => $"Инициатор: {_initiator}; Действие: {_action}; Описание: ";
+        protected SharedException(string initiator, string action)
+        {
+            _initiator = initiator;
+            _action = action;
+        }
+
+        public override string Message => $"Инициатор: {_initiator}; Действие: {_action}; Описание: ";
+    }
 }

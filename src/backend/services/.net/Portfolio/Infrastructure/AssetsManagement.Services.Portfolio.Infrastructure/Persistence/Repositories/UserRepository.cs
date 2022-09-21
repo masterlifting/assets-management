@@ -6,12 +6,13 @@ using Microsoft.Extensions.Logging;
 
 using Shared.Persistense.Repositories;
 
-namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
-
-public sealed class UserRepository<TContext> : Repository<User, TContext>, IUserRepository
-    where TContext : DbContext
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public UserRepository(ILogger<User> logger, TContext context) : base(logger, context)
+    public sealed class UserRepository<TContext> : Repository<User, TContext>, IUserRepository
+        where TContext : DbContext
     {
+        public UserRepository(ILogger<User> logger, TContext context) : base(logger, context)
+        {
+        }
     }
 }

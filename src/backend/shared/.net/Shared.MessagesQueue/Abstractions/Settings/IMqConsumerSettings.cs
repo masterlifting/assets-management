@@ -1,7 +1,8 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Settings;
-
-public interface IMqConsumerSettings
+﻿namespace Shared.MessagesQueue.Abstractions.Settings
 {
-    int Limit { get; set; }
-    string Queue { get; set; }
+    public interface IMqConsumerSettings
+    {
+        int Limit { get; set; }
+        string Queue { get; set; }
+    }
 }

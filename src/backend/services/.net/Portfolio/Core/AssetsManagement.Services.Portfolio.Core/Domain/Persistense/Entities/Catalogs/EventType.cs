@@ -1,18 +1,19 @@
 ﻿using System.Text.Json.Serialization;
 
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 
 using Shared.Persistense.Entities;
 
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
-
-public sealed class EventType : Catalog
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs
 {
-    public OperationType OperationType { get; set; } = null!;
-    public int OperationTypeId { get; set; } = (int)OperationTypes.Default;
+    public sealed class EventType : Catalog
+    {
+        public OperationType OperationType { get; set; } = null!;
+        public int OperationTypeId { get; set; } = (int)OperationTypes.Default;
 
-    [JsonIgnore]
-    public IEnumerable<Event>? Events { get; set; }
+        [JsonIgnore]
+        public IEnumerable<Event>? Events { get; set; }
+    }
 }

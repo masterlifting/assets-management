@@ -1,5 +1,6 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Domain;
-
-public interface IMqPayload
+﻿namespace Shared.MessagesQueue.Abstractions.Domain
 {
+    public interface IMqPayload
+    {
+    }
 }

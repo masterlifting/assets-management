@@ -6,70 +6,71 @@ using RabbitMQ.Client;
 using Shared.Extensions.Logging;
 using Shared.MessagesQueue.Settings.RabbitMq;
 
-namespace Shared.MessagesQueue.Domain.RabbitMq.Connection;
-
-public sealed class RabbitMqClient
+namespace Shared.MessagesQueue.Domain.RabbitMq.Connection
 {
-    private bool _isRegister;
-    private readonly string _initiator;
-
-    private readonly ILogger<RabbitMqClient> _logger;
-    private readonly ConnectionFactory _connectionFactory;
-    private readonly RabbitMqClientSettings _settings;
-
-    public RabbitMqClient(ILogger<RabbitMqClient> logger, IOptions<RabbitMqClientSettings> options)
+    public sealed class RabbitMqClient
     {
-        _logger = logger;
-        _settings = options.Value;
+        private bool _isRegister;
+        private readonly string _initiator;
 
-        _connectionFactory = new ConnectionFactory
+        private readonly ILogger<RabbitMqClient> _logger;
+        private readonly ConnectionFactory _connectionFactory;
+        private readonly RabbitMqClientSettings _settings;
+
+        public RabbitMqClient(ILogger<RabbitMqClient> logger, IOptions<RabbitMqClientSettings> options)
         {
-            HostName = _settings.Host,
-            UserName = _settings.User,
-            Password = _settings.Password
-        };
+            _logger = logger;
+            _settings = options.Value;
 
-        var objectId = GetHashCode();
-        _initiator = $"RabbitMq client {objectId}";
-    }
+            _connectionFactory = new ConnectionFactory
+            {
+                HostName = _settings.Host,
+                UserName = _settings.User,
+                Password = _settings.Password
+            };
 
-    public IModel CreateModel()
-    {
-        if (!_isRegister)
-            Register();
+            var objectId = GetHashCode();
+            _initiator = $"RabbitMq client {objectId}";
+        }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Connect, Constants.Actions.Start);
+        public IModel CreateModel()
+        {
+            if (!_isRegister)
+                Register();
 
-        using var connection = _connectionFactory.CreateConnection();
-        var model = connection.CreateModel();
+            _logger.LogTrace(_initiator, Constants.Actions.Connect, Constants.Actions.Start);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Connect, Constants.Actions.Success);
+            using var connection = _connectionFactory.CreateConnection();
+            var model = connection.CreateModel();
 
-        return model;
-    }
+            _logger.LogTrace(_initiator, Constants.Actions.Connect, Constants.Actions.Success);
 
-    private void Register()
-    {
-        using var model = CreateModel();
+            return model;
+        }
 
-        _logger.LogTrace(_initiator, "Register models", Constants.Actions.Start);
+        private void Register()
+        {
+            using var model = CreateModel();
 
-        foreach (var item in _settings.ModelBuilders)
-            Register(model, item.Exchange, item.Queue);
+            _logger.LogTrace(_initiator, "Register models", Constants.Actions.Start);
 
-        _isRegister = true;
+            foreach (var item in _settings.ModelBuilders)
+                Register(model, item.Exchange, item.Queue);
 
-        _logger.LogTrace(_initiator, "Register models", Constants.Actions.Success);
-    }
-    private static void Register(IModel model, RabbitMqExchange exchange, RabbitMqQueue queue)
-    {
-        var exchangeType = string.Intern(exchange.Type.ToString());
-        var exchangeName = string.Intern(exchange.Name.ToString());
-        var routingKey = string.Intern($"{exchangeName}.{queue.Name}.*");
+            _isRegister = true;
 
-        model.ExchangeDeclare(exchangeName, exchangeType, exchange.IsDurable, exchange.IsAutoDelete, exchange.Arguments);
-        model.QueueDeclare(queue.Name, queue.IsDurable, queue.IsExclusive, queue.IsAutoDelete, queue.Arguments);
+            _logger.LogTrace(_initiator, "Register models", Constants.Actions.Success);
+        }
+        private static void Register(IModel model, RabbitMqExchange exchange, RabbitMqQueue queue)
+        {
+            var exchangeType = string.Intern(exchange.Type.ToString());
+            var exchangeName = string.Intern(exchange.Name.ToString());
+            var routingKey = string.Intern($"{exchangeName}.{queue.Name}.*");
 
-        model.QueueBind(queue.Name, exchangeName, routingKey);
+            model.ExchangeDeclare(exchangeName, exchangeType, exchange.IsDurable, exchange.IsAutoDelete, exchange.Arguments);
+            model.QueueDeclare(queue.Name, queue.IsDurable, queue.IsExclusive, queue.IsAutoDelete, queue.Arguments);
+
+            model.QueueBind(queue.Name, exchangeName, routingKey);
+        }
     }
 }

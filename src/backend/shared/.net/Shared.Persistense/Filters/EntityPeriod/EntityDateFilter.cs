@@ -4,56 +4,57 @@ using Shared.Persistense.Abstractions.Entities.EntityPeriod;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace Shared.Persistense.Filters.EntityPeriod;
-
-public sealed class EntityDateFilter<T> : IEntityFilter<T> where T : class, IEntityDate
+namespace Shared.Persistense.Filters.EntityPeriod
 {
-    public int Year { get; }
-    public int Month { get; }
-    public int Day { get; }
-
-    public Expression<Func<T, bool>> Predicate { get; set; }
-
-    protected EntityDateFilter(Comparisons comparisons, int year)
+    public sealed class EntityDateFilter<T> : IEntityFilter<T> where T : class, IEntityDate
     {
-        Year = year;
-        Month = 1;
-        Day = 1;
+        public int Year { get; }
+        public int Month { get; }
+        public int Day { get; }
 
-        Predicate = comparisons switch
-        {
-            Comparisons.Equal => x => x.Date.Year == Year,
-            Comparisons.More => x => x.Date.Year >= Year,
-            Comparisons.Less => x => x.Date.Year <= Year,
-            _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
-        };
-    }
-    protected EntityDateFilter(Comparisons comparisons, int year, int month)
-    {
-        Year = year;
-        Month = month;
-        Day = 1;
+        public Expression<Func<T, bool>> Predicate { get; set; }
 
-        Predicate = comparisons switch
+        public EntityDateFilter(Comparisons comparisons, int year)
         {
-            Comparisons.Equal => x => x.Date.Year == Year && x.Date.Month == Month,
-            Comparisons.More => x => x.Date.Year > Year || x.Date.Year == Year && x.Date.Month >= Month,
-            Comparisons.Less => x => x.Date.Year < Year || x.Date.Year == Year && x.Date.Month <= Month,
-            _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
-        };
-    }
-    protected EntityDateFilter(Comparisons comparisons, int year, int month, int day)
-    {
-        Year = year;
-        Month = month;
-        Day = day;
+            Year = year;
+            Month = 1;
+            Day = 1;
 
-        Predicate = comparisons switch
+            Predicate = comparisons switch
+            {
+                Comparisons.Equal => x => x.Date.Year == Year,
+                Comparisons.More => x => x.Date.Year >= Year,
+                Comparisons.Less => x => x.Date.Year <= Year,
+                _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
+            };
+        }
+        public EntityDateFilter(Comparisons comparisons, int year, int month)
         {
-            Comparisons.Equal => x => x.Date.Year == Year && x.Date.Month == Month && x.Date.Day == Day,
-            Comparisons.More => x => x.Date.Year > Year || x.Date.Year == Year && (x.Date.Month == Month && x.Date.Day >= Day || x.Date.Month > Month),
-            Comparisons.Less => x => x.Date.Year < Year || x.Date.Year == Year && (x.Date.Month == Month && x.Date.Day <= Day || x.Date.Month < Month),
-            _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
-        };
+            Year = year;
+            Month = month;
+            Day = 1;
+
+            Predicate = comparisons switch
+            {
+                Comparisons.Equal => x => x.Date.Year == Year && x.Date.Month == Month,
+                Comparisons.More => x => x.Date.Year > Year || x.Date.Year == Year && x.Date.Month >= Month,
+                Comparisons.Less => x => x.Date.Year < Year || x.Date.Year == Year && x.Date.Month <= Month,
+                _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
+            };
+        }
+        public EntityDateFilter(Comparisons comparisons, int year, int month, int day)
+        {
+            Year = year;
+            Month = month;
+            Day = day;
+
+            Predicate = comparisons switch
+            {
+                Comparisons.Equal => x => x.Date.Year == Year && x.Date.Month == Month && x.Date.Day == Day,
+                Comparisons.More => x => x.Date.Year > Year || x.Date.Year == Year && (x.Date.Month == Month && x.Date.Day >= Day || x.Date.Month > Month),
+                Comparisons.Less => x => x.Date.Year < Year || x.Date.Year == Year && (x.Date.Month == Month && x.Date.Day <= Day || x.Date.Month < Month),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparisons), comparisons, null)
+            };
+        }
     }
 }

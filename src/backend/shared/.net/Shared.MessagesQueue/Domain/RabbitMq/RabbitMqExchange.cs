@@ -1,12 +1,13 @@
 ﻿using static Shared.MessagesQueue.Constants.Enums.RabbitMq;
 
-namespace Shared.MessagesQueue.Domain.RabbitMq;
-
-public sealed class RabbitMqExchange
+namespace Shared.MessagesQueue.Domain.RabbitMq
 {
-    public ExchangeTypes Type { get; set; }
-    public ExchangeNames Name { get; set; }
-    public bool IsDurable { get; set; }
-    public bool IsAutoDelete { get; set; }
-    public IDictionary<string, object>? Arguments { get; set; }
+    public sealed class RabbitMqExchange
+    {
+        public ExchangeTypes Type { get; set; }
+        public ExchangeNames Name { get; set; }
+        public bool IsDurable { get; set; }
+        public bool IsAutoDelete { get; set; }
+        public IDictionary<string, object>? Arguments { get; set; }
+    }
 }

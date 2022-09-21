@@ -1,10 +1,11 @@
 ﻿using Shared.MessagesQueue.Domain.RabbitMq.Connection;
 
-namespace Shared.MessagesQueue.Settings.RabbitMq;
-
-public sealed class RabbitMqSection
+namespace Shared.MessagesQueue.Settings.RabbitMq
 {
-    public const string Name = "RabbitMq";
-    public RabbitMqClient Client { get; set; } = null!;
-    public Dictionary<string, RabbitMqConsumerSettings>? Consumers { get; set; }
+    public sealed class RabbitMqSection
+    {
+        public const string Name = "RabbitMq";
+        public RabbitMqClient Client { get; set; } = null!;
+        public Dictionary<string, RabbitMqConsumerSettings>? Consumers { get; set; }
+    }
 }

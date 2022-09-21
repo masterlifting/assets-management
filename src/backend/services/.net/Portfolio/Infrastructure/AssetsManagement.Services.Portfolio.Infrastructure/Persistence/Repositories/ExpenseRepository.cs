@@ -6,12 +6,13 @@ using Microsoft.Extensions.Logging;
 
 using Shared.Persistense.Repositories;
 
-namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
-
-public sealed class ExpenseRepository<TContext> : Repository<Expense, TContext>, IExpenseRepository
-    where TContext : DbContext
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public ExpenseRepository(ILogger<Expense> logger, TContext context) : base(logger, context)
+    public sealed class ExpenseRepository<TContext> : Repository<Expense, TContext>, IExpenseRepository
+        where TContext : DbContext
     {
+        public ExpenseRepository(ILogger<Expense> logger, TContext context) : base(logger, context)
+        {
+        }
     }
 }

@@ -1,6 +1,9 @@
-﻿namespace Shared.Persistense.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-public sealed class StringId
+namespace Shared.Persistense.Entities
 {
-    public string Id { get; set; } = null!;
+    public sealed class StringId
+    {
+        public string Id { get; set; } = null!;
+    }
 }

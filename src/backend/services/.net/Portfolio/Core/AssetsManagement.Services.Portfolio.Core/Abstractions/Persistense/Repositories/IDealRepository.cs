@@ -1,10 +1,11 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 
 using Shared.Persistense.Abstractions.Repositories;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-
-public interface IDealRepository : IEntityStateRepository<Deal>
+namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
 {
-    Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives);
+    public interface IDealRepository : IEntityStateRepository<Deal>
+    {
+        Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives);
+    }
 }

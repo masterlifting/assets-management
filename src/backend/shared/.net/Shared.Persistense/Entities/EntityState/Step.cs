@@ -1,7 +1,8 @@
 ﻿using Shared.Persistense.Abstractions.Entities.EntityState;
 
-namespace Shared.Persistense.Entities.EntityState;
-
-public sealed class Step : Catalog, IEntityStepType
+namespace Shared.Persistense.Entities.EntityState
 {
+    public sealed class Step : Catalog, IEntityStepType
+    {
+    }
 }

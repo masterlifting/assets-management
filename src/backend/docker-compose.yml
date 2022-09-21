@@ -2,7 +2,33 @@ version: '3.4'
 
 services:
   am.services.portfolio.host:
-    image: ${DOCKER_REGISTRY-}amservicesportfoliohost:${PLATFORM:-linux}-${TAG:-latest}
+    image: ${DOCKER_REGISTRY-}am.services.portfolio.host:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: portfolio
     build:
-      context: .
+      context: ./.
       dockerfile: services/.net/Portfolio/Host/Dockerfile
+  # postgresql:
+  #   image: postgres:13
+  #   container_name: postgresql
+  #   restart: always
+  #   ports:
+  #     - 5431:5432
+  #   environment:
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #      - ${DB_DATA}:/var/lib/postgresql/data
+  #      - .docker/volumes/persistense/postgres/data:${DB_DATA}
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   container_name: rabbitmq
+  #   restart: always
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${MQ_USER}
+  #     RABBITMQ_DEFAULT_PASS: ${MQ_PASSWORD}
+  #   volumes:
+  #     - ${MQ_DATA}:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
+  #     - ${MQ_LOG}:/var/log/rabbitmq/log
+

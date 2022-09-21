@@ -1,13 +1,14 @@
-﻿namespace Shared.Data;
-
-public static class Constants
+﻿namespace Shared.Data
 {
-    internal static class Actions
+    public static class Constants
     {
-        internal const string Create = "Добавление";
-        internal const string Update = "Обновление";
-        internal const string Delete = "Удаление";
-        internal const string NoData = "Отсутствуют данные для операции";
-        internal const string Success = "Успешно";
+        internal static class Actions
+        {
+            internal const string Create = "Добавление";
+            internal const string Update = "Обновление";
+            internal const string Delete = "Удаление";
+            internal const string NoData = "Отсутствуют данные для операции";
+            internal const string Success = "Успешно";
+        }
     }
 }

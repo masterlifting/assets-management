@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.States;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,23 +9,24 @@ using Shared.Persistense.Repositories;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
-
-public sealed class ReportFileRepository<TContext> : EntityStateRepository<ReportFile, TContext>, IReportFileRepository
-    where TContext : DbContext, IEntityStateDbContext
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public ReportFileRepository(ILogger<ReportFile> logger, TContext context) : base(logger, context) { }
+    public sealed class ReportFileRepository<TContext> : EntityStateRepository<ReportData, TContext>, IReportFileRepository
+        where TContext : DbContext, IEntityStateDbContext
+    {
+        public ReportFileRepository(ILogger<ReportData> logger, TContext context) : base(logger, context) { }
 
-    public override Task CreateAsync(ReportFile entity, CancellationToken? ctToken = null)
-    {
-        entity.StepId = (int)Steps.Parsing;
-        return base.CreateAsync(entity, ctToken);
-    }
-    public override Task CreateRangeAsync(IReadOnlyCollection<ReportFile> entities, CancellationToken? cToken = null)
-    {
-        foreach (var entity in entities)
+        public override Task CreateAsync(ReportData entity, CancellationToken? ctToken = null)
+        {
             entity.StepId = (int)Steps.Parsing;
+            return base.CreateAsync(entity, ctToken);
+        }
+        public override Task CreateRangeAsync(IReadOnlyCollection<ReportData> entities, CancellationToken? cToken = null)
+        {
+            foreach (var entity in entities)
+                entity.StepId = (int)Steps.Parsing;
 
-        return base.CreateRangeAsync(entities, cToken);
+            return base.CreateRangeAsync(entities, cToken);
+        }
     }
 }

@@ -1,5 +1,6 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Settings;
-
-public interface IMqProducerMessageSettings
+﻿namespace Shared.MessagesQueue.Abstractions.Settings
 {
+    public interface IMqProducerMessageSettings
+    {
+    }
 }

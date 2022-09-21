@@ -1,8 +1,9 @@
-﻿namespace Shared.Background.Settings;
-
-public sealed class BackgroundTaskSettings
+﻿namespace Shared.Background.Settings
 {
-    public int Limit { get; set; }
-    public SchedulerSettings Scheduler { get; set; } = new();
-    public RetryTaskSettings Retry { get; set; } = new();
+    public sealed class BackgroundTaskSettings
+    {
+        public int Limit { get; set; }
+        public SchedulerSettings Scheduler { get; set; } = new();
+        public RetryTaskSettings Retry { get; set; } = new();
+    }
 }

@@ -2,18 +2,19 @@
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Shared.Web.HealthChecks;
-
-public sealed class HealthCheck : IHealthCheck
+namespace Shared.Web.HealthChecks
 {
-    private readonly string _host;
-    protected HealthCheck(string host) => _host = host;
-
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public sealed class HealthCheck : IHealthCheck
     {
-        Ping ping = new();
-        var reply = await ping.SendPingAsync(_host).ConfigureAwait(false);
+        private readonly string _host;
+        public HealthCheck(string host) => _host = host;
 
-        return reply.Status != IPStatus.Success ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            Ping ping = new();
+            var reply = await ping.SendPingAsync(_host).ConfigureAwait(false);
+
+            return reply.Status != IPStatus.Success ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
+        }
     }
 }

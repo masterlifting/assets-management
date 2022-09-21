@@ -1,9 +1,14 @@
-﻿namespace Shared.Persistense.Abstractions.Entities.EntityState;
+﻿using Shared.Persistense.Entities.EntityState;
 
-public interface IEntityState : IEntity
+namespace Shared.Persistense.Abstractions.Entities.EntityState
 {
-    string Id { get; init; }
-    int StateId { get; set; }
-    int StepId { get; set; }
-    byte Attempt { get; set; }
+    public interface IEntityState : IEntity
+    {
+        string Id { get; init; }
+        State State { get; set; }
+        int StateId { get; set; }
+        Step Step { get; init; }
+        int StepId { get; set; }
+        byte Attempt { get; set; }
+    }
 }
