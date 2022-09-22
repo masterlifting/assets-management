@@ -1,6 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Parsing.Reports;
+using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deserialization.Reports;
 
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +24,7 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Handlers
         {
             _handlers = new()
         {
-            {(int)Shared.Persistense.Constants.Enums.Steps.Parsing, new ReportParser(
+            {(int)Shared.Persistense.Constants.Enums.Steps.Parsing, new ReportDataParser(
                 logger
                 , accountRepository
                 , derivativeRepository

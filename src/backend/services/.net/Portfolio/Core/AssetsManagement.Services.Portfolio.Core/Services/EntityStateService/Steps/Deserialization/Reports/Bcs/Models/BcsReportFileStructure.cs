@@ -2,7 +2,7 @@ using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deserialization.Reports.Bcs.Models;
 
-internal static class BcsReportStructure
+internal static class BcsReportFileStructure
 {
     internal static readonly string[] Points =
     {

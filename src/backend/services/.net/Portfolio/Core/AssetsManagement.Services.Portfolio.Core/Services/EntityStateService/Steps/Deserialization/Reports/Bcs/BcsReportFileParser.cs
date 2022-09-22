@@ -1,8 +1,5 @@
-using AM.Services.Portfolio.Core.Domain.Persistense.Models;
-using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deserialization.Reports.Bcs.Models;
-
 using Shared.Data.Excel;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
@@ -10,7 +7,7 @@ using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deserialization.Reports.Bcs;
 
-public sealed class BcsReport
+public sealed class BcsReportFileParser
 {
     private const string Initiator = "Парсинг БКС отчета (excel)";
 
@@ -33,7 +30,7 @@ public sealed class BcsReport
 
     private readonly Dictionary<string, (Action<string, Currencies?> Action, EventTypes EventType)> _reportPatterns;
 
-    public BcsReport(byte[] payload)
+    public BcsReportFileParser(byte[] payload)
     {
         _excelDocument = GetExcelDocument(payload);
 
@@ -85,7 +82,7 @@ public sealed class BcsReport
 
         string? cellValue;
 
-        var firstBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[0], StringComparison.OrdinalIgnoreCase) > -1);
+        var firstBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[0], StringComparison.OrdinalIgnoreCase) > -1);
         if (firstBlock is not null)
         {
             _rowId = fileStructure[firstBlock];
@@ -118,7 +115,7 @@ public sealed class BcsReport
             }
         }
 
-        var secondBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[2], StringComparison.OrdinalIgnoreCase) > -1);
+        var secondBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[2], StringComparison.OrdinalIgnoreCase) > -1);
         if (secondBlock is not null)
         {
             _rowId = fileStructure[secondBlock] + 3;
@@ -128,15 +125,15 @@ public sealed class BcsReport
                     throw new PortfolioCoreException(Initiator, "Проверка наличия данных отчета", "Чтение отчета завершено. Данных не найдено.");
         }
 
-        var thirdBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[3], StringComparison.OrdinalIgnoreCase) > -1);
+        var thirdBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[3], StringComparison.OrdinalIgnoreCase) > -1);
         if (thirdBlock is not null)
         {
             _rowId = fileStructure[thirdBlock];
 
             var borders = fileStructure.Keys
                 .Where(x =>
-                    BcsReportStructure.Points[4].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1
-                    || BcsReportStructure.Points[5].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1)
+                    BcsReportFileStructure.Points[4].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1
+                    || BcsReportFileStructure.Points[5].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1)
                 .ToArray();
 
             while (!_excelDocument.TryGetCellValue(_rowId++, 1, borders, out _))
@@ -285,11 +282,11 @@ public sealed class BcsReport
     {
         var currencyCode = _excelDocument.GetCellValue(_rowId, 1);
 
-        if (currencyCode is null || !BcsReportStructure.ExchangeCurrencies.ContainsKey(currencyCode))
+        if (currencyCode is null || !BcsReportFileStructure.ExchangeCurrencies.ContainsKey(currencyCode))
             throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось определить код валюты");
 
-        var incomeCurrency = BcsReportStructure.ExchangeCurrencies[currencyCode].Income;
-        var expenseCurrency = BcsReportStructure.ExchangeCurrencies[currencyCode].Expense;
+        var incomeCurrency = BcsReportFileStructure.ExchangeCurrencies[currencyCode].Income;
+        var expenseCurrency = BcsReportFileStructure.ExchangeCurrencies[currencyCode].Expense;
 
         while (!_excelDocument.TryGetCellValue(_rowId++, 1, $"Итого по {currencyCode}:", out _))
         {
@@ -458,10 +455,10 @@ public sealed class BcsReport
     }
     private Dictionary<string, int> GetFileStructure(int rowId)
     {
-        var structure = new Dictionary<string, int>(BcsReportStructure.Points.Length);
+        var structure = new Dictionary<string, int>(BcsReportFileStructure.Points.Length);
 
         while (!_excelDocument.TryGetCellValue(rowId++, 1, "Дата составления отчета:", out _))
-            if (_excelDocument.TryGetCellValue(rowId, 1, BcsReportStructure.Points, out var cellValue))
+            if (_excelDocument.TryGetCellValue(rowId, 1, BcsReportFileStructure.Points, out var cellValue))
                 if(cellValue is not null)
                     structure.Add(cellValue, rowId);
 
@@ -510,78 +507,17 @@ public sealed class BcsReport
         {
             exchange = _excelDocument.GetCellValue(rowId, 12);
 
-            if (exchange is null)
-                exchange = _excelDocument.GetCellValue(rowId, 10);
-            else exchange ??= _excelDocument.GetCellValue(rowId, 11);
+            exchange = exchange is null
+                ? _excelDocument.GetCellValue(rowId, 10)
+                : exchange switch
+                {
+                    null => _excelDocument.GetCellValue(rowId, 11)
+                    , _ => exchange
+                };
         }
 
-        return exchange is not null && BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
-            ? BcsReportStructure.ExchangeTypes[exchange].ToString().ToUpper()
+        return exchange is not null && BcsReportFileStructure.ExchangeTypes.ContainsKey(exchange)
+            ? BcsReportFileStructure.ExchangeTypes[exchange].ToString().ToUpper()
             : throw new PortfolioCoreException(Initiator, "Получение имени площадки", "Имя не найдено");
     }
-}
-public sealed class BcsReportModel
-{
-    public string Agreement { get; init; } = null!;
-    public string DateStart { get; set; } = null!;
-    public string DateEnd { get; set; } = null!;
-
-    public IEnumerable<BcsReportDividendModel>? Dividends { get; set; }
-    public IEnumerable<BcsReportComissionModel>? Comissions { get; set; }
-    public IEnumerable<BcsReportBalanceModel>? Balances { get; set; }
-    public IEnumerable<BcsReportExchangeRateModel>? ExchangeRates { get; set; }
-    public IEnumerable<BcsReportTransactionModel>? Transactions { get; set; }
-    public IEnumerable<BcsReportStockMoveModel>? StockMoves { get; set; }
-}
-
-public sealed class BcsReportDividendModel
-{
-    public string Info { get; set; } = null!;
-    public string Date { get; set; } = null!;
-    public string Exchange { get; set; } = null!;
-    public string Sum { get; set; } = null!;
-    public string Currency { get; set; } = null!;
-    public string EventType { get; set; } = null!;
-}
-public sealed class BcsReportComissionModel
-{
-    public string Date { get; set; } = null!;
-    public string Exchange { get; set; } = null!;
-    public string Sum { get; set; } = null!;
-    public string Currency { get; set; } = null!;
-    public string EventType { get; set; } = null!;
-}
-public sealed class BcsReportBalanceModel
-{
-    public string Date { get; set; } = null!;
-    public string Exchange { get; set; } = null!;
-    public string Sum { get; set; } = null!;
-    public string Currency { get; set; } = null!;
-    public string EventType { get; set; } = null!;
-}
-public sealed class BcsReportExchangeRateModel
-{
-    public string Date { get; set; } = null!;
-    public string Exchange { get; set; } = null!;
-    public string Value { get; set; } = null!;
-    public string Sum { get; set; } = null!;
-    public string Currency { get; set; } = null!;
-    public string EventType { get; set; } = null!;
-}
-public sealed class BcsReportTransactionModel
-{
-    public string Info { get; set; } = null!;
-    public string Date { get; set; } = null!;
-    public string Exchange { get; set; } = null!;
-    public string Value { get; set; } = null!;
-    public string Sum { get; set; } = null!;
-    public string Currency { get; set; } = null!;
-    public string EventType { get; set; } = null!;
-}
-public sealed class BcsReportStockMoveModel
-{
-    public string Ticker { get; set; } = null!;
-    public string Date { get; set; } = null!;
-    public string Value { get; set; } = null!;
-    public string Info { get; set; } = null!;
 }
