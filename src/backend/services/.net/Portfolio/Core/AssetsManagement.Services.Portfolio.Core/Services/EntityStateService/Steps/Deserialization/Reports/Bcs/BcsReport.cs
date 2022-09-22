@@ -1,14 +1,9 @@
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deserialization.Reports.Bcs.Models;
 
-using Microsoft.Extensions.Logging;
-
 using Shared.Data.Excel;
-
-using System.Globalization;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
@@ -18,13 +13,16 @@ namespace AM.Services.Portfolio.Core.Services.EntityStateService.Steps.Deseriali
 public sealed class BcsReport
 {
     private const string Initiator = "Парсинг БКС отчета (excel)";
-    private const string DividendAction = "Поиск дивидендов";
-    private const string ComissionAction = "Поиск комиссии";
-    private const string BalanceAction = "Поиск движений денежных средств на балансе";
-    private const string ExchangeRateAction = "Поиск обмен валют";
 
     private readonly ExcelDocument _excelDocument;
     private int _rowId;
+
+    private const string DividendsAction = "Поиск дивидендов";
+    private const string ComissionsAction = "Поиск комиссий";
+    private const string BalanceAction = "Поиск движений денежных средств на балансе";
+    private const string ExchangeRatesAction = "Поиск обмена валют";
+    private const string TransactionsAction = "Поиск транзакций";
+    private const string StockMoveAction = "Поиск перемещений акций";
 
     private readonly List<BcsReportDividendModel> _dividends;
     private readonly List<BcsReportComissionModel> _comissions;
@@ -49,14 +47,14 @@ public sealed class BcsReport
             { "НДФЛ", (ParseComission, EventTypes.Ndfl) },
             { "Приход ДС", (ParseBalance, EventTypes.Increase) },
             { "Вывод ДС", (ParseBalance, EventTypes.Decrease) },
-            { "ISIN:", (ParseStockTransactions, EventTypes.Default) },
+            { "ISIN:", (ParseTransactions, EventTypes.Default) },
             { "Сопряж. валюта:", (ParseExchangeRate, EventTypes.Default) },
             { "Вознаграждение компании (СВОП)", (ParseComission, EventTypes.TaxProvider) },
             { "Комиссия за займы \"овернайт ЦБ\"", (ParseComission, EventTypes.TaxProvider) },
             { "Вознаграждение компании (репо)", (ParseComission, EventTypes.TaxProvider) },
             { "Комиссия Биржевой гуру", (ParseComission, EventTypes.TaxProvider) },
             { "Оплата за вывод денежных средств", (ParseComission, EventTypes.TaxProvider) },
-            { "Доп. выпуск акций ", (ParseAdditionalStockRelease, EventTypes.Increase) },
+            { "Доп. выпуск акций ", (ParseStockMove, EventTypes.Increase) },
             { "Проценты по займам \"овернайт ЦБ\"", (ParseBalance, EventTypes.InterestIncome) },
             { "Проценты по займам \"овернайт\"", (ParseBalance, EventTypes.InterestIncome) },
             { "Распределение (4*)", (ParseComission, EventTypes.TaxDepositary) },
@@ -97,7 +95,7 @@ public sealed class BcsReport
             var rowNo = _rowId + 1;
 
             while (!_excelDocument.TryGetCellValue(rowNo++, 1, border, out cellValue))
-                if (!string.IsNullOrWhiteSpace(cellValue))
+                if (cellValue is not null)
                     switch (cellValue)
                     {
                         case "USD":
@@ -114,7 +112,7 @@ public sealed class BcsReport
                 {
                     cellValue = _excelDocument.GetCellValue(_rowId, 2);
 
-                    if (!string.IsNullOrWhiteSpace(cellValue) && _reportPatterns.ContainsKey(cellValue))
+                    if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
                         _reportPatterns[cellValue].Action(cellValue, currency);
                 }
             }
@@ -126,7 +124,7 @@ public sealed class BcsReport
             _rowId = fileStructure[secondBlock] + 3;
 
             while (!_excelDocument.TryGetCellValue(_rowId++, 1, "Итого по валюте Рубль:", out cellValue))
-                if (!string.IsNullOrWhiteSpace(cellValue) && !_reportPatterns.ContainsKey(cellValue))
+                if (cellValue is not null && !_reportPatterns.ContainsKey(cellValue))
                     throw new PortfolioCoreException(Initiator, "Проверка наличия данных отчета", "Чтение отчета завершено. Данных не найдено.");
         }
 
@@ -145,7 +143,7 @@ public sealed class BcsReport
             {
                 cellValue = _excelDocument.GetCellValue(_rowId, 6);
 
-                if (!string.IsNullOrWhiteSpace(cellValue) && _reportPatterns.ContainsKey(cellValue))
+                if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
                     _reportPatterns[cellValue].Action(cellValue, null);
             }
         }
@@ -154,7 +152,7 @@ public sealed class BcsReport
         {
             cellValue = _excelDocument.GetCellValue(_rowId, 12);
 
-            if (!string.IsNullOrWhiteSpace(cellValue) && _reportPatterns.ContainsKey(cellValue))
+            if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
                 _reportPatterns[cellValue].Action(_excelDocument.GetCellValue(_rowId, 1)!, null);
         }
 
@@ -171,7 +169,7 @@ public sealed class BcsReport
     private void ParseDividend(string value, Currencies? currency)
     {
         if (!currency.HasValue)
-            throw new PortfolioCoreException(Initiator, DividendAction, "Не удалось определить валюту");
+            throw new PortfolioCoreException(Initiator, DividendsAction, "Не удалось определить валюту");
 
         var currencyValue = currency.Value.ToString();
         var exchange = GetExchangeName(_rowId);
@@ -179,26 +177,26 @@ public sealed class BcsReport
         var info = _excelDocument.GetCellValue(_rowId, 14);
 
         if (info is null)
-            throw new PortfolioCoreException(Initiator, DividendAction, "Не удалось получить информацию");
+            throw new PortfolioCoreException(Initiator, DividendsAction, "Не удалось получить информацию");
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
 
         if (date is null)
-            throw new PortfolioCoreException(Initiator, DividendAction, "Не удалось получить дату");
+            throw new PortfolioCoreException(Initiator, DividendsAction, "Не удалось получить дату");
 
-        var dividendValue = _excelDocument.GetCellValue(_rowId, 6);
+        var sum = _excelDocument.GetCellValue(_rowId, 6);
 
-        if (dividendValue is null)
-            throw new PortfolioCoreException(Initiator, DividendAction, "Не удалось получить сумму");
+        if (sum is null)
+            throw new PortfolioCoreException(Initiator, DividendsAction, "Не удалось получить сумму");
 
         _dividends.Add(new()
         {
             Info = info,
             Date = date,
             Exchange = exchange,
-            Value = dividendValue,
+            Sum = sum,
             Currency = currencyValue,
-            EventType = EventTypes.Dividend
+            EventType = "Выплата дивиденда"
         });
 
         var taxPosition = info.IndexOf("налог", StringComparison.OrdinalIgnoreCase);
@@ -206,45 +204,43 @@ public sealed class BcsReport
         if (taxPosition <= -1)
             return;
 
-        var taxValue = info[taxPosition..].Split(' ')[1];
-        taxValue = taxValue.IndexOf('$') > -1 ? taxValue[1..] : taxValue;
+        var taxSum = info[taxPosition..].Split(' ')[1];
+        taxSum = taxSum.IndexOf('$') > -1 ? taxSum[1..] : taxSum;
 
         _comissions.Add(new()
         {
-            Info = info,
             Date = date,
             Exchange = exchange,
-            Value = taxValue,
+            Sum = taxSum,
             Currency = currencyValue,
-            EventType = EventTypes.TaxIncome
+            EventType = "Комиссия по выплате дивиденда"
         });
     }
     private void ParseComission(string value, Currencies? currency)
     {
         if (!currency.HasValue)
-            throw new PortfolioCoreException(Initiator, ComissionAction, "Не удалось определить валюту");
+            throw new PortfolioCoreException(Initiator, ComissionsAction, "Не удалось определить валюту");
 
-        var currencyValue = currency.Value.ToString();
+        var currencyName = currency.Value.ToString();
         var exchange = GetExchangeName(_rowId);
 
-        var comissionValue = _excelDocument.GetCellValue(_rowId, 7);
+        var sum = _excelDocument.GetCellValue(_rowId, 7);
 
-        if (comissionValue is null)
-            throw new PortfolioCoreException(Initiator, ComissionAction, "Не удалось получить сумму");
+        if (sum is null)
+            throw new PortfolioCoreException(Initiator, ComissionsAction, "Не удалось получить сумму");
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
 
         if (date is null)
-            throw new PortfolioCoreException(Initiator, ComissionAction, "Не удалось получить дату");
+            throw new PortfolioCoreException(Initiator, ComissionsAction, "Не удалось получить дату");
 
         _comissions.Add(new()
         {
-            Info = value,
             Date = date,
             Exchange = exchange,
-            Value = comissionValue,
-            Currency = currencyValue,
-            EventType = _reportPatterns[value].EventType
+            Sum = sum,
+            Currency = currencyName,
+            EventType = value
         });
     }
     private void ParseBalance(string value, Currencies? currency)
@@ -266,9 +262,9 @@ public sealed class BcsReport
             _ => throw new PortfolioCoreException(Initiator, BalanceAction, "Не удалось определить тип операции")
         };
 
-        var balanceValue = _excelDocument.GetCellValue(_rowId, columnNo);
+        var sum = _excelDocument.GetCellValue(_rowId, columnNo);
 
-        if (balanceValue is null)
+        if (sum is null)
             throw new PortfolioCoreException(Initiator, BalanceAction, "Не удалось получить сумму");
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
@@ -278,12 +274,11 @@ public sealed class BcsReport
 
         _balances.Add(new()
         {
-            Info = value,
             Date = date,
             Exchange = exchange,
-            Value = balanceValue,
+            Sum = sum,
             Currency = currencyValue,
-            EventType = _reportPatterns[value].EventType
+            EventType = value
         });
     }
     private void ParseExchangeRate(string value, Currencies? currency = null)
@@ -291,7 +286,7 @@ public sealed class BcsReport
         var currencyCode = _excelDocument.GetCellValue(_rowId, 1);
 
         if (currencyCode is null || !BcsReportStructure.ExchangeCurrencies.ContainsKey(currencyCode))
-            throw new PortfolioCoreException(Initiator, ExchangeRateAction, "Не удалось определить код валюты");
+            throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось определить код валюты");
 
         var incomeCurrency = BcsReportStructure.ExchangeCurrencies[currencyCode].Income;
         var expenseCurrency = BcsReportStructure.ExchangeCurrencies[currencyCode].Expense;
@@ -303,25 +298,25 @@ public sealed class BcsReport
             var date = _excelDocument.GetCellValue(_rowId, 1);
 
             if (date is null)
-                throw new PortfolioCoreException(Initiator, ExchangeRateAction, "Не удалось получить дату");
+                throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось получить дату");
 
-            var exchange = GetExchangeName(_rowId);
+            var exchange = GetExchangeName(_rowId, 14);
 
-            if (!string.IsNullOrWhiteSpace(incomeValue))
+            if (incomeValue is not null)
             {
-                var cost = _excelDocument.GetCellValue(_rowId, 4);
+                var sum = _excelDocument.GetCellValue(_rowId, 4);
 
-                if (cost is null)
-                    throw new PortfolioCoreException(Initiator, ExchangeRateAction, "Не удалось получить сумму");
+                if (sum is null)
+                    throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось получить сумму");
 
                 _exchangeRates.Add(new()
                 {
                     Date = date,
                     Exchange = exchange,
                     Value = incomeValue,
-                    Cost = cost,
+                    Sum = sum,
                     Currency = incomeCurrency,
-                    EventType = EventTypes.Increase
+                    EventType = "Покупка валюты"
                 });
             }
             else
@@ -329,127 +324,123 @@ public sealed class BcsReport
                 var expenseValue = _excelDocument.GetCellValue(_rowId, 8);
 
                 if (expenseValue is null)
-                    throw new PortfolioCoreException(Initiator, ExchangeRateAction, "Не удалось получить количество");
+                    throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось получить количество продажи");
 
-                var cost = _excelDocument.GetCellValue(_rowId, 7);
+                var sum = _excelDocument.GetCellValue(_rowId, 7);
 
-                if (cost is null)
-                    throw new PortfolioCoreException(Initiator, ExchangeRateAction, "Не удалось получить сумму");
+                if (sum is null)
+                    throw new PortfolioCoreException(Initiator, ExchangeRatesAction, "Не удалось получить сумму");
 
                 _exchangeRates.Add(new()
                 {
                     Date = date,
                     Exchange = exchange,
                     Value = expenseValue,
-                    Cost = cost,
+                    Sum = sum,
                     Currency = expenseCurrency,
-                    EventType = EventTypes.Decrease
+                    EventType = "Продажа валюты"
                 });
             }
         }
     }
-    private void ParseStockTransactions(string value, Currencies? currency = null)
+    private void ParseTransactions(string value, Currencies? currency = null)
     {
-        var isin = _excel.GetCellValue(_rowId, 7);
+        var isin = _excelDocument.GetCellValue(_rowId, 7);
 
         if (isin is null)
-            throw new ApplicationException(nameof(ParseStockTransactions) + ".Isin not found");
+            throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось определить ISIN");
 
-        var infoArray = isin.Split(',').Select(x => x.Trim());
+        var name = _excelDocument.GetCellValue(_rowId, 1);
 
-        var derivativeId = new DerivativeId(_derivatives.Keys.Intersect(infoArray).FirstOrDefault());
-        var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
-
-        var name = _excel.GetCellValue(_rowId, 1);
-
-        while (!_excel.TryGetCellValue(_rowId++, 1, $"Итого по {name}:", out _))
+        while (!_excelDocument.TryGetCellValue(_rowId++, 1, $"Итого по {name}:", out _))
         {
-            var cellBuyValue = _excel.GetCellValue(_rowId, 4);
+            var incomeValue = _excelDocument.GetCellValue(_rowId, 4);
 
-            var date = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, Culture);
-            currency = _excel.GetCellValue(_rowId, 10) switch
+            var date = _excelDocument.GetCellValue(_rowId, 1);
+
+            if (date is null)
+                throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось получить дату");
+
+            var currencyCode = _excelDocument.GetCellValue(_rowId, 10);
+
+            if (currencyCode is null)
+                throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось определить валюту");
+
+            var currencyName = currencyCode switch
             {
-                "USD" => Currencies.Usd,
-                "Рубль" => Currencies.Rub,
-                _ => throw new ArgumentOutOfRangeException(nameof(ParseStockTransactions) + $".Currency {currency} not found")
+                "USD" => Currencies.Usd.ToString(),
+                "Рубль" => Currencies.Rub.ToString(),
+                _ => throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось получить валюту")
             };
 
-            var exchange = _excel.GetCellValue(_rowId, 17);
-            var exchangeId = !string.IsNullOrWhiteSpace(exchange) && BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
-                ? new ExchangeId(BcsReportStructure.ExchangeTypes[exchange])
-                : throw new ApplicationException($"Не удалось определить площадку по значению: {exchange}");
+            var exchange = GetExchangeName(_rowId, 17);
 
-            var dealId = new EntityStateId(Guid.NewGuid());
-            IncomeModel incomeModel;
-            ExpenseModel expenseModel;
-
-            decimal dealValue;
-            decimal dealCost;
-
-            if (!string.IsNullOrWhiteSpace(cellBuyValue))
+            if (incomeValue is not null)
             {
-                dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 5)!);
-                dealValue = decimal.Parse(cellBuyValue);
+                var sum = _excelDocument.GetCellValue(_rowId, 5);
 
-                incomeModel = new IncomeModel(dealId, derivativeId, derivativeCode, dealValue, date);
+                if (sum is null)
+                    throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось получить сумму");
 
-                var expenseDerivativeId = new DerivativeId(currency.Value.ToString());
-                var expenseDerivativeCode = new DerivativeCode(_derivatives[expenseDerivativeId.AsString][0]);
-                expenseModel = new ExpenseModel(dealId, expenseDerivativeId, expenseDerivativeCode, dealValue * dealCost, date);
+                _transactions.Add(new()
+                {
+                    Date = date,
+                    Exchange = exchange,
+                    Value = incomeValue,
+                    Sum = sum,
+                    Currency = currencyName,
+                    EventType = "Продажа акции",
+                    Info = isin
+                });
             }
             else
             {
-                dealValue = decimal.Parse(_excel.GetCellValue(_rowId, 7)!);
-                dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 8)!);
+                var expenseValue = _excelDocument.GetCellValue(_rowId, 7);
 
-                var incomeDerivativeId = new DerivativeId(currency.Value.ToString());
-                var incomeDerivativeCode = new DerivativeCode(_derivatives[incomeDerivativeId.AsString][0]);
-                incomeModel = new IncomeModel(dealId, incomeDerivativeId, incomeDerivativeCode, dealValue * dealCost, date);
+                if (expenseValue is null)
+                    throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось получить количество продажи");
 
-                expenseModel = new ExpenseModel(dealId, derivativeId, derivativeCode, dealValue, date);
+                var sum = _excelDocument.GetCellValue(_rowId, 8);
+
+                if (sum is null)
+                    throw new PortfolioCoreException(Initiator, TransactionsAction, "Не удалось получить сумму");
+
+                _transactions.Add(new()
+                {
+                    Date = date,
+                    Exchange = exchange,
+                    Value = expenseValue,
+                    Sum = sum,
+                    Currency = currencyName,
+                    EventType = "Покупка акции",
+                    Info = isin
+                });
             }
-
-            var dealModel = new DealModel(dealId, incomeModel, expenseModel)
-            {
-                Date = date,
-                Cost = dealCost,
-
-                UserId = _userId,
-                ProviderId = _providerId,
-                AccountId = body.AccountId,
-                ExchangeId = exchangeId,
-
-                Info = name
-            };
-
-            body.AddDeal(dealModel);
         }
     }
-    private void ParseAdditionalStockRelease(string value, Currencies? currency = null)
+    private void ParseStockMove(string value, Currencies? currency = null)
     {
-        var ticker = value.Trim();
+        var date = _excelDocument.GetCellValue(_rowId, 4);
 
-        var (derivative, derivativeCodes) = _derivatives.FirstOrDefault(x => x.Value.Contains(ticker, StringComparer.OrdinalIgnoreCase));
+        if (date is null)
+            throw new PortfolioCoreException(Initiator, StockMoveAction, "Не удалось получить дату");
 
-        var derivativeId = new DerivativeId(derivative);
-        var derivativeCode = new DerivativeCode(derivativeCodes?.FirstOrDefault(x => x.Equals(ticker, StringComparison.OrdinalIgnoreCase)));
+        var moveValue = _excelDocument.GetCellValue(_rowId, 7);
 
-        body.AddEvent(new EventModel
+        if (moveValue is null)
+            throw new PortfolioCoreException(Initiator, StockMoveAction, "Не удалось получить количество");
+
+        var info = _excelDocument.GetCellValue(_rowId, 12);
+
+        if (info is null)
+            throw new PortfolioCoreException(Initiator, StockMoveAction, "Не удалось получить информацию");
+
+        _stockMoves.Add(new()
         {
-            DerivativeId = derivativeId,
-            DerivativeCode = derivativeCode,
-
-            Value = decimal.Parse(_excel.GetCellValue(_rowId, 7)!),
-
-            EventTypeId = new EventTypeId(EventTypes.Increase),
-
-            Date = DateOnly.Parse(_excel.GetCellValue(_rowId, 4)!, Culture),
-            Info = _excel.GetCellValue(_rowId, 12),
-
-            UserId = _userId,
-            AccountId = body.AccountId,
-            ProviderId = _providerId,
-            ExchangeId = new ExchangeId(Exchanges.Spbex)
+            Ticker = value.Trim(),
+            Date = date,
+            Value = moveValue,
+            Info = info
         });
     }
 
@@ -470,8 +461,9 @@ public sealed class BcsReport
         var structure = new Dictionary<string, int>(BcsReportStructure.Points.Length);
 
         while (!_excelDocument.TryGetCellValue(rowId++, 1, "Дата составления отчета:", out _))
-            if (_excelDocument.TryGetCellValue(rowId, 1, BcsReportStructure.Points, out var cell))
-                structure.Add(cell, rowId);
+            if (_excelDocument.TryGetCellValue(rowId, 1, BcsReportStructure.Points, out var cellValue))
+                if(cellValue is not null)
+                    structure.Add(cellValue, rowId);
 
         return !structure.Any()
             ? throw new PortfolioCoreException(Initiator, "Загрузка структуры отчета в память", "Структура не найдена")
@@ -508,19 +500,24 @@ public sealed class BcsReport
             ? throw new PortfolioCoreException(Initiator, "Поиск данных о номере соглашения", "Номер не найден")
             : agreement;
     }
-    private string GetExchangeName(int rowId)
+    private string GetExchangeName(int rowId, int? columnId = null)
     {
-        var exchange = _excelDocument.GetCellValue(rowId, 12);
-        if (string.IsNullOrWhiteSpace(exchange))
-            exchange = _excelDocument.GetCellValue(rowId, 11);
-        else if (string.IsNullOrWhiteSpace(exchange))
-            exchange = _excelDocument.GetCellValue(rowId, 10);
-        else if (string.IsNullOrWhiteSpace(exchange))
-            exchange = _excelDocument.GetCellValue(rowId, 14);
+        string? exchange;
 
-        return string.IsNullOrWhiteSpace(exchange) || !BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
-            ? throw new PortfolioCoreException(Initiator, "Получение имени площадки", "Имя не найдено")
-            : BcsReportStructure.ExchangeTypes[exchange].ToString().ToUpper();
+        if (columnId.HasValue)
+            exchange = _excelDocument.GetCellValue(rowId, columnId.Value);
+        else
+        {
+            exchange = _excelDocument.GetCellValue(rowId, 12);
+
+            if (exchange is null)
+                exchange = _excelDocument.GetCellValue(rowId, 10);
+            else exchange ??= _excelDocument.GetCellValue(rowId, 11);
+        }
+
+        return exchange is not null && BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
+            ? BcsReportStructure.ExchangeTypes[exchange].ToString().ToUpper()
+            : throw new PortfolioCoreException(Initiator, "Получение имени площадки", "Имя не найдено");
     }
 }
 public sealed class BcsReportModel
@@ -542,43 +539,49 @@ public sealed class BcsReportDividendModel
     public string Info { get; set; } = null!;
     public string Date { get; set; } = null!;
     public string Exchange { get; set; } = null!;
-    public string Value { get; set; } = null!;
+    public string Sum { get; set; } = null!;
     public string Currency { get; set; } = null!;
-    public EventTypes EventType { get; set; }
+    public string EventType { get; set; } = null!;
 }
 public sealed class BcsReportComissionModel
 {
-    public string Info { get; set; } = null!;
     public string Date { get; set; } = null!;
     public string Exchange { get; set; } = null!;
-    public string Value { get; set; } = null!;
+    public string Sum { get; set; } = null!;
     public string Currency { get; set; } = null!;
-    public EventTypes EventType { get; set; }
+    public string EventType { get; set; } = null!;
 }
 public sealed class BcsReportBalanceModel
 {
-    public string Info { get; set; } = null!;
     public string Date { get; set; } = null!;
     public string Exchange { get; set; } = null!;
-    public string Value { get; set; } = null!;
+    public string Sum { get; set; } = null!;
     public string Currency { get; set; } = null!;
-    public EventTypes EventType { get; set; }
+    public string EventType { get; set; } = null!;
 }
 public sealed class BcsReportExchangeRateModel
 {
+    public string Date { get; set; } = null!;
+    public string Exchange { get; set; } = null!;
+    public string Value { get; set; } = null!;
+    public string Sum { get; set; } = null!;
+    public string Currency { get; set; } = null!;
+    public string EventType { get; set; } = null!;
+}
+public sealed class BcsReportTransactionModel
+{
     public string Info { get; set; } = null!;
     public string Date { get; set; } = null!;
     public string Exchange { get; set; } = null!;
     public string Value { get; set; } = null!;
-    public string Cost { get; set; } = null!;
+    public string Sum { get; set; } = null!;
     public string Currency { get; set; } = null!;
-    public EventTypes EventType { get; set; }
-}
-public sealed class BcsReportTransactionModel
-{
-
+    public string EventType { get; set; } = null!;
 }
 public sealed class BcsReportStockMoveModel
 {
-
+    public string Ticker { get; set; } = null!;
+    public string Date { get; set; } = null!;
+    public string Value { get; set; } = null!;
+    public string Info { get; set; } = null!;
 }

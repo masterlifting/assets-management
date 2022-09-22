@@ -17,27 +17,27 @@ public sealed class ExcelDocument
         var value = _table.Rows[rowId].ItemArray[columnId]?.ToString();
         return string.IsNullOrWhiteSpace(value) ? null : value;
     }
-    public bool TryGetCellValue(int rowId, int columnId, string pattern, out string cell)
+    public bool TryGetCellValue(int rowId, int columnId, string pattern, out string? value)
     {
-        cell = string.Empty;
+        value = null;
 
         var cellValue = GetCellValue(rowId, columnId);
         var result = cellValue is not null && cellValue.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) > -1;
 
         if (result)
-            cell = cellValue!;
+            value = cellValue!;
 
         return result;
     }
-    public bool TryGetCellValue(int rowId, int columnId, IEnumerable<string> patterns, out string cell)
+    public bool TryGetCellValue(int rowId, int columnId, IEnumerable<string> patterns, out string? value)
     {
-        cell = string.Empty;
+        value = null;
 
         var cellValue = GetCellValue(rowId, columnId);
         var result = cellValue is not null && patterns.Any(x => cellValue.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1);
 
         if (result)
-            cell = cellValue!;
+            value = cellValue!;
 
         return result;
     }
