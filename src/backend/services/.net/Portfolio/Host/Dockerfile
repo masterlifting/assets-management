@@ -1,8 +1,25 @@
+FROM mcr.microsoft.com/dotnet/runtime:6.0 as base
+WORKDIR /app
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-# COPY . ./
-# RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done
-# COPY *.sln ./
-# RUN dotnet restore
+WORKDIR /src
+
+RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done
+COPY *.sln .
+
+RUN dotnet restore
+RUN dotnet build --no-restore -c Release
+
+
+# WORKDIR /
+# COPY . ./src
+
+# WORKDIR /src
+
+
+# WORKDIR /src/AM.Services.Portfolio.Host/
+
+
 # RUN dotnet build --no-restore -c Release
 
 # FROM nexus-ci.corp.dev.vtb/adsd-docker/ubi8/dotnet-60-runtime:6.0-3 AS base
@@ -36,4 +53,4 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 # ENV TZ=Europe/Moscow
 # WORKDIR /app
 # COPY --from=publish /app/publish .
-# ENTRYPOINT ["dotnet", "Depint.Adapter.Cftb.Host.dll"]
+# ENTRYPOINT ["dotnet", "AM.Services.Portfolio.Host.dll"]

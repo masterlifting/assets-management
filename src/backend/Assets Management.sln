@@ -5,10 +5,6 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{1E8244EE-D80C-49D7-875C-FF0CEAB78F33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AM.Services.Market", "services\.net\AM.Services.Market\AM.Services.Market.csproj", "{B88D3467-65F4-4292-8D6F-64A88139BA45}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AM.Services.Recommendations", "services\.net\AM.Services.Recommendations\AM.Services.Recommendations.csproj", "{4230FF4E-0375-45A4-9BEA-2C55B95E4EF9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared.Contracts", "shared\.net\Shared.Contracts\Shared.Contracts.csproj", "{BEAAA694-5963-492F-BEF6-797B2807E96C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{20559BDB-52ED-453B-B68B-7D983ED7AA1E}"
@@ -51,14 +47,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B88D3467-65F4-4292-8D6F-64A88139BA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B88D3467-65F4-4292-8D6F-64A88139BA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B88D3467-65F4-4292-8D6F-64A88139BA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B88D3467-65F4-4292-8D6F-64A88139BA45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4230FF4E-0375-45A4-9BEA-2C55B95E4EF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4230FF4E-0375-45A4-9BEA-2C55B95E4EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4230FF4E-0375-45A4-9BEA-2C55B95E4EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4230FF4E-0375-45A4-9BEA-2C55B95E4EF9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEAAA694-5963-492F-BEF6-797B2807E96C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEAAA694-5963-492F-BEF6-797B2807E96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEAAA694-5963-492F-BEF6-797B2807E96C}.Release|Any CPU.ActiveCfg = Release|Any CPU

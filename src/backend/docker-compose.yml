@@ -1,11 +1,11 @@
-version: '3.4'
+version: '3.7'
 
 services:
   am.services.portfolio.host:
-    image: ${DOCKER_REGISTRY-}am.services.portfolio.host:${PLATFORM:-linux}-${TAG:-latest}
+    #image: ${DOCKER_REGISTRY-}am.services.portfolio.host:${PLATFORM:-linux}-${TAG:-latest}
     container_name: portfolio
     build:
-      context: ./.
+      context: .
       dockerfile: services/.net/Portfolio/Host/Dockerfile
     ports:
       - 1002:1002
@@ -13,9 +13,9 @@ services:
       - ASPNETCORE_URLS=http://+:1002
       - DatabaseConnections__Postgres__Password=${DB_PASSWORD}
     depends_on:
-      - postgresql
+      - postgres
       - rabbitmq
-  postgresql:
+  postgres:
     image: postgres:13
     container_name: postgresql
     restart: always
