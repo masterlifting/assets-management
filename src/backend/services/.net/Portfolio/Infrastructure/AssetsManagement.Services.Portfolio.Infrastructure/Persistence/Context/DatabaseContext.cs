@@ -31,8 +31,9 @@ namespace AM.Services.Portfolio.Infrastructure.Persistence.Context
         public DbSet<Derivative> Derivatives { get; set; } = null!;
         public DbSet<Deal> Deals { get; set; } = null!;
         public DbSet<Event> Events { get; set; } = null!;
-        public DbSet<ReportData> Reports { get; set; } = null!;
+        public DbSet<ReportData> ReportData { get; set; } = null!;
         #endregion
+        public DbSet<Report> Reports { get; set; } = null!;
         public DbSet<Income> Incomes { get; set; } = null!;
         public DbSet<Expense> Expenses { get; set; } = null!;
         public DbSet<Account> Accounts { get; set; } = null!;
@@ -47,9 +48,10 @@ namespace AM.Services.Portfolio.Infrastructure.Persistence.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.UseSerialColumns();
+
             builder.Entity<StringId>().HasNoKey();
 
-            builder.Entity<Asset>().HasKey(x => new { x.Id, x.AssetTypeId });
+            builder.Entity<Asset>().HasKey(x => new { x.Id, x.TypeId });
             builder.Entity<Derivative>().HasKey(x => new { x.Id, x.Code });
 
             builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();

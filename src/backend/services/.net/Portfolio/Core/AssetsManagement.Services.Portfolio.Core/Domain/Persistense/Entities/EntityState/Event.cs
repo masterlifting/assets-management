@@ -18,7 +18,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState
         public DateOnly Date { get; set; }
 
         public EventType Type { get; set; } = null!;
-        public int EventTypeId { get; set; } = (int)EventTypes.Default;
+        public int TypeId { get; set; } = (int)EventTypes.Default;
 
         public Derivative Derivative { get; set; } = null!;
         public string DerivativeId { get; set; } = null!;

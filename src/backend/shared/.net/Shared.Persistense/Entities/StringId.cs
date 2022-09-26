@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Shared.Persistense.Entities
+﻿namespace Shared.Persistense.Entities
 {
     public sealed class StringId
     {

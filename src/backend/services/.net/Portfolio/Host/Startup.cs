@@ -1,7 +1,7 @@
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Abstractions.Web;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Services.EntityStateService.Handlers;
+using AM.Services.Portfolio.Core.Services.EntityState.Handlers;
 using AM.Services.Portfolio.Host.Services.Background.EntityState;
 using AM.Services.Portfolio.Infrastructure.Persistence.Context;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
@@ -34,16 +34,18 @@ namespace AM.Services.Portfolio.Host
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var dbSection = Configuration.GetSection(DatabaseConnectionSection.Name);
+
+            services.Configure<DatabaseConnectionSection>(dbSection);
             services.Configure<BackgroundTaskSection>(Configuration.GetSection(BackgroundTaskSection.Name));
-            services.Configure<DatabaseConnectionSection>(Configuration.GetSection(DatabaseConnectionSection.Name));
             services.Configure<WebclientConnectionSection>(Configuration.GetSection(WebclientConnectionSection.Name));
 
             services.AddMemoryCache();
 
             services.AddDbContext<DatabaseContext>(provider =>
             {
-                var dbConnections = Configuration.GetValue<DatabaseConnectionSection>(DatabaseConnectionSection.Name);
-                provider.UseNpgsql(dbConnections.Postgres.GetConnectionString());
+                var dbConnection = dbSection.Get<DatabaseConnectionSection>().Postgres;
+                provider.UseNpgsql(dbConnection.GetConnectionString());
             });
 
             services.AddHttpClient<IMoexWebclient, MoexWebclient>()
@@ -67,7 +69,7 @@ namespace AM.Services.Portfolio.Host
             services.AddTransient<IEventRepository, EventRepository<DatabaseContext>>();
             services.AddTransient<IExpenseRepository, ExpenseRepository<DatabaseContext>>();
             services.AddTransient<IIncomeRepository, IncomeRepository<DatabaseContext>>();
-            services.AddTransient<IReportFileRepository, ReportFileRepository<DatabaseContext>>();
+            services.AddTransient<IReportDataRepository, ReportDataRepository<DatabaseContext>>();
             services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
 
             services.AddTransient(typeof(EntityStateHandler<>));

@@ -6,7 +6,7 @@ namespace Shared.Persistense.Abstractions.Entities.EntityState
 {
     public abstract class SharedEntityState : SharedEntity, IEntityState
     {
-        [Key, StringLength(40)]
+        [Key, StringLength(50)]
         public string Id { get; init; } = null!;
 
         public State State { get; set; } = null!;

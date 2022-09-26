@@ -24,7 +24,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Models
         public Asset GetEntity() => new()
         {
             Id = AssetId.AsString,
-            AssetTypeId = AssetTypeId.AsInt,
+            TypeId = AssetTypeId.AsInt,
             CountryId = CountryId.AsInt,
 
             Name = Name,
@@ -34,7 +34,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Models
         public static Asset GetEntity(AssetDto dto) => GetModel(dto).GetEntity();
         public static AssetModel GetModel(Asset asset) => new(
             new AssetId(asset.Id)
-            , new AssetTypeId(asset.AssetTypeId)
+            , new AssetTypeId(asset.TypeId)
             , new CountryId(asset.CountryId)
             , asset.Name
             , asset.Info);

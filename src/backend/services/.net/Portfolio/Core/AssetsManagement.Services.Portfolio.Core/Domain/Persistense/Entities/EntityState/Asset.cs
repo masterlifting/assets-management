@@ -9,7 +9,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState
     public sealed class Asset : Balance, IAsset
     {
         public AssetType AssetType { get; set; } = null!;
-        public int AssetTypeId { get; init; }
+        public int TypeId { get; init; }
 
         public Country Country { get; set; } = null!;
         public int CountryId { get; set; }

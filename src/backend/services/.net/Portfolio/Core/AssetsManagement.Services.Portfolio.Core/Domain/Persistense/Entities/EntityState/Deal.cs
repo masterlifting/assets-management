@@ -2,9 +2,7 @@
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 
 using Shared.Persistense.Abstractions.Entities.EntityState;
-using Shared.Persistense.Entities.EntityState;
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState

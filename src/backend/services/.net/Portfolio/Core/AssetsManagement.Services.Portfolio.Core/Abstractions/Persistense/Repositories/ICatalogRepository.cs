@@ -1,7 +1,4 @@
-﻿using Shared.Persistense.Abstractions.Repositories;
-using Shared.Persistense.Entities;
-
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
+﻿namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
 {
 }
 

@@ -16,7 +16,7 @@ namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState
         public string Source { get; init; } = null!;
 
         public byte[] Payload { get; init; } = null!;
-        public JsonDocument? Json { get; init; }
+        public JsonDocument? Json { get; set; }
 
         public ContentType ContentType { get; init; } = null!;
         public int ContentTypeId { get; init; }

@@ -25,13 +25,13 @@ namespace Shared.Extensions.Logging
         public static void LogError(this ILogger logger, SharedException exception) =>
             Error(logger, DateTime.UtcNow, exception.InnerException?.Message ?? exception.Message, null);
         public static void LogWarn(this ILogger logger, string initiator, string action, string result, object? info = null) =>
-            Warning(logger, DateTime.UtcNow, initiator, action, result, info, null);
+            Warning(logger, DateTime.UtcNow, initiator, action, result, info ?? string.Empty, null);
         public static void LogInfo(this ILogger logger, string initiator, string action, string result, object? info = null) =>
-            Information(logger, DateTime.UtcNow, initiator, action, result, info, null);
+            Information(logger, DateTime.UtcNow, initiator, action, result, info ?? string.Empty, null);
         public static void LogDebug(this ILogger logger, string initiator, string action, string result, object? info = null) =>
-            Debug(logger, DateTime.UtcNow, initiator, action, result, info, null);
+            Debug(logger, DateTime.UtcNow, initiator, action, result, info ?? string.Empty, null);
         public static void LogTrace(this ILogger logger, string initiator, string action, string result, object? info = null) =>
-            Trace(logger, DateTime.UtcNow, initiator, action, result, info, null);
+            Trace(logger, DateTime.UtcNow, initiator, action, result, info ?? string.Empty, null);
 
         private static class LogEvents
         {

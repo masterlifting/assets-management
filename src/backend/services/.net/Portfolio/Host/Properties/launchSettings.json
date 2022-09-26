@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "IM.Service.Portfolio": {
+    "AM.Services.Portfolio.Host": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

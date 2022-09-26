@@ -13,7 +13,7 @@ namespace Shared.Persistense.Abstractions.Entities.EntityData
         public string Source { get; init; } = null!;
 
         public byte[] Payload { get; init; } = Array.Empty<byte>();
-        public JsonDocument? Json { get; init; }
+        public JsonDocument? Json { get; set; }
 
         public ContentType ContentType { get; init; } = null!;
         public int ContentTypeId { get; init; }

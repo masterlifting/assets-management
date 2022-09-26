@@ -10,7 +10,7 @@ namespace Shared.Persistense.Abstractions.Entities.EntityData
         string Source { get; init; }
 
         byte[] Payload { get; init; }
-        JsonDocument? Json { get; init; }
+        JsonDocument? Json { get; set; }
 
         ContentType ContentType { get; init; }
         int ContentTypeId { get; init; }
