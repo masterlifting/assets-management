@@ -72,7 +72,7 @@ namespace AM.Services.Portfolio.Host
             services.AddTransient<IReportDataRepository, ReportDataRepository<DatabaseContext>>();
             services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
 
-            services.AddTransient(typeof(EntityStateHandler<>));
+            services.AddTransient(typeof(EntityStateHandling<,>));
 
             services.AddTransient<IEntityStateHandler<Asset>, AssetStateHandler>();
             services.AddTransient<IEntityStateHandler<Derivative>, DerivativeStateHandler>();

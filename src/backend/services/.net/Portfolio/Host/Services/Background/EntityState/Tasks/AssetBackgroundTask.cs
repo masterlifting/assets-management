@@ -1,4 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Host.Exceptions;
 using AM.Services.Portfolio.Infrastructure.Persistence.Context;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
@@ -37,7 +38,7 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks
             var dbSteps = await stepRepository.GetAsync();
             var steps = SetQueueSteps(dbSteps);
 
-            var pipeline = serviceProvider.GetRequiredService<EntityStateHandler<Asset>>();
+            var pipeline = serviceProvider.GetRequiredService<EntityStateHandling<Asset, IAssetRepository>>();
             await pipeline.StartAsync(count, settings, steps, cToken);
         }
 

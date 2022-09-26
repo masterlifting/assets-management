@@ -6,11 +6,11 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public sealed class CatalogRepository<TCatalog, TContext> : Repository<TCatalog, TContext>//, ICatalogRepository<TCatalog>
+    public sealed class CatalogRepository<TCatalog, TContext> : Repository<TCatalog, TContext>
         where TContext : DbContext
         where TCatalog : Catalog
     {
-        public CatalogRepository(ILogger logger, TContext context) : base(logger, context)
+        public CatalogRepository(ILogger<Catalog> logger, TContext context) : base(logger, context)
         {
         }
 

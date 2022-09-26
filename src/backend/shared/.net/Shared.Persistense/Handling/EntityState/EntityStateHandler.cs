@@ -12,17 +12,19 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Handling.EntityState
 {
-    public sealed class EntityStateHandler<TEntity> where TEntity : class, IEntityState
+    public sealed class EntityStateHandling<TEntity, TRepository> 
+        where TEntity : class, IEntityState
+        where TRepository : IEntityStateRepository<TEntity>
     {
         private readonly string _initiator = $"{typeof(TEntity).Name} state";
 
-        private readonly ILogger<EntityStateHandler<TEntity>> _logger;
-        private readonly IEntityStateRepository<TEntity> _repository;
+        private readonly ILogger<TEntity> _logger;
+        private readonly TRepository _repository;
         private readonly IEntityStateHandler<TEntity> _handler;
 
-        public EntityStateHandler(
-            ILogger<EntityStateHandler<TEntity>> logger
-            , IEntityStateRepository<TEntity> repository
+        public EntityStateHandling(
+            ILogger<TEntity> logger
+            , TRepository repository
             , IEntityStateHandler<TEntity> handler)
         {
             _logger = logger;

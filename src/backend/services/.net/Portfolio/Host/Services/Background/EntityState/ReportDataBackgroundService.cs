@@ -16,7 +16,7 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState
             IServiceScopeFactory scopeFactory
             , IOptionsMonitor<BackgroundTaskSection> options
             , ILogger<ReportDataBackgroundService> logger)
-            : base(options, logger, new ReportFileBackgroundTask($"{nameof(ReportData)}_handling", scopeFactory))
+            : base(options, logger, new ReportFileBackgroundTask($"{nameof(ReportData)}_Handle", scopeFactory))
         {
         }
     }

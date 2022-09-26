@@ -46,7 +46,8 @@ namespace Shared.Background.Abstractions.Services
                 return;
             }
 
-            using var timer = new PeriodicTimer(TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan());
+            var timerPeriod = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan();
+            using var timer = new PeriodicTimer(timerPeriod);
 
             while (await timer.WaitForNextTickAsync(cToken))
             {
