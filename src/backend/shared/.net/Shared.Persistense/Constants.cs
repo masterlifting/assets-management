@@ -17,8 +17,8 @@ namespace Shared.Persistense
             internal static class EntityStates
             {
                 internal const string PrepareNewData = ". Подготовка новых данных для обработки";
-                internal const string PrepareUnhandledData = ". Подготовка необработанных данных для обработки";
-                internal const string PrepareData = ". Подготовка данных для обработки";
+                internal const string PrepareUnhandledData = ". Повторная подготовка данных для обработки";
+                internal const string PrepareData = ". Подготовка всех данных для обработки";
                 internal const string GetData = ". Получение данных";
                 internal const string HandleData = ". Обработка полученных данных";
                 internal const string UpdateData = ". Обновление обработанных данных";

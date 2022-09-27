@@ -12,7 +12,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Handling.EntityState
 {
-    public sealed class EntityStateHandling<TEntity, TRepository> 
+    public sealed class EntityStateHandling<TEntity, TRepository>
         where TEntity : class, IEntityState
         where TRepository : IEntityStateRepository<TEntity>
     {
@@ -48,15 +48,23 @@ namespace Shared.Persistense.Handling.EntityState
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.PrepareNewData, Constants.Actions.Start);
                     ids = await _repository.PrepareDataAsync(step, settings.Limit, cToken);
 
+                    if (ids.Any())
+                        _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.PrepareNewData, Constants.Actions.Success, ids.Length);
+
                     if (count % settings.Retry.Skip == 0)
                     {
                         _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.PrepareUnhandledData, Constants.Actions.Start);
 
                         var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.Retry.Skip;
                         var retryDate = DateTime.UtcNow.Add(-retryTime);
+                        
                         var retryIds = await _repository.PrepareRetryDataAsync(step, settings.Limit, retryDate, settings.Retry.Attempts, cToken);
 
-                        ids = ids.Concat(retryIds).ToArray();
+                        if (retryIds.Any())
+                        {
+                            ids = ids.Concat(retryIds).ToArray();
+                            _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.PrepareUnhandledData, Constants.Actions.Success, retryIds.Length);
+                        }
                     }
                 }
                 catch (Exception exception)
@@ -69,8 +77,6 @@ namespace Shared.Persistense.Handling.EntityState
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.PrepareData, Constants.Actions.NoData);
                     continue;
                 }
-
-                _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.PrepareData, Constants.Actions.Success, ids.Length);
 
                 TEntity[] entities;
                 try
@@ -89,7 +95,7 @@ namespace Shared.Persistense.Handling.EntityState
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.HandleData, Constants.Actions.Start);
                     await _handler.HandleDataAsync(step, entities, cToken);
 
-                    foreach (var entity in entities)
+                    foreach (var entity in entities.Where(x => x.StateId != (int)States.Error))
                         entity.StateId = (int)States.Processed;
 
                     _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.HandleData, Constants.Actions.Success);

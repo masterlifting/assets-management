@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Exceptions\Shared.Exceptions.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Persistense\Shared.Persistense.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Web\Shared.Web.csproj" />
+    <ProjectReference Include="..\Core\AM.Services.Portfolio.Core.csproj" />
+  </ItemGroup>
+
+</Project>

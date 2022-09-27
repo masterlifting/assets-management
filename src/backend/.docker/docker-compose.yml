@@ -1,0 +1,29 @@
+version: '3.7'
+name: asset-management-infractructure
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+       - /var/lib/docker/volumes/postgres_data:/var/lib/postgresql/data
+       - .volumes/postgres/data:/var/lib/docker/volumes/postgres_data
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: Ponkorn
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
+    volumes:
+      - /var/lib/docker/volumes/rabbitmq_data:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
+      - /var/lib/docker/volumes/rabbitmq_log:/var/log/rabbitmq/log
+

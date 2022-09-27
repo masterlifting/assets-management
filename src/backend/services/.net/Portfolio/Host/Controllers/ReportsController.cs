@@ -1,7 +1,11 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+using Shared.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
@@ -14,85 +18,89 @@ using static Shared.Persistense.Constants.Catalogs;
 
 using PortfolioCoreException = AM.Services.Portfolio.Host.Exceptions.PortfolioHostException;
 
-namespace AM.Services.Portfolio.Host.Controllers
+namespace AM.Services.Portfolio.Host.Controllers;
+
+[ApiController, Route("[controller]")]
+public sealed class ReportsController : ControllerBase
 {
-    [ApiController, Route("[controller]")]
-    public sealed class ReportsController : ControllerBase
+    private readonly ILogger<ReportsController> _logger;
+    private readonly IReportDataRepository _reportDataRepository;
+    private readonly IUserRepository _userRepository;
+
+    private static readonly Dictionary<string, int> ProviderPatterns = new()
     {
-        private readonly IReportDataRepository _reportDataRepository;
-        private readonly IUserRepository _userRepository;
+        { "^B_k-(.+)_ALL(.+).xls$", (int)Providers.Bcs }
+    };
+    public ReportsController(
+        ILogger<ReportsController> logger
+        , IReportDataRepository reportDataRepository
+        , IUserRepository userRepository)
+    {
+        _logger = logger;
+        _reportDataRepository = reportDataRepository;
+        _userRepository = userRepository;
+    }
 
-        private static readonly Dictionary<string, int> ProviderPatterns = new()
+    [HttpPost]
+    public async Task<IActionResult> Post(IFormFileCollection files)
+    {
+        try
         {
-            { "^B_k-(.+)_ALL(.+).xls$", (int)Providers.Bcs }
-        };
-        public ReportsController(
-            IReportDataRepository reportDataRepository
-            , IUserRepository userRepository)
-        {
-            _reportDataRepository = reportDataRepository;
-            _userRepository = userRepository;
-        }
+            const string userId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
+            await CreateUserAsync(userId);
 
-        [HttpPost]
-        public async Task<IActionResult> Post(IFormFileCollection files)
-        {
-            try
+            foreach (var file in files)
             {
-                const string userId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
-                await CreateUserAsync(userId);
+                var payload = new byte[file.Length];
+                await using var stream = file.OpenReadStream();
+                var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
 
-                foreach (var file in files)
+                var reportData = new ReportData
                 {
-                    var payload = new byte[file.Length];
-                    await using var stream = file.OpenReadStream();
-                    var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
+                    Id = Convert.ToBase64String(SHA256.HashData(payload)),
+                    UserId = userId,
+                    ProviderId = GetProviderId(file.FileName),
+                    Name = file.FileName,
+                    Source = nameof(ReportsController),
+                    ContentTypeId = (int)ContentTypeDictionary[file.ContentType],
+                    Payload = payload
+                };
 
-                    var id = Convert.ToBase64String(SHA256.HashData(payload));
+                var createdResult = await _reportDataRepository.TryCreateAsync(reportData);
 
-                    var createdResult = await _reportDataRepository.TryCreateAsync(new()
-                    {
-                        Id = id,
-                        UserId = userId,
-                        ProviderId = GetProviderId(file.FileName),
-                        Name = file.FileName,
-                        Source = nameof(ReportsController),
-                        ContentTypeId = (int)ContentTypeDictionary[file.ContentType],
-                        Payload = payload
-                    });
-
-                    if (!createdResult.IsSuccess)
-                        throw new PortfolioCoreException(nameof(ReportsController), $"Сохранение файла отчета: {file.FileName}", createdResult.Error!);
-                }
-
-                return Ok();
+                if (!createdResult.IsSuccess)
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"Сохранение файла '{reportData.Id}' отчета: {file.FileName}", createdResult.Error!));
             }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+
+            return Ok();
         }
-
-        private static int GetProviderId(string fileName)
+        catch (Exception exception)
         {
-            foreach (var (pattern, providerId) in ProviderPatterns)
-            {
-                var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
-
-                if (match.Success)
-                    return providerId;
-            }
-
-            throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
+            return BadRequest(exception.Message);
         }
-        private async Task CreateUserAsync(string userId)
+    }
+
+    private static int GetProviderId(string fileName)
+    {
+        foreach (var (pattern, providerId) in ProviderPatterns)
         {
-            if (await _userRepository.DbSet.FindAsync(userId) is null)
-                await _userRepository.CreateAsync(new()
-                {
-                    Id = userId,
-                    Name = "Пестунов Андрей"
-                });
+            var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
+
+            if (match.Success)
+                return providerId;
         }
+
+        throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
+    }
+    private async Task CreateUserAsync(string userId)
+    {
+        var user = await _userRepository.FindAsync(userId);
+        
+        if (user is null)
+            await _userRepository.CreateAsync(new()
+            {
+                Id = userId,
+                Name = "Пестунов Андрей"
+            });
     }
 }

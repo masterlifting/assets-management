@@ -9,12 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Core\AssetsManagement.Services.Portfolio.Core\AM.Services.Portfolio.Core.csproj" />
-    <ProjectReference Include="..\Infrastructure\AssetsManagement.Services.Portfolio.Infrastructure\AM.Services.Portfolio.Infrastructure.csproj" />
+    <ProjectReference Include="..\Core\AM.Services.Portfolio.Core.csproj" />
+    <ProjectReference Include="..\Infrastructure\AM.Services.Portfolio.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

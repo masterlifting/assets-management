@@ -25,76 +25,75 @@ using Shared.Persistense.Handling.EntityState;
 
 using System;
 
-namespace AM.Services.Portfolio.Host
+namespace AM.Services.Portfolio.Host;
+
+public sealed class Startup
 {
-    public sealed class Startup
+    private IConfiguration Configuration { get; }
+    public Startup(IConfiguration configuration) => Configuration = configuration;
+
+    public void ConfigureServices(IServiceCollection services)
     {
-        private IConfiguration Configuration { get; }
-        public Startup(IConfiguration configuration) => Configuration = configuration;
+        var dbSection = Configuration.GetSection(DatabaseConnectionSection.Name);
 
-        public void ConfigureServices(IServiceCollection services)
+        services.Configure<DatabaseConnectionSection>(dbSection);
+        services.Configure<BackgroundTaskSection>(Configuration.GetSection(BackgroundTaskSection.Name));
+        services.Configure<WebclientConnectionSection>(Configuration.GetSection(WebclientConnectionSection.Name));
+
+        services.AddMemoryCache();
+
+        services.AddDbContext<DatabaseContext>(provider =>
         {
-            var dbSection = Configuration.GetSection(DatabaseConnectionSection.Name);
+            var dbConnection = dbSection.Get<DatabaseConnectionSection>().Postgres;
+            provider.UseNpgsql(dbConnection.GetConnectionString());
+        }, ServiceLifetime.Transient);
 
-            services.Configure<DatabaseConnectionSection>(dbSection);
-            services.Configure<BackgroundTaskSection>(Configuration.GetSection(BackgroundTaskSection.Name));
-            services.Configure<WebclientConnectionSection>(Configuration.GetSection(WebclientConnectionSection.Name));
+        services.AddHttpClient<IMoexWebclient, MoexWebclient>()
+            .AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
+            .AddTransientHttpErrorPolicy(policy => policy.CircuitBreakerAsync(3, TimeSpan.FromSeconds(30)));
 
-            services.AddMemoryCache();
-
-            services.AddDbContext<DatabaseContext>(provider =>
-            {
-                var dbConnection = dbSection.Get<DatabaseConnectionSection>().Postgres;
-                provider.UseNpgsql(dbConnection.GetConnectionString());
-            });
-
-            services.AddHttpClient<IMoexWebclient, MoexWebclient>()
-                .AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
-                .AddTransientHttpErrorPolicy(policy => policy.CircuitBreakerAsync(3, TimeSpan.FromSeconds(30)));
-
-            services.AddControllers().AddJsonOptions(x =>
-            {
-                x.JsonSerializerOptions.Converters.Add(new JsonExtensions.TimeOnlyConverter());
-                x.JsonSerializerOptions.Converters.Add(new JsonExtensions.DateOnlyConverter());
-            });
-
-            services.AddRabbitMq(Configuration);
-
-            services.AddTransient(typeof(CatalogRepository<,>));
-            services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
-            services.AddTransient<IAccountRepository, AccountRepository<DatabaseContext>>();
-            services.AddTransient<IAssetRepository, AssetRepository<DatabaseContext>>();
-            services.AddTransient<IDerivativeRepository, DerivativeRepository<DatabaseContext>>();
-            services.AddTransient<IDealRepository, DealRepository<DatabaseContext>>();
-            services.AddTransient<IEventRepository, EventRepository<DatabaseContext>>();
-            services.AddTransient<IExpenseRepository, ExpenseRepository<DatabaseContext>>();
-            services.AddTransient<IIncomeRepository, IncomeRepository<DatabaseContext>>();
-            services.AddTransient<IReportDataRepository, ReportDataRepository<DatabaseContext>>();
-            services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
-
-            services.AddTransient(typeof(EntityStateHandling<,>));
-
-            services.AddTransient<IEntityStateHandler<Asset>, AssetStateHandler>();
-            services.AddTransient<IEntityStateHandler<Derivative>, DerivativeStateHandler>();
-            services.AddTransient<IEntityStateHandler<Deal>, DealStateHandler>();
-            services.AddTransient<IEntityStateHandler<Event>, EventStateHandler>();
-            services.AddTransient<IEntityStateHandler<ReportData>, ReportDataStateHandler>();
-
-            services.AddHostedService<AssetBackgroundService>();
-            services.AddHostedService<DerivativeBackgroundService>();
-            services.AddHostedService<DealBackgroundService>();
-            services.AddHostedService<EventBackgroundService>();
-            services.AddHostedService<ReportDataBackgroundService>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        services.AddControllers().AddJsonOptions(x =>
         {
-            if (env.IsDevelopment())
-                app.UseDeveloperExceptionPage();
+            x.JsonSerializerOptions.Converters.Add(new JsonExtensions.TimeOnlyConverter());
+            x.JsonSerializerOptions.Converters.Add(new JsonExtensions.DateOnlyConverter());
+        });
 
-            app.UseRouting();
+        services.AddRabbitMq(Configuration);
 
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
-        }
+        services.AddTransient(typeof(CatalogRepository<,>));
+        services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
+        services.AddTransient<IAccountRepository, AccountRepository<DatabaseContext>>();
+        services.AddTransient<IAssetRepository, AssetRepository<DatabaseContext>>();
+        services.AddTransient<IDerivativeRepository, DerivativeRepository<DatabaseContext>>();
+        services.AddTransient<IDealRepository, DealRepository<DatabaseContext>>();
+        services.AddTransient<IEventRepository, EventRepository<DatabaseContext>>();
+        services.AddTransient<IExpenseRepository, ExpenseRepository<DatabaseContext>>();
+        services.AddTransient<IIncomeRepository, IncomeRepository<DatabaseContext>>();
+        services.AddTransient<IReportDataRepository, ReportDataRepository<DatabaseContext>>();
+        services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
+
+        services.AddTransient(typeof(EntityStateHandling<,>));
+
+        services.AddTransient<IEntityStateHandler<Asset>, AssetStateHandler>();
+        services.AddTransient<IEntityStateHandler<Derivative>, DerivativeStateHandler>();
+        services.AddTransient<IEntityStateHandler<Deal>, DealStateHandler>();
+        services.AddTransient<IEntityStateHandler<Event>, EventStateHandler>();
+        services.AddTransient<IEntityStateHandler<ReportData>, ReportDataStateHandler>();
+
+        services.AddHostedService<AssetBackgroundService>();
+        services.AddHostedService<DerivativeBackgroundService>();
+        services.AddHostedService<DealBackgroundService>();
+        services.AddHostedService<EventBackgroundService>();
+        services.AddHostedService<ReportDataBackgroundService>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+            app.UseDeveloperExceptionPage();
+
+        app.UseRouting();
+
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

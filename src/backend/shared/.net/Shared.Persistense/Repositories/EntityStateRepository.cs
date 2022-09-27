@@ -45,15 +45,15 @@ namespace Shared.Persistense.Repositories
 	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
 	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
 	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
-                WHERE ""{nameof(IEntityState.Id)}"" = 
+                WHERE ""{nameof(IEntityState.Id)}"" IN 
 	                ( SELECT ""{nameof(IEntityState.Id)}""
 	                  FROM ""{_tableName}""
 	                  WHERE ""{nameof(IEntityState.StepId)}"" = {step.Id} AND ""{nameof(IEntityState.StateId)}"" = {(int)States.Ready} 
-	                  LIMIT  1
+	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
                 RETURNING ""{nameof(IEntityState.Id)}"";";
 
-            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync();
+            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync(cToken);
 
             return result.Select(x => x.Id).ToArray();
         }
@@ -64,18 +64,18 @@ namespace Shared.Persistense.Repositories
 	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
 	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
 	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
-                WHERE ""{nameof(IEntityState.Id)}"" = 
+                WHERE ""{nameof(IEntityState.Id)}"" IN 
 	                ( SELECT ""{nameof(IEntityState.Id)}""
 	                  FROM ""{_tableName}""
 	                  WHERE 
                             ""{nameof(IEntityState.StepId)}"" = {step.Id} 
                             AND ((""{nameof(IEntityState.StateId)}"" = {(int)States.Ready} AND ""{nameof(IEntityState.UpdateTime)}"" < '{updateTime : yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IEntityState.StateId)}"" = {(int)States.Error}))
 			                AND ""{nameof(IEntityState.Attempt)}"" < {maxAttempts}
-	                  LIMIT  1
+	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
                 RETURNING ""{nameof(IEntityState.Id)}"";";
 
-            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync();
+            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync(cToken);
             
             return result.Select(x => x.Id).ToArray();
         }

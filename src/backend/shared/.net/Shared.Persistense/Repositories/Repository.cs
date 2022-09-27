@@ -12,8 +12,6 @@ namespace Shared.Persistense.Repositories
     public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity : class, IEntity
         where TContext : DbContext
     {
-        public DbSet<TEntity> DbSet { get; }
-
         private readonly string _initiator;
         private readonly TContext _context;
         private readonly ILogger _logger;
@@ -23,7 +21,6 @@ namespace Shared.Persistense.Repositories
             _context = context;
 
             _logger = logger;
-            DbSet = context.Set<TEntity>();
 
             var objectId = base.GetHashCode();
             _initiator = $"{typeof(TEntity).Name} repository ({objectId})";
@@ -33,12 +30,12 @@ namespace Shared.Persistense.Repositories
         {
             if (!ctToken.HasValue)
             {
-                await DbSet.AddAsync(entity).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddAsync(entity).ConfigureAwait(false);
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                await DbSet.AddAsync(entity, ctToken.Value).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddAsync(entity, ctToken.Value).ConfigureAwait(false);
                 await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
             }
 
@@ -48,7 +45,7 @@ namespace Shared.Persistense.Repositories
         {
             try
             {
-                await CreateAsync(entity, cToken);
+                await CreateAsync(entity, cToken).ConfigureAwait(false);
                 return new Result(true);
             }
             catch (Exception exception)
@@ -67,12 +64,12 @@ namespace Shared.Persistense.Repositories
             int result;
             if (!cToken.HasValue)
             {
-                await DbSet.AddRangeAsync(entities).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddRangeAsync(entities).ConfigureAwait(false);
                 result = await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                await DbSet.AddRangeAsync(entities, cToken.Value).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddRangeAsync(entities, cToken.Value).ConfigureAwait(false);
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
@@ -82,7 +79,7 @@ namespace Shared.Persistense.Repositories
         {
             try
             {
-                await CreateRangeAsync(entities, cToken);
+                await CreateRangeAsync(entities, cToken).ConfigureAwait(false);
                 return new Result(true);
             }
             catch (Exception exception)
@@ -93,17 +90,17 @@ namespace Shared.Persistense.Repositories
 
         public virtual async Task UpdateAsync(object[] id, TEntity entity, CancellationToken? ctToken = null)
         {
-            if (await DbSet.FindAsync(id) is null)
+            if (await _context.Set<TEntity>().FindAsync(id) is null)
                 throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
 
             if (!ctToken.HasValue)
             {
-                DbSet.Update(entity);
+                _context.Set<TEntity>().Update(entity);
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                DbSet.Update(entity);
+                _context.Set<TEntity>().Update(entity);
                 await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
             }
 
@@ -132,12 +129,12 @@ namespace Shared.Persistense.Repositories
             int result;
             if (!cToken.HasValue)
             {
-                DbSet.UpdateRange(entities);
+                _context.Set<TEntity>().UpdateRange(entities);
                 result = await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                DbSet.UpdateRange(entities);
+                _context.Set<TEntity>().UpdateRange(entities);
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
@@ -158,19 +155,19 @@ namespace Shared.Persistense.Repositories
 
         public virtual async Task<TEntity> DeleteAsync(object[] id, CancellationToken? cToken = null)
         {
-            var entity = await DbSet.FindAsync(id);
+            var entity = await _context.Set<TEntity>().FindAsync(id);
 
             if (entity is null)
                 throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
 
             if (!cToken.HasValue)
             {
-                DbSet.Remove(entity);
+                _context.Set<TEntity>().Remove(entity);
                 await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                DbSet.Remove(entity);
+                _context.Set<TEntity>().Remove(entity);
                 await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
@@ -201,12 +198,12 @@ namespace Shared.Persistense.Repositories
             int result;
             if (!cToken.HasValue)
             {
-                DbSet.RemoveRange(entities);
+                _context.Set<TEntity>().RemoveRange(entities);
                 result = await _context.SaveChangesAsync().ConfigureAwait(false);
             }
             else
             {
-                DbSet.RemoveRange(entities);
+                _context.Set<TEntity>().RemoveRange(entities);
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
