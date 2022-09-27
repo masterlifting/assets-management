@@ -3,7 +3,7 @@ using AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Repo
 
 using Shared.Persistense.Abstractions.Handling.EntityState;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports;
 
 public sealed class ReportDataParser : IEntityStepHandler<ReportData>
 {

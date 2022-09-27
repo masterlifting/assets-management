@@ -6,6 +6,8 @@ using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Abstractions.Repositories;
 using Shared.Persistense.Exceptions;
 
+using static Shared.Persistense.Constants.Enums;
+
 namespace Shared.Persistense.Repositories
 {
     public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TContext>, IEntityStateRepository<TEntity>
@@ -23,7 +25,7 @@ namespace Shared.Persistense.Repositories
 
         public override Task CreateAsync(TEntity entity, CancellationToken? ctToken = null)
         {
-            entity.StateId = (int)Constants.Enums.States.Ready;
+            entity.StateId = (int)States.Ready;
 
             return base.CreateAsync(entity, ctToken);
         }
@@ -31,7 +33,7 @@ namespace Shared.Persistense.Repositories
         public override Task CreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
         {
             foreach (var entity in entities)
-                entity.StateId = (int)Constants.Enums.States.Ready;
+                entity.StateId = (int)States.Ready;
 
             return base.CreateRangeAsync(entities, cToken);
         }
@@ -39,39 +41,43 @@ namespace Shared.Persistense.Repositories
         public async Task<string[]> PrepareDataAsync(IEntityStepType step, int limit, CancellationToken cToken)
         {
             var query = @$"
-                DECLARE @StepId INT = {step}, @Limit INT = {limit}
-                DECLARE @UpdatedIds TABLE (Id BIGINT)
-                UPDATE TOP (@Limit) {_tableName} SET
-	                StateId = 2, 
-	                Attempt = Attempt+1,
-	                UpdateTime = GETDATE()
-	                OUTPUT INSERTED.Id INTO @UpdatedIds
-		        WHERE StepId = @StepId AND StateId = 1 
-			    SELECT Id FROM @UpdatedIds";
+                UPDATE ""{_tableName}"" SET
+	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
+	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
+	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
+                WHERE ""{nameof(IEntityState.Id)}"" = 
+	                ( SELECT ""{nameof(IEntityState.Id)}""
+	                  FROM ""{_tableName}""
+	                  WHERE ""{nameof(IEntityState.StepId)}"" = {step.Id} AND ""{nameof(IEntityState.StateId)}"" = {(int)States.Ready} 
+	                  LIMIT  1
+	                  FOR UPDATE SKIP LOCKED )
+                RETURNING ""{nameof(IEntityState.Id)}"";";
 
-            var result = _context.StringIds.FromSqlRaw(query);
+            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync();
 
-            return await result.Select(x => x.Id).ToArrayAsync(cToken);
+            return result.Select(x => x.Id).ToArray();
         }
         public async Task<string[]> PrepareRetryDataAsync(IEntityStepType step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken)
         {
             var query = @$"
-                DECLARE @StepId INT = {step}, @Limit INT = {limit}, @UpdateTime DATETIME2 = {updateTime}, @MaxAttempts INT = {maxAttempts}
-                DECLARE @UpdatedIds TABLE (Id BIGINT)
-                UPDATE TOP (@Limit) {_tableName} SET
-	                StateId = 2, 
-	                Attempt = Attempt+1,
-	                UpdateTime = GETDATE()
-	                OUTPUT INSERTED.Id INTO @UpdatedIds
-                WHERE 
-			        StepId = @StepId 
-			        AND ((StateId = 2 AND UpdateTime < @UpdateTime) OR (StateId = -1))
-			        AND Attempt < @MaxAttempts
-			    SELECT Id FROM @UpdatedIds";
+                UPDATE ""{_tableName}"" SET
+	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
+	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
+	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
+                WHERE ""{nameof(IEntityState.Id)}"" = 
+	                ( SELECT ""{nameof(IEntityState.Id)}""
+	                  FROM ""{_tableName}""
+	                  WHERE 
+                            ""{nameof(IEntityState.StepId)}"" = {step.Id} 
+                            AND ((""{nameof(IEntityState.StateId)}"" = {(int)States.Ready} AND ""{nameof(IEntityState.UpdateTime)}"" < '{updateTime : yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IEntityState.StateId)}"" = {(int)States.Error}))
+			                AND ""{nameof(IEntityState.Attempt)}"" < {maxAttempts}
+	                  LIMIT  1
+	                  FOR UPDATE SKIP LOCKED )
+                RETURNING ""{nameof(IEntityState.Id)}"";";
 
-            var result = _context.StringIds.FromSqlRaw(query);
-
-            return await result.Select(x => x.Id).ToArrayAsync(cToken);
+            var result = await _context.StringIds.FromSqlRaw(query).ToArrayAsync();
+            
+            return result.Select(x => x.Id).ToArray();
         }
         public Task<TEntity[]> GetDataAsync(IEntityStepType step, IEnumerable<string> ids, CancellationToken cToken) =>
             _context.Set<TEntity>().Where(x => x.StepId == step.Id && ids.Contains(x.Id)).ToArrayAsync(cToken);

@@ -8,7 +8,7 @@ using Shared.Persistense.Abstractions.Handling.EntityState;
 
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports;
 
 public sealed class ReportParser : IEntityStepHandler<ReportData>
 {

@@ -11,7 +11,7 @@ using Shared.Persistense.Exceptions;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports.Bcs
 {
     public sealed class BcsReportParser
     {

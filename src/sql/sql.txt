@@ -1,0 +1,14 @@
+SELECT "Id", "Name", "Source", "Payload", "Json", "ContentTypeId", "ProviderId", "UserId", "UpdateTime", "Info", "StateId", "StepId", "Attempt"
+	FROM public."ReportData";
+ 
+UPDATE "ReportData" SET
+        "StateId" = 1
+    , "Attempt" = 0
+    , "UpdateTime" = NOW()
+WHERE "Id" = 
+    ( SELECT "Id"
+        FROM "ReportData"
+        WHERE "StepId" = 2 AND "StateId" = 3 
+        LIMIT  1
+        FOR UPDATE SKIP LOCKED )
+RETURNING "Id";

@@ -1,4 +1,4 @@
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs.Models;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models;
 
 public sealed class BcsReportModel
 {

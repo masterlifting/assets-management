@@ -16,7 +16,7 @@ namespace Shared.Persistense.Handling.EntityState
         where TEntity : class, IEntityState
         where TRepository : IEntityStateRepository<TEntity>
     {
-        private readonly string _initiator = $"{typeof(TEntity).Name} state";
+        private readonly string _initiator = $"Обработчик {typeof(TEntity).Name}";
 
         private readonly ILogger<TEntity> _logger;
         private readonly TRepository _repository;
@@ -35,7 +35,7 @@ namespace Shared.Persistense.Handling.EntityState
         public async Task StartAsync<TStep>(int count, BackgroundTaskSettings settings, Queue<TStep> steps, CancellationToken cToken)
             where TStep : Catalog, IEntityStepType
         {
-            _logger.LogDebug(_initiator, "Запуск шагов обработки", steps.Count);
+            _logger.LogTrace(_initiator, "Запуск шагов обработки", Constants.Actions.Start, "Шагов: " + steps.Count);
 
             for (var i = 0; i < steps.Count; i++)
             {
@@ -48,7 +48,7 @@ namespace Shared.Persistense.Handling.EntityState
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.PrepareNewData, Constants.Actions.Start);
                     ids = await _repository.PrepareDataAsync(step, settings.Limit, cToken);
 
-                    if ((decimal)(count % settings.Retry.Skip) == 0)
+                    if (count % settings.Retry.Skip == 0)
                     {
                         _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.PrepareUnhandledData, Constants.Actions.Start);
 
@@ -105,11 +105,11 @@ namespace Shared.Persistense.Handling.EntityState
                     _logger.LogError(new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.HandleData, exception));
                 }
 
-                var nextStep = steps.Peek();
+                var isNextStep = steps.TryPeek(out var nextStep);
                 try
                 {
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Start);
-                    await _repository.SaveResultAsync(nextStep, entities, cToken);
+                    await _repository.SaveResultAsync(isNextStep ? nextStep : null, entities, cToken);
                     _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Success);
                 }
                 catch (Exception exception)

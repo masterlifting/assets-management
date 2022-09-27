@@ -1,6 +1,6 @@
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports.Bcs.Models
 {
     public static class BcsReportStructure
     {

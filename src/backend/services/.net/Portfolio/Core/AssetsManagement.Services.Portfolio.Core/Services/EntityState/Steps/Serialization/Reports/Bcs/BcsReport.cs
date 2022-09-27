@@ -5,7 +5,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 using AM.Services.Portfolio.Core.Exceptions;
-using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports.Bcs.Models;
 
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +14,7 @@ using Shared.Data.Excel;
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports.Bcs
 {
     public sealed class BcsReport
     {

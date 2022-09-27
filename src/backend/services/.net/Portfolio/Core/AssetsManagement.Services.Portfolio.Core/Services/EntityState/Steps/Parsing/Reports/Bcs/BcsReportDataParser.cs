@@ -1,4 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs;
 
 using Shared.Extensions.Serialization;
 
@@ -6,7 +7,7 @@ using System.Text.Json;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs
 {
     public sealed class BcsReportDataParser
     {

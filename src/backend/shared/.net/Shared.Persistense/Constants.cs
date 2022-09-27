@@ -12,7 +12,7 @@ namespace Shared.Persistense
             internal const string Create = "Добавление";
             internal const string Update = "Обновление";
             internal const string Delete = "Удаление";
-            internal const string NoData = "Отсутствуют данные для операции";
+            internal const string NoData = "Отсутствуют данные";
 
             internal static class EntityStates
             {

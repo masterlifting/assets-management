@@ -1,12 +1,12 @@
 using AM.Services.Portfolio.Core.Exceptions;
-using AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs.Models;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models;
 
 using Shared.Data.Excel;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs;
 
 public sealed class BcsReportFileParser
 {

@@ -26,7 +26,7 @@ namespace Shared.Persistense.Repositories
             DbSet = context.Set<TEntity>();
 
             var objectId = base.GetHashCode();
-            _initiator = $"Repository ({typeof(TEntity).Name}) {objectId}";
+            _initiator = $"{typeof(TEntity).Name} repository ({objectId})";
         }
 
         public virtual async Task CreateAsync(TEntity entity, CancellationToken? ctToken = null)
@@ -42,7 +42,7 @@ namespace Shared.Persistense.Repositories
                 await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.Success);
+            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
         }
         public virtual async Task<Result> TryCreateAsync(TEntity entity, CancellationToken? cToken = null)
         {
@@ -60,7 +60,7 @@ namespace Shared.Persistense.Repositories
         {
             if (!entities.Any())
             {
-                _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
+                _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace Shared.Persistense.Repositories
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
+            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
         }
         public virtual async Task<Result> TryCreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
         {
@@ -107,7 +107,7 @@ namespace Shared.Persistense.Repositories
                 await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
         }
         public virtual async Task<Result> TryUpdateAsync(object[] id, TEntity entity, CancellationToken? cToken = null)
         {
@@ -125,7 +125,7 @@ namespace Shared.Persistense.Repositories
         {
             if (!entities.Any())
             {
-                _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+                _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
                 return;
             }
 
@@ -141,7 +141,7 @@ namespace Shared.Persistense.Repositories
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
+            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
         }
         public virtual async Task<Result> TryUpdateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
         {
@@ -174,7 +174,7 @@ namespace Shared.Persistense.Repositories
                 await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
+            _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
 
             return entity;
         }
@@ -194,7 +194,7 @@ namespace Shared.Persistense.Repositories
         {
             if (!entities.Any())
             {
-                _logger.LogDebug(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+                _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
                 return;
             }
 
@@ -210,7 +210,7 @@ namespace Shared.Persistense.Repositories
                 result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
             }
 
-            _logger.LogDebug(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
+            _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
         }
         public virtual async Task<Result> TryDeleteRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
         {

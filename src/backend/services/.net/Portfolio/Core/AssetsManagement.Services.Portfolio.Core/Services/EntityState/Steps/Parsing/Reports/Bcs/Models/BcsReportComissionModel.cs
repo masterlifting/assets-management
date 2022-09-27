@@ -1,6 +1,6 @@
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Deserialization.Reports.Bcs.Models;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models;
 
-public sealed class BcsReportBalanceModel
+public sealed class BcsReportComissionModel
 {
     public string Date { get; set; } = null!;
     public string Exchange { get; set; } = null!;
