@@ -43,7 +43,7 @@ namespace Shared.Persistense.Repositories
             var query = @$"
                 UPDATE ""{_tableName}"" SET
 	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
-	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
+	                , ""{nameof(IEntityState.Attempt)}"" = CASE WHEN ""{nameof(IEntityState.StepId)}"" = {step.Id} THEN ""{nameof(IEntityState.Attempt)}"" + 1 ELSE ""{nameof(IEntityState.Attempt)}"" END
 	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
                 WHERE ""{nameof(IEntityState.Id)}"" IN 
 	                ( SELECT ""{nameof(IEntityState.Id)}""
@@ -62,7 +62,7 @@ namespace Shared.Persistense.Repositories
             var query = @$"
                 UPDATE ""{_tableName}"" SET
 	                  ""{nameof(IEntityState.StateId)}"" = {(int)States.Processing}
-	                , ""{nameof(IEntityState.Attempt)}"" = ""{nameof(IEntityState.Attempt)}"" + 1
+	                , ""{nameof(IEntityState.Attempt)}"" = CASE WHEN ""{nameof(IEntityState.StepId)}"" = {step.Id} THEN ""{nameof(IEntityState.Attempt)}"" + 1 ELSE ""{nameof(IEntityState.Attempt)}"" END
 	                , ""{nameof(IEntityState.UpdateTime)}"" = NOW()
                 WHERE ""{nameof(IEntityState.Id)}"" IN 
 	                ( SELECT ""{nameof(IEntityState.Id)}""

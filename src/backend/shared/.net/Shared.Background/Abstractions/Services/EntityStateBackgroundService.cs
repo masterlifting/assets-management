@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Shared.Background.Abstractions.Tasks;
 using Shared.Background.Exceptions;
 using Shared.Background.Settings;
@@ -49,7 +50,7 @@ namespace Shared.Background.Abstractions.Services
             var timerPeriod = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan();
             using var timer = new PeriodicTimer(timerPeriod);
 
-            while (await timer.WaitForNextTickAsync(cToken))
+            do
             {
                 if (settings.Scheduler.IsStop(out var stopInfo))
                 {
@@ -95,7 +96,7 @@ namespace Shared.Background.Abstractions.Services
                     if (settings.Scheduler.IsOnce)
                         settings.Scheduler.SetOnce();
                 }
-            }
+            } while (await timer.WaitForNextTickAsync(cToken));
         }
         public override async Task StopAsync(CancellationToken cToken)
         {

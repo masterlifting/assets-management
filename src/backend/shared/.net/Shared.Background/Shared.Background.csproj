@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared.Extensions\Shared.Extensions.csproj" />
     <ProjectReference Include="..\Shared.Frameworks\Shared.Frameworks.csproj" />
+    <ProjectReference Include="..\Shared.Persistense\Shared.Persistense.csproj" />
   </ItemGroup>
 
 </Project>

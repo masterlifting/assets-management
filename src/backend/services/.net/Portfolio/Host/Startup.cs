@@ -21,9 +21,8 @@ using Shared.Background.Settings.Sections;
 using Shared.Extensions.Serialization;
 using Shared.MessagesQueue;
 using Shared.Persistense.Abstractions.Handling.EntityState;
-using Shared.Persistense.Handling.EntityState;
-
 using System;
+using Shared.Background.Handling.EntityState;
 
 namespace AM.Services.Portfolio.Host;
 

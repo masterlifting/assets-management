@@ -8,37 +8,36 @@ using Shared.Contracts.Models.Pagination;
 using System;
 using System.Threading.Tasks;
 
-namespace AM.Services.Portfolio.Host.Controllers
-{
-    [ApiController, Route("[controller]")]
-    public sealed class EventsController : ControllerBase
-    {
-        private readonly EventApi api;
-        public EventsController(EventApi api) => this.api = api;
+namespace AM.Services.Portfolio.Host.Controllers;
 
-        [HttpGet]
-        public async Task<IActionResult> Get(int page = 0, int limit = 0)
+[ApiController, Route("[controller]")]
+public sealed class EventsController : ControllerBase
+{
+    private readonly EventApi api;
+    public EventsController(EventApi api) => this.api = api;
+
+    [HttpGet]
+    public async Task<IActionResult> Get(int page = 0, int limit = 0)
+    {
+        try
         {
-            try
-            {
-                return Ok(await api.GetAsync(new Paginator<Event>(page, limit)));
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+            return Ok(await api.GetAsync(new Paginator<Event>(page, limit)));
         }
-        [HttpGet("{companyId}")]
-        public async Task<IActionResult> Get(string companyId, int page = 0, int limit = 0)
+        catch (Exception exception)
         {
-            try
-            {
-                return Ok(await api.GetAsync(companyId, new Paginator<Event>(page, limit)));
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
-            }
+            return BadRequest(exception.Message);
+        }
+    }
+    [HttpGet("{companyId}")]
+    public async Task<IActionResult> Get(string companyId, int page = 0, int limit = 0)
+    {
+        try
+        {
+            return Ok(await api.GetAsync(companyId, new Paginator<Event>(page, limit)));
+        }
+        catch (Exception exception)
+        {
+            return BadRequest(exception.Message);
         }
     }
 }

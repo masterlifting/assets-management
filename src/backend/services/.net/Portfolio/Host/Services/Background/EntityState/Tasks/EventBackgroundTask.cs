@@ -9,13 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Shared.Background.Abstractions.Tasks;
 using Shared.Background.Settings;
 using Shared.Persistense.Entities.EntityState;
-using Shared.Persistense.Handling.EntityState;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Shared.Background.Handling.EntityState;
 using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks
