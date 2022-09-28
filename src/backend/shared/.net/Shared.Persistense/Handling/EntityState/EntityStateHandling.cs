@@ -57,7 +57,7 @@ namespace Shared.Persistense.Handling.EntityState
 
                         var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.Retry.Skip;
                         var retryDate = DateTime.UtcNow.Add(-retryTime);
-                        
+
                         var retryIds = await _repository.PrepareRetryDataAsync(step, settings.Limit, retryDate, settings.Retry.Attempts, cToken);
 
                         if (retryIds.Any())
@@ -69,7 +69,8 @@ namespace Shared.Persistense.Handling.EntityState
                 }
                 catch (Exception exception)
                 {
-                    throw new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.PrepareData, exception);
+                    _logger.LogError(new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.PrepareData, exception));
+                    continue;
                 }
 
                 if (!ids.Any())
@@ -87,7 +88,8 @@ namespace Shared.Persistense.Handling.EntityState
                 }
                 catch (Exception exception)
                 {
-                    throw new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.GetData, exception);
+                    _logger.LogError(new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.GetData, exception));
+                    continue;
                 }
 
                 try
@@ -112,15 +114,29 @@ namespace Shared.Persistense.Handling.EntityState
                 }
 
                 var isNextStep = steps.TryPeek(out var nextStep);
+
                 try
                 {
                     _logger.LogTrace(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Start);
-                    await _repository.SaveResultAsync(isNextStep ? nextStep : null, entities, cToken);
-                    _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Success);
+
+                    if (isNextStep)
+                    {
+                        foreach (var entity in entities.Where(x => x.StateId == (int)States.Processed))
+                            entity.StateId = (int)States.Ready;
+
+                        await _repository.SaveResultAsync(nextStep, entities, cToken);
+                        _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Success, $"Установлен следующий шаг: {nextStep!.Info}");
+                    }
+                    else
+                    {
+                        await _repository.SaveResultAsync(null, entities, cToken);
+                        _logger.LogDebug(_initiator, action + Constants.Actions.EntityStates.UpdateData, Constants.Actions.Success);
+                    }
+
                 }
                 catch (Exception exception)
                 {
-                    throw new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.UpdateData, exception);
+                    _logger.LogError(new SharedPersistenseEntityStateException(_initiator, action + Constants.Actions.EntityStates.UpdateData, exception));
                 }
             }
         }

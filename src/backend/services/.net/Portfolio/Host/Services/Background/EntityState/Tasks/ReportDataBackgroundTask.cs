@@ -20,11 +20,11 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks
 {
-    public sealed class ReportFileBackgroundTask : IEntityStateBackgroundTask
+    public sealed class ReportDataBackgroundTask : IEntityStateBackgroundTask
     {
         private readonly IServiceScopeFactory _scopeFactory;
         public string Name { get; }
-        public ReportFileBackgroundTask(string taskName, IServiceScopeFactory scopeFactory)
+        public ReportDataBackgroundTask(string taskName, IServiceScopeFactory scopeFactory)
         {
             Name = taskName;
             _scopeFactory = scopeFactory;
@@ -45,12 +45,20 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState.Tasks
         {
             var result = new Queue<Step>(steps.Count);
 
-            var calculatingStep = steps.FirstOrDefault(x => x.Id == (int)Steps.Parsing);
+            var parsing = steps.FirstOrDefault(x => x.Id == (int)Steps.Parsing);
 
-            if (calculatingStep is null)
+            if (parsing is null)
                 throw new PortfolioHostException(Name, $"Добавление в очередь шага обработки: {nameof(Steps.Parsing)}", "Отсутствует в базе данных");
 
-            result.Enqueue(calculatingStep);
+            result.Enqueue(parsing);
+
+            var serialization = steps.FirstOrDefault(x => x.Id == (int)Steps.Deserialization);
+
+            if (serialization is null)
+                throw new PortfolioHostException(Name, $"Добавление в очередь шага обработки: {nameof(Steps.Deserialization)}", "Отсутствует в базе данных");
+
+            result.Enqueue(serialization);
+
             return result;
         }
     }

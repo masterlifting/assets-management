@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 using Shared.Contracts.Models.Results;
@@ -19,7 +20,6 @@ namespace Shared.Persistense.Repositories
         protected Repository(ILogger logger, TContext context)
         {
             _context = context;
-
             _logger = logger;
 
             var objectId = base.GetHashCode();
@@ -30,13 +30,13 @@ namespace Shared.Persistense.Repositories
         {
             if (!ctToken.HasValue)
             {
-                await _context.Set<TEntity>().AddAsync(entity).ConfigureAwait(false);
-                await _context.SaveChangesAsync().ConfigureAwait(false);
+                await _context.Set<TEntity>().AddAsync(entity);
+                await _context.SaveChangesAsync();
             }
             else
             {
-                await _context.Set<TEntity>().AddAsync(entity, ctToken.Value).ConfigureAwait(false);
-                await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddAsync(entity, ctToken.Value);
+                await _context.SaveChangesAsync(ctToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
@@ -45,7 +45,7 @@ namespace Shared.Persistense.Repositories
         {
             try
             {
-                await CreateAsync(entity, cToken).ConfigureAwait(false);
+                await CreateAsync(entity, cToken);
                 return new Result(true);
             }
             catch (Exception exception)
@@ -64,13 +64,13 @@ namespace Shared.Persistense.Repositories
             int result;
             if (!cToken.HasValue)
             {
-                await _context.Set<TEntity>().AddRangeAsync(entities).ConfigureAwait(false);
-                result = await _context.SaveChangesAsync().ConfigureAwait(false);
+                await _context.Set<TEntity>().AddRangeAsync(entities);
+                result = await _context.SaveChangesAsync();
             }
             else
             {
-                await _context.Set<TEntity>().AddRangeAsync(entities, cToken.Value).ConfigureAwait(false);
-                result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
+                await _context.Set<TEntity>().AddRangeAsync(entities, cToken.Value);
+                result = await _context.SaveChangesAsync(cToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
@@ -79,7 +79,7 @@ namespace Shared.Persistense.Repositories
         {
             try
             {
-                await CreateRangeAsync(entities, cToken).ConfigureAwait(false);
+                await CreateRangeAsync(entities, cToken);
                 return new Result(true);
             }
             catch (Exception exception)
@@ -96,12 +96,12 @@ namespace Shared.Persistense.Repositories
             if (!ctToken.HasValue)
             {
                 _context.Set<TEntity>().Update(entity);
-                await _context.SaveChangesAsync().ConfigureAwait(false);
+                await _context.SaveChangesAsync();
             }
             else
             {
                 _context.Set<TEntity>().Update(entity);
-                await _context.SaveChangesAsync(ctToken.Value).ConfigureAwait(false);
+                await _context.SaveChangesAsync(ctToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
@@ -130,12 +130,12 @@ namespace Shared.Persistense.Repositories
             if (!cToken.HasValue)
             {
                 _context.Set<TEntity>().UpdateRange(entities);
-                result = await _context.SaveChangesAsync().ConfigureAwait(false);
+                result = await _context.SaveChangesAsync();
             }
             else
             {
                 _context.Set<TEntity>().UpdateRange(entities);
-                result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
+                result = await _context.SaveChangesAsync(cToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
@@ -163,12 +163,12 @@ namespace Shared.Persistense.Repositories
             if (!cToken.HasValue)
             {
                 _context.Set<TEntity>().Remove(entity);
-                await _context.SaveChangesAsync().ConfigureAwait(false);
+                await _context.SaveChangesAsync();
             }
             else
             {
                 _context.Set<TEntity>().Remove(entity);
-                await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
+                await _context.SaveChangesAsync(cToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
@@ -199,12 +199,12 @@ namespace Shared.Persistense.Repositories
             if (!cToken.HasValue)
             {
                 _context.Set<TEntity>().RemoveRange(entities);
-                result = await _context.SaveChangesAsync().ConfigureAwait(false);
+                result = await _context.SaveChangesAsync();
             }
             else
             {
                 _context.Set<TEntity>().RemoveRange(entities);
-                result = await _context.SaveChangesAsync(cToken.Value).ConfigureAwait(false);
+                result = await _context.SaveChangesAsync(cToken.Value);
             }
 
             _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);

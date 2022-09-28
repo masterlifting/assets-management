@@ -1,5 +1,16 @@
-SELECT "Id", "Name", "Source", "Payload", "Json", "ContentTypeId", "ProviderId", "UserId", "UpdateTime", "Info", "StateId", "StepId", "Attempt"
-	FROM public."ReportData";
+SELECT 
+	"rd"."Id"
+	, "rd"."UpdateTime"
+	, "rd"."Name"
+	, "step"."Info" as "step"
+	, "state"."Info" as "state"
+	, "rd"."Info"
+	, "rd"."Attempt"
+	, "rd"."Json" FROM public."ReportData" as "rd"
+JOIN public."Steps" as "step" on "rd"."StepId" = "step"."Id"
+JOIN public."States" as "state" on "rd"."StateId" = "state"."Id"
+ 
+DELETE FROM public."ReportData"
  
 UPDATE "ReportData" SET
         "StateId" = 1
