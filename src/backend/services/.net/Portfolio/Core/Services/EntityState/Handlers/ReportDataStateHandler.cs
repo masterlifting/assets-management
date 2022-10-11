@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData;
 using Microsoft.Extensions.Logging;
 
 using Shared.Persistense.Abstractions.Entities.EntityState;

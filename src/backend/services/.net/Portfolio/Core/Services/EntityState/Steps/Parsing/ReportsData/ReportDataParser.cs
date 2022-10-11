@@ -1,13 +1,10 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs;
-
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs;
 using Microsoft.Extensions.Logging;
-
 using Shared.Persistense.Abstractions.Handling.EntityState;
-
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData;
 
 public sealed class ReportDataParser : IEntityStepHandler<ReportData>
 {

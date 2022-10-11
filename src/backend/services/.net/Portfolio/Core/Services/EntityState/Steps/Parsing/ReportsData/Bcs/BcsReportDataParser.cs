@@ -1,13 +1,12 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using Shared.Extensions.Serialization;
-
-using System.Text.Json;
+﻿using System.Text.Json;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Exceptions;
 using Microsoft.Extensions.Logging;
 using Shared.Extensions.Logging;
+using Shared.Extensions.Serialization;
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs;
 
 public sealed class BcsReportDataParser
 {

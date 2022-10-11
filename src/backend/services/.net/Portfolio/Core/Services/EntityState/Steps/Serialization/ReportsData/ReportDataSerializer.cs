@@ -1,15 +1,13 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports.Bcs;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.ReportsData.Bcs;
 using Microsoft.Extensions.Logging;
-
 using Shared.Persistense.Abstractions.Handling.EntityState;
-
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Reports;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.ReportsData;
 
-public sealed class ReportParser : IEntityStepHandler<ReportData>
+public sealed class ReportDataSerializer : IEntityStepHandler<ReportData>
 {
     private readonly ILogger _logger;
     private readonly IDerivativeRepository _derivativeRepository;
@@ -18,7 +16,7 @@ public sealed class ReportParser : IEntityStepHandler<ReportData>
     private readonly IEventRepository _eventRepository;
     private readonly IAccountRepository _accountRepository;
 
-    public ReportParser(
+    public ReportDataSerializer(
         ILogger logger
         , IAccountRepository accountRepository
         , IDerivativeRepository derivativeRepository
@@ -41,7 +39,7 @@ public sealed class ReportParser : IEntityStepHandler<ReportData>
             {
                 case (int)Providers.Bcs:
                     {
-                        var parser = new BcsReportParser(
+                        var parser = new BcsReportDataSerializer(
                             _logger
                             , _accountRepository
                             , _derivativeRepository

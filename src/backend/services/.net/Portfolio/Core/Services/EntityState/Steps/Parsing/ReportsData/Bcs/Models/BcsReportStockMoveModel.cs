@@ -1,4 +1,4 @@
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.Reports.Bcs.Models;
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs.Models;
 
 public sealed class BcsReportStockMoveModel
 {
