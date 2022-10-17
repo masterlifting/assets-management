@@ -2,9 +2,8 @@
 
 using Shared.Persistense.Abstractions.Repositories;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
+namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+
+public interface IEventRepository : IEntityStateRepository<Event>
 {
-    public interface IEventRepository : IEntityStateRepository<Event>
-    {
-    }
 }

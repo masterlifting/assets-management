@@ -69,7 +69,7 @@ public sealed class ReportsController : ControllerBase
                 var createdResult = await _reportDataRepository.TryCreateAsync(reportData);
 
                 if (!createdResult.IsSuccess)
-                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"Сохранение файла '{reportData.Id}' отчета: {file.FileName}", createdResult.Error!));
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"Saving report: '{file.FileName}'", createdResult.Error!));
             }
 
             return Ok();
@@ -90,7 +90,7 @@ public sealed class ReportsController : ControllerBase
                 return providerId;
         }
 
-        throw new PortfolioCoreException("ReportFileController", "Определение провайдера отчета", $"Не удалось у файла {fileName}");
+        throw new PortfolioCoreException(nameof(ReportsController), nameof(GetProviderId), $"Report provider not recognized for '{fileName}'");
     }
     private async Task CreateUserAsync(string userId)
     {
@@ -100,7 +100,7 @@ public sealed class ReportsController : ControllerBase
             await _userRepository.CreateAsync(new()
             {
                 Id = userId,
-                Name = "Пестунов Андрей"
+                Name = "Andrey Pestunov"
             });
     }
 }

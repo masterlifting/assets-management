@@ -2,17 +2,16 @@
 
 using System.Text.Json;
 
-namespace Shared.Persistense.Abstractions.Entities.EntityData
+namespace Shared.Persistense.Abstractions.Entities.EntityData;
+
+public interface IEntityData : IEntity
 {
-    public interface IEntityData : IEntity
-    {
-        string Name { get; init; }
-        string Source { get; init; }
+    string Name { get; init; }
+    string Source { get; init; }
 
-        byte[] Payload { get; init; }
-        JsonDocument? Json { get; set; }
+    byte[] Payload { get; init; }
+    JsonDocument? Json { get; set; }
 
-        ContentType ContentType { get; init; }
-        int ContentTypeId { get; init; }
-    }
+    ContentType ContentType { get; init; }
+    int ContentTypeId { get; init; }
 }

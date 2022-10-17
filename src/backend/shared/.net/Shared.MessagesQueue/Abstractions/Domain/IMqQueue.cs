@@ -1,7 +1,6 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Domain
+﻿namespace Shared.MessagesQueue.Abstractions.Domain;
+
+public interface IMqQueue
 {
-    public interface IMqQueue
-    {
-        string Name { get; }
-    }
+    string Name { get; }
 }

@@ -1,8 +1,7 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Domain
+﻿namespace Shared.MessagesQueue.Abstractions.Domain;
+
+public interface IMqMessage<T> where T : class
 {
-    public interface IMqMessage<T> where T : class
-    {
-        T Payload { get; set; }
-        IDictionary<string, string> Headers { get; init; }
-    }
+    T Payload { get; set; }
+    IDictionary<string, string> Headers { get; init; }
 }

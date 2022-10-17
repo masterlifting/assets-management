@@ -1,59 +1,58 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Shared.Extensions.Serialization
+namespace Shared.Extensions.Serialization;
+
+public static class JsonExtensions
 {
-    public static class JsonExtensions
+    public static JsonSerializerOptions Options { get; }
+
+    static JsonExtensions()
     {
-        public static JsonSerializerOptions Options { get; }
+        Options = new(JsonSerializerDefaults.Web);
+        Options.Converters.Add(new DateOnlyConverter());
+        Options.Converters.Add(new TimeOnlyConverter());
+    }
+    public static T DeserializeFromString<T>(this string data) where T : class
+    {
+        var result = JsonSerializer.Deserialize<T>(data, Options);
+        return result ?? throw new NullReferenceException("Json serialization result is NULL");
+    }
+    public static T DeserializeFromJsonDocument<T>(this JsonDocument data) where T : class
+    {
+        var result = data.Deserialize<T>(Options);
+        return result ?? throw new NullReferenceException("Json serialization result is NULL");
+    }
+    public static string SerializeToString<T>(this T data) where T : class => data as string ?? JsonSerializer.Serialize(data, Options);
 
-        static JsonExtensions()
+    public sealed class DateOnlyConverter : JsonConverter<DateOnly>
+    {
+        private readonly string _serializationFormat;
+        public DateOnlyConverter() : this(null) { }
+        public DateOnlyConverter(string? serializationFormat) => _serializationFormat = serializationFormat ?? "yyyy-MM-dd";
+
+        public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            Options = new(JsonSerializerDefaults.Web);
-            Options.Converters.Add(new DateOnlyConverter());
-            Options.Converters.Add(new TimeOnlyConverter());
+            var value = reader.GetString();
+            return DateOnly.Parse(value!);
         }
-        public static T DeserializeFromString<T>(this string data) where T : class
+
+        public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options) =>
+            writer.WriteStringValue(value.ToString(_serializationFormat));
+    }
+    public sealed class TimeOnlyConverter : JsonConverter<TimeOnly>
+    {
+        private readonly string _serializationFormat;
+        public TimeOnlyConverter() : this(null) { }
+        public TimeOnlyConverter(string? serializationFormat) => _serializationFormat = serializationFormat ?? "HH:mm:ss";
+
+        public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var result = JsonSerializer.Deserialize<T>(data, Options);
-            return result ?? throw new NullReferenceException("Json serialization result is NULL");
+            var value = reader.GetString();
+            return TimeOnly.Parse(value!);
         }
-        public static T DeserializeFromJsonDocument<T>(this JsonDocument data) where T : class
-        {
-            var result = data.Deserialize<T>(Options);
-            return result ?? throw new NullReferenceException("Json serialization result is NULL");
-        }
-        public static string SerializeToString<T>(this T data) where T : class => data as string ?? JsonSerializer.Serialize(data, Options);
 
-        public sealed class DateOnlyConverter : JsonConverter<DateOnly>
-        {
-            private readonly string _serializationFormat;
-            public DateOnlyConverter() : this(null) { }
-            public DateOnlyConverter(string? serializationFormat) => _serializationFormat = serializationFormat ?? "yyyy-MM-dd";
-
-            public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                var value = reader.GetString();
-                return DateOnly.Parse(value!);
-            }
-
-            public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options) =>
-                writer.WriteStringValue(value.ToString(_serializationFormat));
-        }
-        public sealed class TimeOnlyConverter : JsonConverter<TimeOnly>
-        {
-            private readonly string _serializationFormat;
-            public TimeOnlyConverter() : this(null) { }
-            public TimeOnlyConverter(string? serializationFormat) => _serializationFormat = serializationFormat ?? "HH:mm:ss";
-
-            public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                var value = reader.GetString();
-                return TimeOnly.Parse(value!);
-            }
-
-            public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options) =>
-                writer.WriteStringValue(value.ToString(_serializationFormat));
-        }
+        public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options) =>
+            writer.WriteStringValue(value.ToString(_serializationFormat));
     }
 }

@@ -40,7 +40,7 @@ public sealed class BcsReportFileParser
             { "�������������� ��������", (ParseComission, EventTypes.TaxProvider) },
             { "�������������� �� ������������ ����� ����", (ParseComission, EventTypes.TaxDepositary) },
             { "�������� ��", (ParseComission, EventTypes.TaxDepositary) },
-            { "����", (ParseComission, EventTypes.Ndfl) },
+            { "����", (ParseComission, EventTypes.TaxCountry) },
             { "������ ��", (ParseBalance, EventTypes.Increase) },
             { "����� ��", (ParseBalance, EventTypes.Decrease) },
             { "ISIN:", (ParseTransactions, EventTypes.Default) },
@@ -51,8 +51,8 @@ public sealed class BcsReportFileParser
             { "�������� �������� ����", (ParseComission, EventTypes.TaxProvider) },
             { "������ �� ����� �������� �������", (ParseComission, EventTypes.TaxProvider) },
             { "���. ������ ����� ", (ParseStockMove, EventTypes.Increase) },
-            { "�������� �� ������ \"�������� ��\"", (ParseBalance, EventTypes.InterestIncome) },
-            { "�������� �� ������ \"��������\"", (ParseBalance, EventTypes.InterestIncome) },
+            { "�������� �� ������ \"�������� ��\"", (ParseBalance, EventTypes.InterestProfit) },
+            { "�������� �� ������ \"��������\"", (ParseBalance, EventTypes.InterestProfit) },
             { "������������� (4*)", (ParseComission, EventTypes.TaxDepositary) },
             { "���������� ���������� �� ������", (ParseBalance, EventTypes.Dividend) }
         };
@@ -99,8 +99,8 @@ public sealed class BcsReportFileParser
                         case "USD":
                             GetAction("USD", Currencies.Usd);
                             break;
-                        case "�����":
-                            GetAction("�����", Currencies.Rub);
+                        case "Рубль":
+                            GetAction("Рубль", Currencies.Rub);
                             break;
                     }
 
@@ -255,7 +255,7 @@ public sealed class BcsReportFileParser
         {
             EventTypes.Increase => 6,
             EventTypes.Decrease => 7,
-            EventTypes.InterestIncome => 6,
+            EventTypes.InterestProfit => 6,
             EventTypes.Dividend => 6,
             _ => throw new PortfolioCoreException(_initiator, BalanceAction, "�� ������� ���������� ��� ��������")
         };

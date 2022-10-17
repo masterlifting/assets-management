@@ -6,10 +6,12 @@ using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Abstractions.Repositories;
-using Shared.Persistense.Entities;
+using Shared.Persistense.Entities.EntityState;
+using Shared.Persistense.Models.ValueObject;
+using Shared.Persistense.Models.ValueObject.EntityState;
 
 using static Shared.Background.Constants;
-using static Shared.Persistense.Constants;
+using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Background.Handling.EntityState;
 
@@ -17,7 +19,7 @@ public sealed class EntityStateHandling<TEntity, TRepository>
     where TEntity : class, IEntityState
     where TRepository : IEntityStateRepository<TEntity>
 {
-    private readonly string _initiator = $"Обработчик {typeof(TEntity).Name}";
+    private readonly string _initiator = $"Handler {typeof(TEntity).Name}";
 
     private readonly ILogger<TEntity> _logger;
     private readonly TRepository _repository;
@@ -30,11 +32,12 @@ public sealed class EntityStateHandling<TEntity, TRepository>
         _handler = handler;
     }
 
-    public async Task StartAsync<TStep>(int count, BackgroundTaskSettings settings, Queue<TStep> steps, CancellationToken cToken)
-        where TStep : Catalog, IEntityStepType
+    public async Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken)
     {
-        _logger.LogTrace(_initiator, "Запуск шагов обработки", Actions.Start, "Шагов: " + steps.Count);
+        var steps = GetQueueSteps(settings.Steps);
 
+        _logger.LogTrace(_initiator, "Begin processing by steps", Actions.Start, "Steps count: " + steps.Count);
+        
         for (var i = 0; i <= steps.Count; i++)
         {
             var step = steps.Dequeue();
@@ -95,8 +98,8 @@ public sealed class EntityStateHandling<TEntity, TRepository>
                 _logger.LogTrace(_initiator, action + Actions.EntityStates.HandleData, Actions.Start);
                 await _handler.HandleDataAsync(step, entities, cToken);
 
-                foreach (var entity in entities.Where(x => x.StateId != (int)Enums.States.Error))
-                    entity.StateId = (int)Enums.States.Processed;
+                foreach (var entity in entities.Where(x => x.StateId != (int)States.Error))
+                    entity.StateId = (int)States.Processed;
 
                 _logger.LogDebug(_initiator, action + Actions.EntityStates.HandleData, Actions.Success);
             }
@@ -104,7 +107,7 @@ public sealed class EntityStateHandling<TEntity, TRepository>
             {
                 foreach (var entity in entities)
                 {
-                    entity.StateId = (int)Enums.States.Error;
+                    entity.StateId = (int)States.Error;
                     entity.Info = exception.Message;
                 }
 
@@ -119,11 +122,11 @@ public sealed class EntityStateHandling<TEntity, TRepository>
 
                 if (isNextStep)
                 {
-                    foreach (var entity in entities.Where(x => x.StateId == (int)Enums.States.Processed))
-                        entity.StateId = (int)Enums.States.Ready;
+                    foreach (var entity in entities.Where(x => x.StateId == (int)States.Processed))
+                        entity.StateId = (int)States.Ready;
 
                     await _repository.SaveResultAsync(nextStep, entities, cToken);
-                    _logger.LogDebug(_initiator, action + Actions.EntityStates.UpdateData, Actions.Success, $"Установлен следующий шаг: {nextStep!.Info}");
+                    _logger.LogDebug(_initiator, action + Actions.EntityStates.UpdateData, Actions.Success, $"Next step: '{nextStep!.Name}' is set");
                 }
                 else
                 {
@@ -136,5 +139,14 @@ public sealed class EntityStateHandling<TEntity, TRepository>
                 _logger.LogError(new SharedBackgroundException(_initiator, action + Actions.EntityStates.UpdateData, exception));
             }
         }
+    }
+    private static Queue<Step> GetQueueSteps(Steps[] steps)
+    {
+        var result = new Queue<Step>(steps.Length);
+
+        foreach (var step in steps)
+            result.Enqueue(new Step(new StepId(step)));
+
+        return result;
     }
 }

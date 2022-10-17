@@ -1,18 +1,31 @@
 ﻿using Shared.Persistense.Entities;
 
+using static Shared.Persistense.Constants.Enums;
+
 namespace Shared.Persistense;
 
 public static class Constants
 {
-    internal static class Actions
+    public static class Actions
     {
-        internal const string Start = "Запущено";
-        internal const string Success = "Успешно";
+        public const string Start = "Was start";
+        public const string Success = "Success";
 
-        internal const string Create = "Добавление";
-        internal const string Update = "Обновление";
-        internal const string Delete = "Удаление";
-        internal const string NoData = "Отсутствуют данные";
+        public const string Create = "Creating";
+        public const string Update = "Updating";
+        public const string Delete = "Deleting";
+        public const string NoData = "Data not found";
+        public static class ValueObject
+        {
+            public const string Set = "Setting ValueObject properties";
+            public static string ValueNotValid(string? value) => value is null ? "Value not found" : $"Value: '{value}' not valid";
+            public static string ValueNotValid(int value) => $"Value: '{value}' not valid";
+        }
+        public static class EntityState
+        {
+            public static string StepNotImplemented(string name) => $"Step: '{name}' not implemented'";
+            public static string StepNotFound(Steps step) => $"Step: '{step}' not found'";
+        }
     }
     public static class Enums
     {
@@ -27,7 +40,7 @@ public static class Constants
         {
             Loading = 1,
             Parsing,
-            Deserialization,
+            Serialization,
             Computing,
             Sending
         }
@@ -47,26 +60,26 @@ public static class Constants
     {
         public static readonly Catalog[] States =
         {
-            new() {Id = (int) Enums.States.Ready, Name = nameof(Enums.States.Ready), Info = "Готов к обработке" },
-            new() {Id = (int) Enums.States.Processing, Name = nameof(Enums.States.Processing), Info = "Обрабатывается" },
-            new() {Id = (int) Enums.States.Processed, Name = nameof(Enums.States.Processed), Info = "Обработан" },
-            new() {Id = (int) Enums.States.Error, Name = nameof(Enums.States.Error), Info = "Ошибка обработки" }
+            new((int) Enums.States.Ready, nameof(Enums.States.Ready)) { Info = "Ready to processing data" },
+            new((int) Enums.States.Processing, nameof(Enums.States.Processing)) { Info = "Processing data" },
+            new((int) Enums.States.Processed, nameof(Enums.States.Processed)) { Info = "Processed data" },
+            new((int) Enums.States.Error, nameof(Enums.States.Error)) { Info = "Error of processing" }
         };
         public static readonly Catalog[] Steps =
         {
-            new() {Id = (int) Enums.Steps.Loading, Name = nameof(Enums.Steps.Loading), Info = "Загрузка" },
-            new() {Id = (int) Enums.Steps.Parsing, Name = nameof(Enums.Steps.Parsing), Info = "Парсинг" },
-            new() {Id = (int) Enums.Steps.Deserialization, Name = nameof(Enums.Steps.Deserialization), Info = "Десиарилизация" },
-            new() {Id = (int) Enums.Steps.Computing, Name = nameof(Enums.Steps.Computing), Info = "Вычисления" },
-            new() {Id = (int) Enums.Steps.Sending, Name = nameof(Enums.Steps.Sending), Info = "Отправка" }
+            new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
+            new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
+            new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
+            new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
+            new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
         };
         public static readonly Catalog[] ContentTypes =
         {
-            new() {Id = (int) Enums.ContentTypes.Excel, Name = nameof(Enums.ContentTypes.Excel), Info = "Excel файл" },
-            new() {Id = (int) Enums.ContentTypes.Html, Name = nameof(Enums.ContentTypes.Html), Info = "HTML страница" }
+            new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
+            new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }
         };
 
-        public static readonly Dictionary<string, Enums.ContentTypes> ContentTypeDictionary = new()
+        public static readonly Dictionary<string, ContentTypes> ContentTypeDictionary = new()
         {
             {"application/vnd.ms-excel", Enums.ContentTypes.Excel}
         };

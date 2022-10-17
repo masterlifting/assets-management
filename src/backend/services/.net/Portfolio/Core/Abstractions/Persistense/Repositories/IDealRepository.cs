@@ -2,10 +2,9 @@
 
 using Shared.Persistense.Abstractions.Repositories;
 
-namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories
+namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+
+public interface IDealRepository : IEntityStateRepository<Deal>
 {
-    public interface IDealRepository : IEntityStateRepository<Deal>
-    {
-        Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives);
-    }
+    Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives);
 }

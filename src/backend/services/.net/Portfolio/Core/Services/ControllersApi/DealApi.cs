@@ -3,17 +3,16 @@ using AM.Services.Portfolio.Core.Models.Api.Http;
 
 using Shared.Contracts.Models.Pagination;
 
-namespace AM.Services.Portfolio.Core.Services.ControllersApi
+namespace AM.Services.Portfolio.Core.Services.ControllersApi;
+
+public sealed class DealApi
 {
-    public sealed class DealApi
+    public Task<PaginatedResult<DealGetDto>> GetAsync(string companyId, Paginator<Deal> paginator)
     {
-        public Task<PaginatedResult<DealGetDto>> GetAsync(string companyId, Paginator<Deal> paginator)
-        {
-            throw new NotImplementedException();
-        }
-        public Task<PaginatedResult<DealGetDto>> GetAsync(Paginator<Deal> paginator)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
+    public Task<PaginatedResult<DealGetDto>> GetAsync(Paginator<Deal> paginator)
+    {
+        throw new NotImplementedException();
     }
 }

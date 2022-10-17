@@ -1,9 +1,8 @@
 ﻿using Shared.Background.Settings;
 
-namespace Shared.Background.Abstractions.Tasks
+namespace Shared.Background.Abstractions.Tasks;
+
+public interface IEntityStateBackgroundTask : IBackgroundTask
 {
-    public interface IEntityStateBackgroundTask : IBackgroundTask
-    {
-        Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken);
-    }
+    Task StartAsync(int count, BackgroundTaskSettings settings, CancellationToken cToken);
 }

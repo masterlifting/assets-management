@@ -1,26 +1,26 @@
 ﻿namespace Shared.Background;
 
-public static class Constants
+internal static class Constants
 {
     internal static class Actions
     {
-        internal const string Start = "Запущено";
-        internal const string Done = "Выполнено";
-        internal const string Stop = "Остановлено";
-        internal const string NoConfig = "Конфигурация задачи не найдена";
-        internal const string Limit = "Установлено максимальное количество объектов для обработки";
-        internal const string NextStart = "Следующий запуск через: ";
+        internal const string Start = "Start";
+        internal const string Done = "Done";
+        internal const string Stop = "Stop";
+        internal const string NoConfig = "Task configuration not found";
+        internal const string Limit = "Size of data for processing reached the limit";
+        internal const string NextStart = "Next start over: ";
 
-        internal const string NoData = "Данные отсутствуют";
-        internal const string Success = "Успешно";
+        internal const string NoData = "Data for processing not found";
+        internal const string Success = "Success";
         internal static class EntityStates
         {
-            internal const string PrepareNewData = ". Подготовка новых данных для обработки";
-            internal const string PrepareUnhandledData = ". Повторная подготовка данных для обработки";
-            internal const string PrepareData = ". Подготовка данных для обработки";
-            internal const string GetData = ". Получение данных";
-            internal const string HandleData = ". Обработка полученных данных";
-            internal const string UpdateData = ". Обновление обработанных данных";
+            internal const string PrepareNewData = ". Preparing new data to processing";
+            internal const string PrepareUnhandledData = ". Repeated preparing data to processing";
+            internal const string PrepareData = ". Preparing data to processing";
+            internal const string GetData = ". Receiving data";
+            internal const string HandleData = ". Processing received data";
+            internal const string UpdateData = ". Updating processed data";
         }
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace Shared.Background.Abstractions.Tasks
+﻿namespace Shared.Background.Abstractions.Tasks;
+
+public interface IBackgroundTask
 {
-    public interface IBackgroundTask
-    {
-        public string Name { get; }
-    }
+    public string Name { get; }
 }

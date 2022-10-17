@@ -2,7 +2,6 @@ using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Abstractions.Web;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Services.EntityState.Handlers;
-using AM.Services.Portfolio.Host.Services.Background.EntityState;
 using AM.Services.Portfolio.Infrastructure.Persistence.Context;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 using AM.Services.Portfolio.Infrastructure.Settings;
@@ -23,6 +22,7 @@ using Shared.MessagesQueue;
 using Shared.Persistense.Abstractions.Handling.EntityState;
 using System;
 using Shared.Background.Handling.EntityState;
+using AM.Services.Portfolio.Host.Services.Background.EntityState.Services;
 
 namespace AM.Services.Portfolio.Host;
 

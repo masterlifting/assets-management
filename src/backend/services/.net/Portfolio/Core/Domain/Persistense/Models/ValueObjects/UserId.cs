@@ -1,17 +1,18 @@
 ﻿using AM.Services.Portfolio.Core.Exceptions;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects
+using static Shared.Persistense.Constants;
+
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+
+public sealed record UserId
 {
-    public sealed record UserId
+    public string AsString { get; }
+
+    public UserId(string? value)
     {
-        public string AsString { get; }
+        if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
+            throw new PortfolioCoreException(nameof(UserId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
 
-        public UserId(string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
-                throw new PortfolioCoreException("", "", "Не удалось определить идентификатор пользователя");
-
-            AsString = value.ToUpper();
-        }
+        AsString = value.ToUpper();
     }
 }

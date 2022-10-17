@@ -1,8 +1,7 @@
-﻿namespace Shared.Persistense.Abstractions.Entities
+﻿namespace Shared.Persistense.Abstractions.Entities;
+
+public interface IEntity
 {
-    public interface IEntity
-    {
-        DateTime UpdateTime { get; set; }
-        string? Info { get; set; }
-    }
+    DateTime UpdateTime { get; set; }
+    string? Info { get; set; }
 }

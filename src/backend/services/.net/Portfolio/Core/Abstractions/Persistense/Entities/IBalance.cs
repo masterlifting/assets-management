@@ -1,9 +1,8 @@
-﻿namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Entities
+﻿namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Entities;
+
+public interface IBalance
 {
-    public interface IBalance
-    {
-        decimal BalanceValue { get; set; }
-        decimal BalanceCost { get; set; }
-        decimal LastDealCost { get; set; }
-    }
+    decimal BalanceValue { get; set; }
+    decimal BalanceCost { get; set; }
+    decimal LastDealCost { get; set; }
 }

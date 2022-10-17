@@ -9,28 +9,27 @@ using Shared.Persistense.Repositories;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
+
+public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, IDealRepository
+    where TContext : DbContext, IEntityStateDbContext
 {
-    public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, IDealRepository
-        where TContext : DbContext, IEntityStateDbContext
+    public DealRepository(ILogger<Deal> logger, TContext context) : base(logger, context)
     {
-        public DealRepository(ILogger<Deal> logger, TContext context) : base(logger, context)
+    }
+
+    public override Task CreateRangeAsync(IReadOnlyCollection<Deal> entities, CancellationToken? cToken = null)
+    {
+        foreach (var item in entities)
         {
+            item.StateId = (int)States.Ready;
+            item.StepId = (int)Steps.Computing;
         }
 
-        public override Task CreateRangeAsync(IReadOnlyCollection<Deal> entities, CancellationToken? cToken = null)
-        {
-            foreach (var item in entities)
-            {
-                item.StateId = (int)States.Ready;
-                item.StepId = (int)Steps.Computing;
-            }
-
-            return base.CreateRangeAsync(entities, cToken);
-        }
-        public Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives)
-        {
-            throw new NotImplementedException();
-        }
+        return base.CreateRangeAsync(entities, cToken);
+    }
+    public Task<Deal[]> GetFullDealsAsync(IEnumerable<Derivative> derivatives)
+    {
+        throw new NotImplementedException();
     }
 }

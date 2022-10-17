@@ -1,51 +1,51 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using Shared.Persistense.Models.ValueObject.EntityState;
 
-namespace AM.Services.Portfolio.Core.Domain.Persistense.Models
+namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
+
+public sealed record EventModel
 {
-    public sealed record EventModel
+    public EntityStateId EntityStateId { get; init; } = null!;
+
+    public decimal Value { get; init; }
+
+    public DateOnly Date { get; init; }
+
+    public EventTypeId EventTypeId { get; init; } = null!;
+
+    public DerivativeId DerivativeId { get; init; } = null!;
+    public DerivativeCode DerivativeCode { get; init; } = null!;
+
+    public int AccountId { get; init; }
+
+    public UserId UserId { get; init; } = null!;
+
+    public ProviderId ProviderId { get; init; } = null!;
+
+    public ExchangeId ExchangeId { get; init; } = null!;
+
+    public StateId StateId { get; init; } = null!;
+    public StepId StepId { get; init; } = null!;
+    public byte Attempt { get; init; }
+    public string? Info { get; init; }
+
+    public Event GetEntity() => new()
     {
-        public EntityStateId EntityStateId { get; init; } = null!;
+        Id = EntityStateId.AsString,
 
-        public decimal Value { get; init; }
+        Value = Value,
 
-        public DateOnly Date { get; init; }
+        AccountId = AccountId,
+        UserId = UserId.AsString,
+        ExchangeId = ExchangeId.AsInt,
+        ProviderId = ProviderId.AsInt,
 
-        public EventTypeId EventTypeId { get; init; } = null!;
-
-        public DerivativeId DerivativeId { get; init; } = null!;
-        public DerivativeCode DerivativeCode { get; init; } = null!;
-
-        public int AccountId { get; init; }
-
-        public UserId UserId { get; init; } = null!;
-
-        public ProviderId ProviderId { get; init; } = null!;
-
-        public ExchangeId ExchangeId { get; init; } = null!;
-
-        public StateId StateId { get; init; } = null!;
-        public StepId StepId { get; init; } = null!;
-        public byte Attempt { get; init; }
-        public string? Info { get; init; }
-
-        public Event GetEntity() => new()
-        {
-            Id = EntityStateId.AsString,
-
-            Value = Value,
-
-            AccountId = AccountId,
-            UserId = UserId.AsString,
-            ExchangeId = ExchangeId.AsInt,
-            ProviderId = ProviderId.AsInt,
-
-            StateId = StateId.AsInt,
-            StepId = StepId.AsInt,
-            Attempt = Attempt,
-            Info = Info,
-            Date = Date,
-            UpdateTime = DateTime.UtcNow
-        };
-    }
+        StateId = StateId.AsInt,
+        StepId = StepId.AsInt,
+        Attempt = Attempt,
+        Info = Info,
+        Date = Date,
+        UpdateTime = DateTime.UtcNow
+    };
 }

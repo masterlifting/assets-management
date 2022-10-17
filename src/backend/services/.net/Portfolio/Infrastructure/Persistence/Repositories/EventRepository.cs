@@ -9,24 +9,23 @@ using Shared.Persistense.Repositories;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
+namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
+
+public sealed class EventRepository<TContext> : EntityStateRepository<Event, TContext>, IEventRepository
+    where TContext : DbContext, IEntityStateDbContext
 {
-    public sealed class EventRepository<TContext> : EntityStateRepository<Event, TContext>, IEventRepository
-        where TContext : DbContext, IEntityStateDbContext
+    public EventRepository(ILogger<Event> logger, TContext context) : base(logger, context)
     {
-        public EventRepository(ILogger<Event> logger, TContext context) : base(logger, context)
+    }
+
+    public override Task CreateRangeAsync(IReadOnlyCollection<Event> entities, CancellationToken? cToken = null)
+    {
+        foreach (var item in entities)
         {
+            item.StateId = (int)States.Ready;
+            item.StepId = (int)Steps.Computing;
         }
 
-        public override Task CreateRangeAsync(IReadOnlyCollection<Event> entities, CancellationToken? cToken = null)
-        {
-            foreach (var item in entities)
-            {
-                item.StateId = (int)States.Ready;
-                item.StepId = (int)Steps.Computing;
-            }
-
-            return base.CreateRangeAsync(entities, cToken);
-        }
+        return base.CreateRangeAsync(entities, cToken);
     }
 }

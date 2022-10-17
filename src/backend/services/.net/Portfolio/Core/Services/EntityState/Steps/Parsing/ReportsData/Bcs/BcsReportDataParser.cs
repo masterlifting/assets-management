@@ -1,9 +1,13 @@
 ﻿using System.Text.Json;
+
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Exceptions;
+
 using Microsoft.Extensions.Logging;
+
 using Shared.Extensions.Logging;
 using Shared.Extensions.Serialization;
+
 using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs;
@@ -27,7 +31,7 @@ public sealed class BcsReportDataParser
             {
                 file.StateId = (int)States.Error;
                 file.Info = exception.Message;
-                _logger.LogError(new PortfolioCoreException(file.Name,"Получение модели отчета", exception));
+                _logger.LogError(new PortfolioCoreException(file.Name, nameof(BcsReportFileParser.GetReportModel), exception));
             }
         }, cToken)));
 }

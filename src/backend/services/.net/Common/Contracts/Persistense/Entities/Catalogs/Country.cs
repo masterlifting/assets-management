@@ -1,8 +1,7 @@
 ﻿using Shared.Persistense.Entities;
 
-namespace AM.Services.Common.Contracts.Persistense.Entities.Catalogs
+namespace AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
+
+public sealed class Country : Catalog
 {
-    public sealed class Country : Catalog
-    {
-    }
 }

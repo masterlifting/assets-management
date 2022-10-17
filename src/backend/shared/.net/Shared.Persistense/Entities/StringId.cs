@@ -1,7 +1,6 @@
-﻿namespace Shared.Persistense.Entities
+﻿namespace Shared.Persistense.Entities;
+
+public sealed class StringId
 {
-    public sealed class StringId
-    {
-        public string Id { get; set; } = null!;
-    }
+    public string Id { get; set; } = null!;
 }

@@ -1,21 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.Attributes.Validation
+namespace Shared.Attributes.Validation;
+
+public sealed class MoreZeroAttribute : ValidationAttribute
 {
-    public sealed class MoreZeroAttribute : ValidationAttribute
+    private readonly string _property;
+    public MoreZeroAttribute(string property) => _property = property;
+
+    public override bool IsValid(object? value)
     {
-        private readonly string _property;
-        public MoreZeroAttribute(string property) => _property = property;
+        var stringValue = value?.ToString();
 
-        public override bool IsValid(object? value)
-        {
-            var stringValue = value?.ToString();
+        var isParse = decimal.TryParse(stringValue, out var result);
 
-            var isParse = decimal.TryParse(stringValue, out var result);
+        ErrorMessage = $"The '{_property}' must be greater than 0";
 
-            ErrorMessage = $"The '{_property}' must be greater than 0";
-
-            return isParse && result > 0;
-        }
+        return isParse && result > 0;
     }
 }

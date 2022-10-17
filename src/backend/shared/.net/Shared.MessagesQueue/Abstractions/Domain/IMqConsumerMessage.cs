@@ -1,7 +1,6 @@
-﻿namespace Shared.MessagesQueue.Abstractions.Domain
+﻿namespace Shared.MessagesQueue.Abstractions.Domain;
+
+public interface IMqConsumerMessage<TPayload> : IMqMessage<TPayload> where TPayload : class
 {
-    public interface IMqConsumerMessage<TPayload> : IMqMessage<TPayload> where TPayload : class
-    {
-        DateTime DateTime { get; init; }
-    }
+    DateTime DateTime { get; init; }
 }

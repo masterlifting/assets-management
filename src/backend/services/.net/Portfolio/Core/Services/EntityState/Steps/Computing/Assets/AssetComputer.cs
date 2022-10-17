@@ -2,13 +2,12 @@
 
 using Shared.Persistense.Abstractions.Handling.EntityState;
 
-namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Computing.Assets
+namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Computing.Assets;
+
+public sealed class AssetComputer : IEntityStepHandler<Asset>
 {
-    public sealed class AssetComputer : IEntityStepHandler<Asset>
+    public Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
     {
-        public Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

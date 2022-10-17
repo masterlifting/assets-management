@@ -1,34 +1,33 @@
-﻿namespace Shared.MessagesQueue
+﻿namespace Shared.MessagesQueue;
+
+public static class Constants
 {
-    public static class Constants
+    internal const int Limit = 10_000;
+    internal static class Actions
     {
-        internal const int Limit = 10_000;
-        internal static class Actions
+        internal const string Connect = "Connecting";
+        internal const string Disconnect = "Disconnecting";
+        internal const string Start = "Was start";
+        internal const string Done = "Was done";
+        internal const string Success = "Success";
+        internal const string Post = "Sending";
+    }
+    public static class Enums
+    {
+        public static class RabbitMq
         {
-            internal const string Connect = "Подключение";
-            internal const string Disconnect = "Отключение";
-            internal const string Start = "Запущено";
-            internal const string Done = "Завершено";
-            internal const string Success = "Успешно";
-            internal const string Post = "Отправка";
-        }
-        public static class Enums
-        {
-            public static class RabbitMq
+            public enum ExchangeNames
             {
-                public enum ExchangeNames
-                {
-                    In,
-                    Apc,
-                    Sync
-                }
-                public enum ExchangeTypes
-                {
-                    Direct,
-                    Fannout,
-                    Topic,
-                    Headers
-                }
+                In,
+                Apc,
+                Sync
+            }
+            public enum ExchangeTypes
+            {
+                Direct,
+                Fannout,
+                Topic,
+                Headers
             }
         }
     }
