@@ -11,7 +11,7 @@ public sealed class OperationType : Catalog
     public OperationType()
     {
     }
-    public OperationType(OperationTypeId operationTypeId) : (operationTypeId.AsInt, operationTypeId.AsString)
+    public OperationType(OperationTypeId operationTypeId) : base (operationTypeId.AsInt, operationTypeId.AsString)
     {
     }
 

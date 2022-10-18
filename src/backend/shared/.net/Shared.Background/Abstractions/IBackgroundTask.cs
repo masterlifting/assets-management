@@ -1,4 +1,4 @@
-﻿namespace Shared.Background.Abstractions.Tasks;
+﻿namespace Shared.Background.Abstractions;
 
 public interface IBackgroundTask
 {

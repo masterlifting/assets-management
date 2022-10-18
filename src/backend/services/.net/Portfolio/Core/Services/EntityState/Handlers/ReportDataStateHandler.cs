@@ -1,27 +1,28 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-using AM.Services.Portfolio.Core.Exceptions;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.ReportsData;
 
 using Microsoft.Extensions.Logging;
-
-using Shared.Persistense.Abstractions.Entities.EntityState;
-using Shared.Persistense.Abstractions.Handling.EntityState;
-
+using Shared.Background.Abstractions.EntityState;
 using static Shared.Persistense.Constants;
 
 namespace AM.Services.Portfolio.Core.Services.EntityState.Handlers;
 
-public sealed class ReportDataStateHandler : IEntityStateHandler<ReportData>
+public sealed class ReportDataStateHandler : EntityStateHandler<ReportData>
 {
-    private readonly Dictionary<int, IEntityStepHandler<ReportData>> _handlers;
-
-    public ReportDataStateHandler(ILogger<ReportDataStateHandler> logger)
-    {
-        _handlers = new()
+    public ReportDataStateHandler(
+        ILogger<ReportDataStateHandler> logger
+        , IReportDataRepository reportDataRepository
+        , IAccountRepository accountRepository
+        , IDerivativeRepository derivativeRepository
+        , IReportRepository reportRepository
+        , IDealRepository dealRepository
+        , IEventRepository eventRepository) : base(reportDataRepository, new()
         {
-            {(int)Enums.Steps.Parsing, new ReportDataParser(logger)}};
+            {(int)Enums.Steps.Parsing, new ReportDataParser(logger)},
+            {(int)Enums.Steps.Serialization, new ReportDataSerializer(logger,accountRepository,derivativeRepository,reportRepository,dealRepository,eventRepository)}
+        })
+    {
     }
-    public Task HandleDataAsync(IEntityStepType step, IEnumerable<ReportData> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
-        ? _handlers[step.Id].HandleAsync(data, cToken)
-        : throw new PortfolioCoreException(nameof(ReportDataStateHandler), nameof(HandleDataAsync), Actions.EntityState.StepNotImplemented(step.Name));
 }

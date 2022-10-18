@@ -1,6 +1,6 @@
 ﻿using Shared.Persistense.Abstractions.Entities.EntityState;
 
-namespace Shared.Persistense.Abstractions.Handling.EntityState;
+namespace Shared.Background.Abstractions.EntityState;
 
 public interface IEntityStepHandler<in T> where T : class, IEntityState
 {

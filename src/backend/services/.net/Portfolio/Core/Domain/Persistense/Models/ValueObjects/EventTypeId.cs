@@ -14,7 +14,7 @@ public sealed record EventTypeId
     public EventTypeId(int value)
     {
         if (!Enum.TryParse<EventTypes>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

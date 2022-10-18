@@ -13,7 +13,7 @@ public sealed record ExchangeId
     public ExchangeId(int value)
     {
         if (!Enum.TryParse<Exchanges>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

@@ -6,9 +6,8 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 using AM.Services.Portfolio.Core.Models.Clients;
 
 using Microsoft.Extensions.Logging;
-
+using Shared.Background.Abstractions.EntityState;
 using Shared.Extensions.Logging;
-using Shared.Persistense.Abstractions.Handling.EntityState;
 using Shared.Persistense.Exceptions;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;

@@ -18,13 +18,8 @@ public static class Constants
         public static class ValueObject
         {
             public const string Set = "Setting ValueObject properties";
-            public static string ValueNotValid(string? value) => value is null ? "Value not found" : $"Value: '{value}' not valid";
-            public static string ValueNotValid(int value) => $"Value: '{value}' not valid";
-        }
-        public static class EntityState
-        {
-            public static string StepNotImplemented(string name) => $"Step: '{name}' not implemented'";
-            public static string StepNotFound(Steps step) => $"Step: '{step}' not found'";
+            public static string ValueNotValidError(string? value) => value is null ? "Value not found" : $"Value: '{value}' not valid";
+            public static string ValueNotValidError(int value) => $"Value: '{value}' not valid";
         }
     }
     public static class Enums

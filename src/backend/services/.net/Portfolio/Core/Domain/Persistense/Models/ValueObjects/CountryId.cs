@@ -14,7 +14,7 @@ public sealed record CountryId
     public CountryId(int value)
     {
         if (!Enum.TryParse<Countries>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(CountryId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(CountryId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

@@ -14,7 +14,7 @@ public sealed record StepId
     public StepId(int value)
     {
         if (!Enum.TryParse<Steps>(value.ToString(), true, out var enumResult))
-            throw new SharedPersistenseEntityStepException(nameof(StepId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new SharedPersistenseEntityStepException(nameof(StepId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

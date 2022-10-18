@@ -10,7 +10,7 @@ public sealed record EntityStateId
     public EntityStateId(string? value)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
-            throw new SharedPersistenseEntityStateException(nameof(EntityStateId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new SharedPersistenseEntityStateException(nameof(EntityStateId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsString = value.ToUpper();
     }

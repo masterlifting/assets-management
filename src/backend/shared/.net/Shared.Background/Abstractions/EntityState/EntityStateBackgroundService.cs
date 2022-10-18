@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using Shared.Background.Abstractions.Tasks;
 using Shared.Background.Exceptions;
 using Shared.Background.Settings;
 using Shared.Background.Settings.Sections;
 using Shared.Extensions.Logging;
+using Shared.Persistense.Abstractions.Entities.EntityState;
 
-namespace Shared.Background.Abstractions.Services;
+namespace Shared.Background.Abstractions.EntityState;
 
-public abstract class EntityStateBackgroundService : BackgroundService
+public abstract class EntityStateBackgroundService<TEntity> : BackgroundService where TEntity : class, IEntityState
 {
     private int _count;
     private const int Limit = 5_000;
@@ -18,16 +18,15 @@ public abstract class EntityStateBackgroundService : BackgroundService
     private Dictionary<string, BackgroundTaskSettings>? _tasks;
 
     private readonly ILogger _logger;
-    private readonly IEntityStateBackgroundTask _task;
+    private readonly EntityStateBackgroundTask<TEntity> _task;
 
-    protected EntityStateBackgroundService(IOptionsMonitor<BackgroundTaskSection> options, ILogger logger, IEntityStateBackgroundTask task)
+    protected EntityStateBackgroundService(IOptionsMonitor<BackgroundTaskSection> options, ILogger logger, IServiceScopeFactory scopeFactory)
     {
         _tasks = options.CurrentValue.Tasks;
         options.OnChange(x => _tasks = x.Tasks);
 
-        _task = task;
+        _task = new EntityStateBackgroundTask<TEntity>(scopeFactory);
         _logger = logger;
-
     }
     protected override async Task ExecuteAsync(CancellationToken cToken)
     {

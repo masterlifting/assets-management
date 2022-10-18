@@ -2,6 +2,7 @@ using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Abstractions.Web;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Services.EntityState.Handlers;
+using AM.Services.Portfolio.Host.Services.Background.EntityState;
 using AM.Services.Portfolio.Infrastructure.Persistence.Context;
 using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 using AM.Services.Portfolio.Infrastructure.Settings;
@@ -16,13 +17,12 @@ using Microsoft.Extensions.Hosting;
 
 using Polly;
 
+using Shared.Background.Abstractions.EntityState;
 using Shared.Background.Settings.Sections;
 using Shared.Extensions.Serialization;
 using Shared.MessagesQueue;
-using Shared.Persistense.Abstractions.Handling.EntityState;
+
 using System;
-using Shared.Background.Handling.EntityState;
-using AM.Services.Portfolio.Host.Services.Background.EntityState.Services;
 
 namespace AM.Services.Portfolio.Host;
 
@@ -71,13 +71,13 @@ public sealed class Startup
         services.AddTransient<IReportDataRepository, ReportDataRepository<DatabaseContext>>();
         services.AddTransient<IReportRepository, ReportRepository<DatabaseContext>>();
 
-        services.AddTransient(typeof(EntityStateHandling<,>));
+        services.AddTransient(typeof(EntityStateProcessing<>));
 
-        services.AddTransient<IEntityStateHandler<Asset>, AssetStateHandler>();
-        services.AddTransient<IEntityStateHandler<Derivative>, DerivativeStateHandler>();
-        services.AddTransient<IEntityStateHandler<Deal>, DealStateHandler>();
-        services.AddTransient<IEntityStateHandler<Event>, EventStateHandler>();
-        services.AddTransient<IEntityStateHandler<ReportData>, ReportDataStateHandler>();
+        services.AddTransient<EntityStateHandler<Asset>, AssetStateHandler>();
+        services.AddTransient<EntityStateHandler<Deal>, DealStateHandler>();
+        services.AddTransient<EntityStateHandler<Derivative>, DerivativeStateHandler>();
+        services.AddTransient<EntityStateHandler<Event>, EventStateHandler>();
+        services.AddTransient<EntityStateHandler<ReportData>, ReportDataStateHandler>();
 
         services.AddHostedService<AssetBackgroundService>();
         services.AddHostedService<DerivativeBackgroundService>();

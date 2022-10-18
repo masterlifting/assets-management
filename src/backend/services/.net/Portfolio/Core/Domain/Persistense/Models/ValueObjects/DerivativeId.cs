@@ -10,7 +10,7 @@ public sealed record DerivativeId
     public DerivativeId(string? value)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > 20)
-            throw new PortfolioCoreException(nameof(DerivativeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(DerivativeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsString = value.ToUpper();
     }

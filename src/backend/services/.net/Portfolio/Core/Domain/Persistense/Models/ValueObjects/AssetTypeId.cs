@@ -13,7 +13,7 @@ public sealed record AssetTypeId
     public AssetTypeId(int value)
     {
         if (!Enum.TryParse<AssetTypes>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(AssetTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(AssetTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

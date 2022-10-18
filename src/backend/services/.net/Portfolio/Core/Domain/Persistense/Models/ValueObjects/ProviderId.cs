@@ -14,7 +14,7 @@ public sealed record ProviderId
     public ProviderId(int value)
     {
         if (!Enum.TryParse<Providers>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(ProviderId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValid(value));
+            throw new PortfolioCoreException(nameof(ProviderId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
 
         AsInt = value;
         AsEnum = enumResult;

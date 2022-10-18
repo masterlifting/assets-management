@@ -1,6 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
-
-using Shared.Persistense.Abstractions.Handling.EntityState;
+using Shared.Background.Abstractions.EntityState;
 
 namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Computing.Events;
 
