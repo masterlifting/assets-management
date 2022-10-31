@@ -18,8 +18,8 @@ public static class Constants
         public static class ValueObject
         {
             public const string Set = "Setting ValueObject properties";
-            public static string ValueNotValidError(string? value) => value is null ? "Value not found" : $"Value: '{value}' not valid";
-            public static string ValueNotValidError(int value) => $"Value: '{value}' not valid";
+            public static string ValueNotValidError(string? value) => value is null ? "Value was not found" : $"Value: '{value}' is not valid";
+            public static string ValueNotValidError(int value) => $"Value: '{value}' is not valid";
         }
     }
     public static class Enums

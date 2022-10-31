@@ -10,6 +10,6 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
 public sealed class ReportDataBackgroundService : EntityStateBackgroundService<ReportData>
 {
-    public ReportDataBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<AssetBackgroundService> logger)
+    public ReportDataBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<ReportDataBackgroundService> logger)
          : base(options, logger, scopeFactory) { }
 }

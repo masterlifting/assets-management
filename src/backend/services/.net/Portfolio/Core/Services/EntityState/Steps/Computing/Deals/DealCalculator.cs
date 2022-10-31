@@ -34,7 +34,7 @@ public sealed class DealCalculator : IEntityStepHandler<Deal>
     //    await _unitOfWork.Derivative.UpdateRangeAsync(derivatives, CancellationToken.None);
     //}
 
-    public Task HandleAsync(IEnumerable<Deal> entities, CancellationToken cToken)
+    public Task HandleStepAsync(IEnumerable<Deal> entities, CancellationToken cToken)
     {
         throw new NotImplementedException();
     }

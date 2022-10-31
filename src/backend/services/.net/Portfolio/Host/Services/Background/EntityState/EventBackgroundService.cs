@@ -10,6 +10,6 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
 public sealed class EventBackgroundService : EntityStateBackgroundService<Event>
 {
-    public EventBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<AssetBackgroundService> logger)
+    public EventBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<EventBackgroundService> logger)
          : base(options, logger, scopeFactory) { }
 }

@@ -2,6 +2,7 @@
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs.Models;
 
 using Microsoft.Extensions.Logging;
@@ -43,107 +44,55 @@ public sealed class BcsReportDataSerializer
     public async Task StartAsync(IEnumerable<ReportData> files, CancellationToken cToken)
     {
         var derivativeDictionary = await _derivativeRepository.GetGroupedDerivativesAsync(cToken);
-        
-        var reports = await GetBcsReportsAsync(files, derivativeDictionary, cToken);
-
-        await ParseHeadersAsync(reports, cToken);
-
         var accountDictionary = await _accountRepository.GetGroupedAccountsByProviderAsync(ProviderId, cToken);
-        await ParseBodiesAsync(reports, accountDictionary, cToken);
+        
+        var reports = await GetBcsReportsAsync(files, accountDictionary, derivativeDictionary, cToken);
 
-        await SaveBcsReportsDataAsync(reports, cToken);
+        await SaveBcsReportsDataAsync(reports.Where(x => x is not null), cToken);
     }
 
-    private Task<BcsReport?[]> GetBcsReportsAsync(IEnumerable<ReportData> files, IDictionary<string, string[]> derivativeDictionary, CancellationToken cToken)
+    private Task<BcsReport?[]> GetBcsReportsAsync(IEnumerable<ReportData> files, IDictionary<string, int> accountDictionary, IDictionary<string, string[]> derivativeDictionary, CancellationToken cToken)
         => Task.WhenAll(files
+            .Where(file => file.Json is not null)
             .Select(file => Task.Run(() =>
             {
                 try
                 {
-                    return new BcsReport(_logger, file, derivativeDictionary);
+                    var reportModel = file.Json!.Deserialize<BcsReportModel>();
+                    
+                    var userId = new UserId(file.UserId);
+
+                    var reports = new BcsReport(_logger, file, userId, reportModel, accountDictionary, derivativeDictionary);
+
+                    reports.SetDeals();
+                    reports.SetEvents();
+
+                    return reports;
                 }
                 catch (Exception exception)
                 {
                     file.StateId = (int)States.Error;
                     file.Info = exception.Message;
+                    
                     return null;
                 }
             }, cToken)));
-    private static Task ParseHeadersAsync(IEnumerable<BcsReport?> bcsReports, CancellationToken cToken)
-        => Task.WhenAll(bcsReports
-            .Where(bcsReport => bcsReport is not null)
-            .Select(bcsReport => Task.Run(() =>
-            {
-                try
-                {
-                    bcsReport!.Header = bcsReport.GetHeader();
-                }
-                catch (Exception exception)
-                {
-                    bcsReport!.File.StateId = (int)States.Error;
-                    bcsReport.File.Info = exception.Message;
-                }
-            }, cToken)));
-    private Task ParseBodiesAsync(IEnumerable<BcsReport?> bcsReports, IDictionary<string, int> accountDictionary, CancellationToken cToken)
-        => Task.WhenAll(bcsReports
-            .Where(bcsReport => bcsReport?.Header is not null)
-            .GroupBy(bcsReport => bcsReport!.Header!.Agreement)
-            .Select(groupBcsReports => Task.Run(async () =>
-            {
-                #region automatically creating account!!!
-                if (!accountDictionary.ContainsKey(groupBcsReports.Key))
-                {
-                    var accounts = groupBcsReports
-                        .Select(x => new Account
-                        {
-                            Name = groupBcsReports.Key,
-                            UserId = x!.File.UserId,
-                            ProviderId = ProviderId.AsInt,
-                        })
-                        .ToArray();
-
-                    await _accountRepository.CreateRangeAsync(accounts, cToken);
-
-                    foreach (var account in accounts)
-                    {
-                        accountDictionary.Add(account.Name, account.Id);
-                        _logger.LogWarn(nameof(BcsReportDataSerializer), "Автоматическое создание акаунта", account.Name);
-                    }
-                }
-                #endregion
-
-                var accountId = accountDictionary[groupBcsReports.Key];
-
-                await Task.WhenAll(groupBcsReports.Select(groupBcsReport => Task.Run(() =>
-                {
-                    try
-                    {
-                        groupBcsReport!.Body = groupBcsReport.GetBody(accountId);
-                    }
-                    catch (Exception exception)
-                    {
-                        groupBcsReport!.File.StateId = (int)States.Error;
-                        groupBcsReport.File.Info = exception.Message;
-                    }
-                }, cToken)));
-            }, cToken)));
-    private async Task SaveBcsReportsDataAsync(IEnumerable<BcsReport?> bcsReports, CancellationToken cToken)
+    private async Task SaveBcsReportsDataAsync(IEnumerable<BcsReport> bcsReports, CancellationToken cToken)
     {
-        foreach (var reportsGroup in bcsReports
-                     .Where(x => x?.Header is not null && x.Body is not null)
-                     .GroupBy(x => x!.Body!.AccountId))
+        foreach (var reportsGroup in bcsReports.GroupBy(x => x.AccountId.AsInt))
         {
             var accountId = reportsGroup.Key;
+
             var currentReports = new List<Report>(reportsGroup.Count());
 
             foreach (var bcsReport in reportsGroup)
             {
                 var report = new Report
                 {
-                    AccountId = reportsGroup.Key,
-                    DateStart = bcsReport!.Header!.DateStart,
-                    DateEnd = bcsReport.Header.DateEnd,
-                    ReportDataId = bcsReport.File.Id
+                    AccountId = accountId,
+                    ReportDataId = bcsReport.File.Id,
+                    DateStart = bcsReport.DateStart,
+                    DateEnd = bcsReport.DateEnd
                 };
 
                 var reportCreatedResult = await _reportRepository.TryCreateAsync(report, cToken);
@@ -153,8 +102,6 @@ public sealed class BcsReportDataSerializer
                     bcsReport.File.StateId = (int)States.Error;
                     bcsReport.File.Info = reportCreatedResult.Error;
 
-                    _logger.LogError(new SharedPersistenseEntityStepException(nameof(BcsReportDataSerializer), $"Сохранение отчета БКС '{bcsReport.File.Name}'", reportCreatedResult.Error!));
-
                     continue;
                 }
 
@@ -163,7 +110,7 @@ public sealed class BcsReportDataSerializer
 
             if (!currentReports.Any())
             {
-                _logger.LogWarn(nameof(BcsReportDataSerializer), "Сохранение отчетов БКС", "Не удалось сохранить ни одного отчета");
+                _logger.LogWarn(nameof(BcsReportDataSerializer), nameof(SaveBcsReportsDataAsync), "Reports was not saved");
                 continue;
             }
 
@@ -179,7 +126,7 @@ public sealed class BcsReportDataSerializer
                 var reportsAlreadyDates = GetReportAlreadyDates(dbReportsDates.Concat(currentReportsDates));
 
                 var deals = reportsGroup
-                    .SelectMany(x => x!.Body!.Deals)
+                    .SelectMany(x => x!.Deals)
                     .Where(x => !reportsAlreadyDates.Contains(x.Date))
                     .ToArray();
 
@@ -187,7 +134,7 @@ public sealed class BcsReportDataSerializer
                     await _dealRepository.CreateRangeAsync(deals, cToken);
 
                 var events = reportsGroup
-                    .SelectMany(x => x!.Body!.Events)
+                    .SelectMany(x => x!.Events)
                     .Where(x => !reportsAlreadyDates.Contains(x.Date))
                     .ToArray();
 
@@ -223,12 +170,4 @@ public sealed class BcsReportDataSerializer
         })
         .Distinct()
         .ToArray();
-
-    private static void Desirialize(IEnumerable<ReportData> files)
-    {
-        var models = files
-            .Where(x => x.Json is not null)
-            .Select(x => x.Json!.DeserializeFromJsonDocument<BcsReportModel>())
-            .ToArray();
-    }
 }

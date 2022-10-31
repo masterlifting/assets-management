@@ -17,6 +17,6 @@ public abstract class EntityStateHandler<TEntity> where TEntity : class, IEntity
     }
 
     public Task HandleDataAsync(IEntityStepType step, IEnumerable<TEntity> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
-        ? _handlers[step.Id].HandleAsync(data, cToken)
+        ? _handlers[step.Id].HandleStepAsync(data, cToken)
         : throw new SharedBackgroundException(typeof(TEntity).Name + "Handler", nameof(HandleDataAsync), $"Step: '{step.Name}' not implemented'");
 }

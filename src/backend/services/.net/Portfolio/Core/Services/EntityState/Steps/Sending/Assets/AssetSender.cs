@@ -88,7 +88,7 @@ public sealed class AssetSender : IEntityStepHandler<Asset>
     //    return (assetBalanceCost, lastDealCost);
     //}
 
-    public Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
+    public Task HandleStepAsync(IEnumerable<Asset> entities, CancellationToken cToken)
     {
         throw new NotImplementedException();
     }

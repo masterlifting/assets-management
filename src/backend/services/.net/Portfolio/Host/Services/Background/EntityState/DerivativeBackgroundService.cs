@@ -10,6 +10,6 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
 public sealed class DerivativeBackgroundService : EntityStateBackgroundService<Derivative>
 {
-    public DerivativeBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<AssetBackgroundService> logger)
+    public DerivativeBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<DerivativeBackgroundService> logger)
         : base(options, logger, scopeFactory) { }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Shared.Background.Abstractions;
-using Shared.Background.Handling.EntityState;
+
 using Shared.Background.Settings;
 using Shared.Persistense.Abstractions.Entities.EntityState;
 

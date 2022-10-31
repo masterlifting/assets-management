@@ -69,7 +69,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
 	                  FROM ""{_tableName}""
 	                  WHERE 
                             ""{nameof(IEntityState.StepId)}"" = {step.Id} 
-                            AND ((""{nameof(IEntityState.StateId)}"" = {(int)States.Ready} AND ""{nameof(IEntityState.UpdateTime)}"" < '{updateTime : yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IEntityState.StateId)}"" = {(int)States.Error}))
+                            AND ((""{nameof(IEntityState.StateId)}"" = {(int)States.Processing} AND ""{nameof(IEntityState.UpdateTime)}"" < '{updateTime : yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IEntityState.StateId)}"" = {(int)States.Error}))
 			                AND ""{nameof(IEntityState.Attempt)}"" < {maxAttempts}
 	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )

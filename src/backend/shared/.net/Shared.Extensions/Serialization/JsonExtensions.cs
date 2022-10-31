@@ -13,17 +13,17 @@ public static class JsonExtensions
         Options.Converters.Add(new DateOnlyConverter());
         Options.Converters.Add(new TimeOnlyConverter());
     }
-    public static T DeserializeFromString<T>(this string data) where T : class
+    public static T Deserialize<T>(this string data) where T : class
     {
         var result = JsonSerializer.Deserialize<T>(data, Options);
         return result ?? throw new NullReferenceException("Json serialization result is NULL");
     }
-    public static T DeserializeFromJsonDocument<T>(this JsonDocument data) where T : class
+    public static T Deserialize<T>(this JsonDocument data) where T : class
     {
         var result = data.Deserialize<T>(Options);
         return result ?? throw new NullReferenceException("Json serialization result is NULL");
     }
-    public static string SerializeToString<T>(this T data) where T : class => data as string ?? JsonSerializer.Serialize(data, Options);
+    public static string Serialize<T>(this T data) where T : class => data as string ?? JsonSerializer.Serialize(data, Options);
 
     public sealed class DateOnlyConverter : JsonConverter<DateOnly>
     {

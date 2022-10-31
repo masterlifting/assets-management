@@ -1,12 +1,11 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-using Shared.Persistense.Models.ValueObject.EntityState;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Models;
 
 public sealed record ExpenseModel
 {
-    public ExpenseModel(EntityStateId dealId, DerivativeId derivativeId, DerivativeCode derivativeCode, decimal value, DateOnly date)
+    public ExpenseModel(DealId dealId, DerivativeId derivativeId, DerivativeCode derivativeCode, decimal value, DateOnly date)
     {
         DerivativeId = derivativeId;
         DerivativeCode = derivativeCode;
@@ -14,9 +13,9 @@ public sealed record ExpenseModel
         Value = value;
         Date = date;
     }
+    public DealId DealId { get; }
     public DerivativeId DerivativeId { get; }
     public DerivativeCode DerivativeCode { get; }
-    public EntityStateId DealId { get; }
 
     public decimal Value { get; }
     public DateOnly Date { get; }

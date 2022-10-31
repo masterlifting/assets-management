@@ -166,7 +166,7 @@ public sealed class EventCalculator : IEntityStepHandler<Event>
     //    return income.Sum(x => x.Value) - expense.Sum(x => x.Value);
     //}
 
-    public Task HandleAsync(IEnumerable<Event> entities, CancellationToken cToken)
+    public Task HandleStepAsync(IEnumerable<Event> entities, CancellationToken cToken)
     {
         throw new NotImplementedException();
     }

@@ -1,14 +1,13 @@
-using System.Globalization;
-
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
-using AM.Services.Portfolio.Core.Exceptions;
+using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs.Models;
 
 using Microsoft.Extensions.Logging;
 
-using Shared.Data.Excel;
+using Shared.Persistense.Models.ValueObject.EntityState;
+
+using System.Globalization;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
@@ -17,483 +16,341 @@ namespace AM.Services.Portfolio.Core.Services.EntityState.Steps.Serialization.Re
 
 public sealed class BcsReport
 {
-    //public ReportData File { get; }
-    //public BcsReportHeader? Header { get; set; }
-    //public BcsReportBody? Body { get; set; }
-
-    //private readonly ProviderId _providerId = new(Providers.Bcs);
-    //private readonly UserId _userId;
-
-    //private readonly IFormatProvider _culture;
-    //private readonly ILogger _logger;
-
-    //private int _rowId;
-    //private readonly ExcelDocument _excel;
-
-    //private readonly IDictionary<string, string[]> _derivatives;
-    //private readonly Dictionary<string, int> _reportPoints;
-    //private readonly Dictionary<string, (Action<BcsReportBody, string, Currencies?> Action, EventTypes EventType)> _reportPatterns;
-
-    //public BcsReport(ILogger logger, ReportData file, IDictionary<string, string[]> derivatives)
-    //{
-    //    File = file;
-
-    //    try
-    //    {
-    //        var table = ExcelLoader.LoadTable(file.Payload);
-    //        _excel = new ExcelDocument(table);
-    //    }
-    //    catch (Exception exception)
-    //    {
-    //        throw new PortfolioCoreException("О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©Ґ", "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ excel О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", exception.Message);
-    //    }
-
-    //    _logger = logger;
-    //    _derivatives = derivatives;
-    //    _userId = new UserId(file.UserId);
-    //    _culture = new CultureInfo("ru-RU");
-    //    _reportPoints = new Dictionary<string, int>(BcsReportStructure.Points.Length);
-    //    _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
-    //    {
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", (ParseDividend, EventTypes.Dividend) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.TaxDepositary) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ", (ParseComission, EventTypes.TaxDepositary) },
-    //        { "О©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.Ndfl) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ", (ParseBalance, EventTypes.Increase) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ", (ParseBalance, EventTypes.Decrease) },
-    //        { "ISIN:", (ParseStockTransactions, EventTypes.Default) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ. О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ:", (ParseExchangeRate, EventTypes.Default) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ (О©ҐО©ҐО©ҐО©Ґ)", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©Ґ \"О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ\"", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ (О©ҐО©ҐО©ҐО©Ґ)", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", (ParseComission, EventTypes.TaxProvider) },
-    //        { "О©ҐО©ҐО©Ґ. О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©Ґ ", (ParseAdditionalStockRelease, EventTypes.Increase) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ \"О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ\"", (ParseBalance, EventTypes.InterestIncome) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ \"О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ\"", (ParseBalance, EventTypes.InterestIncome) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ (4*)", (ParseComission, EventTypes.TaxDepositary) },
-    //        { "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ", (ParseBalance, EventTypes.Dividend) }
-    //    };
-    //}
-
-    //public BcsReportHeader GetHeader()
-    //{
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, "О©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ:", out _))
-    //    {
-    //        if (_excel.TryGetCellValue(_rowId, 1, BcsReportStructure.Points, out var cell))
-    //            _reportPoints.Add(cell, _rowId);
-    //    }
-
-    //    if (!_reportPoints.Any())
-    //        throw new ApplicationException("Report structure not recognized");
-
-    //    string? period = null;
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, "О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ:", out _))
-    //        period = _excel.GetCellValue(_rowId, 5);
-
-    //    if (period is null)
-    //        throw new ApplicationException($"Agreement period '{period}' not recognized");
-    //    var dates = period.Split(' ');
-
-    //    string? agreement = null;
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, "О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ:", out _))
-    //        agreement = _excel.GetCellValue(_rowId, 5);
-
-    //    return new BcsReportHeader
-    //    {
-    //        Agreement = agreement ?? throw new ApplicationException($"Agreement '{agreement}' not found"),
-    //        DateStart = DateOnly.Parse(dates[1], _culture),
-    //        DateEnd = DateOnly.Parse(dates[3], _culture)
-    //    };
-    //}
-    //public BcsReportBody GetBody(int accountId)
-    //{
-    //    var body = new BcsReportBody(accountId, _excel.RowsCount);
-
-    //    string? cellValue;
-
-    //    var firstBlock = _reportPoints.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[0], StringComparison.OrdinalIgnoreCase) > -1);
-    //    if (firstBlock is not null)
-    //    {
-    //        _rowId = _reportPoints[firstBlock];
-
-    //        var border = _reportPoints.Skip(1).First().Key;
-
-    //        var rowNo = _rowId++;
-    //        while (!_excel.TryGetCellValue(rowNo++, 1, border, out cellValue))
-    //            if (!string.IsNullOrWhiteSpace(cellValue))
-    //                switch (cellValue)
-    //                {
-    //                    case "USD":
-    //                        GetAction("USD", Currencies.Usd);
-    //                        break;
-    //                    case "О©ҐО©ҐО©ҐО©ҐО©Ґ":
-    //                        GetAction("О©ҐО©ҐО©ҐО©ҐО©Ґ", Currencies.Rub);
-    //                        break;
-    //                }
-
-    //        void GetAction(string value, Currencies? currency)
-    //        {
-    //            while (!_excel.TryGetCellValue(_rowId++, 1, new[] { $"О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ {value}:", border }, out _))
-    //            {
-    //                cellValue = _excel.GetCellValue(_rowId, 2);
-
-    //                if (string.IsNullOrWhiteSpace(cellValue))
-    //                    continue;
-
-    //                if (_reportPatterns.ContainsKey(cellValue))
-    //                    _reportPatterns[cellValue].Action(body, cellValue, currency);
-    //                else if (!BcsReportStructure.SkippedActions.Contains(cellValue, StringComparer.OrdinalIgnoreCase))
-    //                    _logger.LogWarning($"parse {firstBlock}", cellValue, "not recognized");
-    //            }
-    //        }
-    //    }
-
-    //    var secondBlock = _reportPoints.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[2], StringComparison.OrdinalIgnoreCase) > -1);
-    //    if (secondBlock is not null)
-    //    {
-    //        _rowId = _reportPoints[secondBlock] + 3;
-
-    //        while (!_excel.TryGetCellValue(_rowId++, 1, "О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©Ґ:", out cellValue))
-    //            if (!string.IsNullOrWhiteSpace(cellValue))
-    //                CheckComission(cellValue);
-    //    }
-
-    //    var thirdBlock = _reportPoints.Keys.FirstOrDefault(x => x.IndexOf(BcsReportStructure.Points[3], StringComparison.OrdinalIgnoreCase) > -1);
-    //    if (thirdBlock is not null)
-    //    {
-    //        _rowId = _reportPoints[thirdBlock];
-    //        var borders = _reportPoints.Keys
-    //            .Where(x => BcsReportStructure.Points[4].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1 || BcsReportStructure.Points[5].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1)
-    //            .ToArray();
-
-    //        while (!_excel.TryGetCellValue(_rowId++, 1, borders, out _))
-    //        {
-    //            cellValue = _excel.GetCellValue(_rowId, 6);
-
-    //            if (!string.IsNullOrWhiteSpace(cellValue) && _reportPatterns.ContainsKey(cellValue))
-    //                _reportPatterns[cellValue].Action(body, cellValue, null);
-    //        }
-    //    }
-
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, "О©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ:", out _))
-    //    {
-    //        cellValue = _excel.GetCellValue(_rowId, 12);
-
-    //        if (!string.IsNullOrWhiteSpace(cellValue) && _reportPatterns.ContainsKey(cellValue))
-    //            _reportPatterns[cellValue].Action(body, _excel.GetCellValue(_rowId, 1)!, null);
-    //    }
-
-    //    return body;
-    //}
-
-    //private void ParseDividend(BcsReportBody body, string value, Currencies? currency)
-    //{
-    //    if (!currency.HasValue)
-    //        throw new ArgumentNullException(nameof(currency));
-
-    //    var info = _excel.GetCellValue(_rowId, 14);
-
-    //    if (info is null)
-    //        throw new Exception(nameof(ParseDividend) + ". Info not found");
-
-    //    var dateTime = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, _culture);
-    //    var exchangeId = GetExchangeId();
-
-    //    // О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ
-
-    //    var derivativeId = new DerivativeId(currency.Value.ToString());
-    //    var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
-
-    //    body.AddEvent(new EventModel
-    //    {
-    //        DerivativeId = derivativeId,
-    //        DerivativeCode = derivativeCode,
-
-    //        EventTypeId = new EventTypeId(EventTypes.Dividend),
-    //        Value = decimal.Parse(_excel.GetCellValue(_rowId, 6)!),
-
-    //        Date = dateTime,
-    //        Info = info,
-
-    //        ExchangeId = exchangeId,
-    //        AccountId = body.AccountId,
-    //        UserId = _userId,
-    //        ProviderId = _providerId
-    //    });
-
-    //    // О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ
-    //    decimal tax = 0;
-    //    var taxPosition = info.IndexOf("О©ҐО©ҐО©ҐО©ҐО©Ґ", StringComparison.OrdinalIgnoreCase);
-    //    if (taxPosition > -1)
-    //    {
-    //        var taxRow = info[taxPosition..].Split(' ')[1];
-    //        taxRow = taxRow.IndexOf('$') > -1 ? taxRow[1..] : taxRow;
-    //        tax = decimal.Parse(taxRow, NumberStyles.Number, _culture);
-    //    }
-
-    //    body.AddEvent(new EventModel
-    //    {
-    //        DerivativeId = derivativeId,
-    //        DerivativeCode = derivativeCode,
-
-    //        EventTypeId = new EventTypeId(EventTypes.TaxIncome),
-    //        Value = tax,
-
-    //        Date = dateTime,
-    //        Info = info,
-
-    //        ExchangeId = exchangeId,
-    //        AccountId = body.AccountId,
-    //        UserId = _userId,
-    //        ProviderId = _providerId
-    //    });
-    //}
-    //private void ParseComission(BcsReportBody body, string value, Currencies? currency)
-    //{
-    //    if (!currency.HasValue)
-    //        throw new ArgumentNullException(nameof(currency));
-
-    //    var derivativeId = new DerivativeId(currency.Value.ToString());
-    //    var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
-
-    //    body.AddEvent(new EventModel
-    //    {
-    //        DerivativeId = derivativeId,
-    //        DerivativeCode = derivativeCode,
-
-    //        EventTypeId = new EventTypeId(_reportPatterns[value].EventType),
-    //        Value = decimal.Parse(_excel.GetCellValue(_rowId, 7)!),
-
-    //        Date = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, _culture),
-    //        Info = value,
-
-    //        AccountId = body.AccountId,
-    //        UserId = _userId,
-    //        ProviderId = _providerId,
-    //        ExchangeId = GetExchangeId()
-    //    });
-    //}
-    //private void ParseBalance(BcsReportBody body, string value, Currencies? currency)
-    //{
-    //    if (!currency.HasValue)
-    //        throw new ArgumentNullException(nameof(currency));
-
-    //    var eventTypeId = new EventTypeId(_reportPatterns[value].EventType);
-
-    //    var columnNo = eventTypeId.AsEnum switch
-    //    {
-    //        EventTypes.Increase => 6,
-    //        EventTypes.Decrease => 7,
-    //        EventTypes.InterestIncome => 6,
-    //        EventTypes.Dividend => 6,
-    //        _ => throw new ApplicationException(nameof(ParseBalance) + $".{nameof(EventType)} '{value}' not recognized")
-    //    };
-
-    //    var derivativeId = new DerivativeId(currency.Value.ToString());
-    //    var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
-
-    //    body.AddEvent(new EventModel
-    //    {
-    //        DerivativeId = derivativeId,
-    //        DerivativeCode = derivativeCode,
-
-    //        EventTypeId = eventTypeId,
-    //        Value = decimal.Parse(_excel.GetCellValue(_rowId, columnNo)!),
-
-    //        Date = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, _culture),
-    //        Info = value,
-
-    //        AccountId = body.AccountId,
-    //        UserId = _userId,
-    //        ProviderId = _providerId,
-    //        ExchangeId = GetExchangeId()
-    //    });
-    //}
-    //private void ParseExchangeRate(BcsReportBody body, string value, Currencies? currency = null)
-    //{
-    //    var code = _excel.GetCellValue(_rowId, 1);
-
-    //    if (code is null)
-    //        throw new ApplicationException(nameof(ParseExchangeRate) + ".Code not found");
-
-    //    if (!BcsReportStructure.ExchangeCurrencies.ContainsKey(code))
-    //        throw new ApplicationException(nameof(ParseExchangeRate) + $".Derivative '{code}' not found");
-
-    //    var incomeDerivativeId = new DerivativeId(BcsReportStructure.ExchangeCurrencies[code].Income);
-    //    var incomeDerivativeCode = new DerivativeCode(_derivatives[incomeDerivativeId.AsString][0]);
-
-    //    var expenseDerivativeId = new DerivativeId(BcsReportStructure.ExchangeCurrencies[code].Expense);
-    //    var expenseDerivativeCode = new DerivativeCode(_derivatives[expenseDerivativeId.AsString][0]);
-
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, $"О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ {code}:", out _))
-    //    {
-    //        var cellBuyValue = _excel.GetCellValue(_rowId, 5);
-
-    //        var date = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, _culture);
-    //        var exchange = _excel.GetCellValue(_rowId, 14);
-    //        var exchangeId = !string.IsNullOrWhiteSpace(exchange) && BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
-    //            ? new ExchangeId(BcsReportStructure.ExchangeTypes[exchange])
-    //            : throw new ApplicationException($"О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ: {exchange}");
-
-    //        var dealId = new EntityStateId(Guid.NewGuid());
-    //        IncomeModel incomeModel;
-    //        ExpenseModel expenseModel;
-
-    //        decimal dealValue;
-    //        decimal dealCost;
-
-    //        if (!string.IsNullOrWhiteSpace(cellBuyValue))
-    //        {
-    //            dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 4)!);
-    //            dealValue = decimal.Parse(cellBuyValue);
-    //            incomeModel = new IncomeModel(dealId, incomeDerivativeId, incomeDerivativeCode, dealValue, date);
-    //            expenseModel = new ExpenseModel(dealId, expenseDerivativeId, expenseDerivativeCode, dealValue * dealCost, date);
-    //        }
-    //        else
-    //        {
-    //            dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 7)!);
-    //            dealValue = decimal.Parse(_excel.GetCellValue(_rowId, 8)!);
-    //            incomeModel = new IncomeModel(dealId, incomeDerivativeId, incomeDerivativeCode, dealValue * dealCost, date);
-    //            expenseModel = new ExpenseModel(dealId, expenseDerivativeId, expenseDerivativeCode, dealValue, date);
-    //        }
-
-    //        var dealModel = new DealModel(dealId, incomeModel, expenseModel)
-    //        {
-    //            Date = date,
-    //            Cost = dealCost,
-
-    //            UserId = _userId,
-    //            ProviderId = _providerId,
-    //            AccountId = body.AccountId,
-    //            ExchangeId = exchangeId,
-
-    //            Info = code
-    //        };
-
-    //        body.AddDeal(dealModel);
-    //    }
-    //}
-    //private void ParseStockTransactions(BcsReportBody body, string value, Currencies? currency = null)
-    //{
-    //    var isin = _excel.GetCellValue(_rowId, 7);
-
-    //    if (isin is null)
-    //        throw new ApplicationException(nameof(ParseStockTransactions) + ".Isin not found");
-
-    //    var infoArray = isin.Split(',').Select(x => x.Trim());
-
-    //    var derivativeId = new DerivativeId(_derivatives.Keys.Intersect(infoArray).FirstOrDefault());
-    //    var derivativeCode = new DerivativeCode(_derivatives[derivativeId.AsString][0]);
-
-    //    var name = _excel.GetCellValue(_rowId, 1);
-
-    //    while (!_excel.TryGetCellValue(_rowId++, 1, $"О©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ {name}:", out _))
-    //    {
-    //        var cellBuyValue = _excel.GetCellValue(_rowId, 4);
-
-    //        var date = DateOnly.Parse(_excel.GetCellValue(_rowId, 1)!, _culture);
-    //        currency = _excel.GetCellValue(_rowId, 10) switch
-    //        {
-    //            "USD" => Currencies.Usd,
-    //            "О©ҐО©ҐО©ҐО©ҐО©Ґ" => Currencies.Rub,
-    //            _ => throw new ArgumentOutOfRangeException(nameof(ParseStockTransactions) + $".Currency {currency} not found")
-    //        };
-
-    //        var exchange = _excel.GetCellValue(_rowId, 17);
-    //        var exchangeId = !string.IsNullOrWhiteSpace(exchange) && BcsReportStructure.ExchangeTypes.ContainsKey(exchange)
-    //            ? new ExchangeId(BcsReportStructure.ExchangeTypes[exchange])
-    //            : throw new ApplicationException($"О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ О©ҐО©Ґ О©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©ҐО©Ґ: {exchange}");
-
-    //        var dealId = new EntityStateId(Guid.NewGuid());
-    //        IncomeModel incomeModel;
-    //        ExpenseModel expenseModel;
-
-    //        decimal dealValue;
-    //        decimal dealCost;
-
-    //        if (!string.IsNullOrWhiteSpace(cellBuyValue))
-    //        {
-    //            dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 5)!);
-    //            dealValue = decimal.Parse(cellBuyValue);
-
-    //            incomeModel = new IncomeModel(dealId, derivativeId, derivativeCode, dealValue, date);
-
-    //            var expenseDerivativeId = new DerivativeId(currency.Value.ToString());
-    //            var expenseDerivativeCode = new DerivativeCode(_derivatives[expenseDerivativeId.AsString][0]);
-    //            expenseModel = new ExpenseModel(dealId, expenseDerivativeId, expenseDerivativeCode, dealValue * dealCost, date);
-    //        }
-    //        else
-    //        {
-    //            dealValue = decimal.Parse(_excel.GetCellValue(_rowId, 7)!);
-    //            dealCost = decimal.Parse(_excel.GetCellValue(_rowId, 8)!);
-
-    //            var incomeDerivativeId = new DerivativeId(currency.Value.ToString());
-    //            var incomeDerivativeCode = new DerivativeCode(_derivatives[incomeDerivativeId.AsString][0]);
-    //            incomeModel = new IncomeModel(dealId, incomeDerivativeId, incomeDerivativeCode, dealValue * dealCost, date);
-
-    //            expenseModel = new ExpenseModel(dealId, derivativeId, derivativeCode, dealValue, date);
-    //        }
-
-    //        var dealModel = new DealModel(dealId, incomeModel, expenseModel)
-    //        {
-    //            Date = date,
-    //            Cost = dealCost,
-
-    //            UserId = _userId,
-    //            ProviderId = _providerId,
-    //            AccountId = body.AccountId,
-    //            ExchangeId = exchangeId,
-
-    //            Info = name
-    //        };
-
-    //        body.AddDeal(dealModel);
-    //    }
-    //}
-    //private void ParseAdditionalStockRelease(BcsReportBody body, string value, Currencies? currency = null)
-    //{
-    //    var ticker = value.Trim();
-
-    //    var (derivative, derivativeCodes) = _derivatives.FirstOrDefault(x => x.Value.Contains(ticker, StringComparer.OrdinalIgnoreCase));
-
-    //    var derivativeId = new DerivativeId(derivative);
-    //    var derivativeCode = new DerivativeCode(derivativeCodes?.FirstOrDefault(x => x.Equals(ticker, StringComparison.OrdinalIgnoreCase)));
-
-    //    body.AddEvent(new EventModel
-    //    {
-    //        DerivativeId = derivativeId,
-    //        DerivativeCode = derivativeCode,
-
-    //        Value = decimal.Parse(_excel.GetCellValue(_rowId, 7)!),
-
-    //        EventTypeId = new EventTypeId(EventTypes.Increase),
-
-    //        Date = DateOnly.Parse(_excel.GetCellValue(_rowId, 4)!, _culture),
-    //        Info = _excel.GetCellValue(_rowId, 12),
-
-    //        UserId = _userId,
-    //        AccountId = body.AccountId,
-    //        ProviderId = _providerId,
-    //        ExchangeId = new ExchangeId(Exchanges.Spbex)
-    //    });
-    //}
-
-    //private void CheckComission(string value)
-    //{
-    //    if (!_reportPatterns.ContainsKey(value))
-    //        throw new ApplicationException(nameof(CheckComission) + $".{nameof(EventType)} '{value}' not found");
-    //}
-    //private ExchangeId GetExchangeId()
-    //{
-    //    var exchange = _excel.GetCellValue(_rowId, 12);
-    //    if (string.IsNullOrWhiteSpace(exchange))
-    //        exchange = _excel.GetCellValue(_rowId, 11);
-    //    if (string.IsNullOrWhiteSpace(exchange))
-    //        exchange = _excel.GetCellValue(_rowId, 10);
-
-    //    return new ExchangeId(string.IsNullOrWhiteSpace(exchange) ? Exchanges.Default : BcsReportStructure.ExchangeTypes[exchange]);
-    //}
+    private readonly ProviderId _providerId = new(Providers.Bcs);
+    private readonly IFormatProvider _culture = new CultureInfo("ru-RU");
+
+    private readonly ILogger _logger;
+    private readonly BcsReportModel _reportModel;
+
+    private readonly IDictionary<string, string[]> _derivativeDictionary;
+
+    public ReportData File { get; }
+
+    public UserId UserId { get; }
+    public AccountId AccountId { get; }
+
+    public DateOnly DateStart { get; }
+    public DateOnly DateEnd { get; }
+
+    public IEnumerable<Event> Events { get; }
+    private readonly List<Event> _events;
+    public IEnumerable<Deal> Deals { get; }
+    private readonly List<Deal> _deals;
+
+    public BcsReport(
+        ILogger logger
+        , ReportData file
+        , UserId userId
+        , BcsReportModel reportModel
+        , IDictionary<string, int> accountDictionary
+        , IDictionary<string, string[]> derivativeDictionary)
+    {
+        _logger = logger;
+        File = file;
+        _reportModel = reportModel;
+        _derivativeDictionary = derivativeDictionary;
+
+        UserId = userId;
+        AccountId = new AccountId(reportModel.Agreement, accountDictionary);
+        DateStart = DateOnly.Parse(reportModel.DateStart, _culture);
+        DateEnd = DateOnly.Parse(reportModel.DateEnd, _culture);
+
+        _events = new List<Event>();
+        _deals = new List<Deal>();
+
+        Events = _events;
+        Deals = _deals;
+    }
+
+
+    public void SetEvents()
+    {
+        if (_reportModel.Dividends is not null)
+        {
+            var models = GetEventModels(_reportModel.Dividends.ToArray());
+            _events.AddRange(models.Select(x => x.GetEntity()));
+        }
+        if (_reportModel.Comissions is not null)
+        {
+            var models = GetEventModels(_reportModel.Comissions.ToArray());
+            _events.AddRange(models.Select(x => x.GetEntity()));
+        }
+        if (_reportModel.Balances is not null)
+        {
+            var models = GetEventModels(_reportModel.Balances.ToArray());
+            _events.AddRange(models.Select(x => x.GetEntity()));
+        }
+        if (_reportModel.StockMoves is not null)
+        {
+            var models = GetEventModels(_reportModel.StockMoves.ToArray());
+            _events.AddRange(models.Select(x => x.GetEntity()));
+        }
+    }
+    public void SetDeals()
+    {
+        if (_reportModel.ExchangeRates is not null)
+        {
+            var models = GetEventModels(_reportModel.ExchangeRates.ToArray());
+            _deals.AddRange(models.Select(x => x.GetEntity()));
+        }
+        if (_reportModel.Transactions is not null)
+        {
+            var models = GetEventModels(_reportModel.Transactions.ToArray());
+            _deals.AddRange(models.Select(x => x.GetEntity()));
+        }
+    }
+
+    private EventModel[] GetEventModels(BcsReportDividendModel[] items)
+    {
+        var result = new List<EventModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Currency);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.EventType, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.Dividend },
+                { "2", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId(item.Exchange, new Dictionary<string, int>
+            {
+                { "1", (int)Exchanges.Spbex },
+                { "2", (int)Exchanges.Moex }
+            });
+
+            var model = new EventModel(
+                decimal.Parse(item.Sum, _culture)
+                , DateOnly.Parse(item.Date, _culture)
+                , eventTypeId
+                , derivativeId
+                , derivativeCode
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , item.Info);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
+    private EventModel[] GetEventModels(BcsReportComissionModel[] items)
+    {
+        var result = new List<EventModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Currency);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.EventType, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.TaxCountry },
+                { "2", (int)EventTypes.TaxDepositary },
+                { "3", (int)EventTypes.TaxDeal },
+                { "4", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId(item.Exchange, new Dictionary<string, int>
+            {
+                { "1", (int)Exchanges.Spbex },
+                { "2", (int)Exchanges.Moex }
+            });
+
+            var model = new EventModel(
+                decimal.Parse(item.Sum, _culture)
+                , DateOnly.Parse(item.Date, _culture)
+                , eventTypeId
+                , derivativeId
+                , derivativeCode
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , null);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
+    private EventModel[] GetEventModels(BcsReportBalanceModel[] items)
+    {
+        var result = new List<EventModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Currency);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.EventType, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.Dividend },
+                { "2", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId(item.Exchange, new Dictionary<string, int>
+            {
+                { "1", (int)Exchanges.Spbex },
+                { "2", (int)Exchanges.Moex }
+            });
+
+            var model = new EventModel(
+                decimal.Parse(item.Sum, _culture)
+                , DateOnly.Parse(item.Date, _culture)
+                , eventTypeId
+                , derivativeId
+                , derivativeCode
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , null);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
+    private EventModel[] GetEventModels(BcsReportStockMoveModel[] items)
+    {
+        var result = new List<EventModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Ticker);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.Info, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.Dividend },
+                { "2", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId((int)Exchanges.Spbex);
+
+            var model = new EventModel(
+                decimal.Parse(item.Value, _culture)
+                , DateOnly.Parse(item.Date, _culture)
+                , eventTypeId
+                , derivativeId
+                , derivativeCode
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , item.Info);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
+    
+    private DealModel[] GetEventModels(BcsReportExchangeRateModel[] items)
+    {
+        var result = new List<DealModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Currency);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.EventType, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.Dividend },
+                { "2", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId(item.Exchange, new Dictionary<string, int>
+            {
+                { "1", (int)Exchanges.Spbex },
+                { "2", (int)Exchanges.Moex }
+            });
+
+            var value = decimal.Parse(item.Sum, _culture);
+            var date = DateOnly.Parse(item.Date, _culture);
+
+            var dealId = new DealId();
+
+            var income = new IncomeModel(dealId, derivativeId, derivativeCode, value, date);
+            var expense = new ExpenseModel(dealId, derivativeId, derivativeCode, value, date);
+
+            var model = new DealModel(
+                value
+                , date
+                , income
+                , expense
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , null);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
+    private DealModel[] GetEventModels(BcsReportTransactionModel[] items)
+    {
+        var result = new List<DealModel>(items.Length);
+
+        foreach (var item in items)
+        {
+            var derivativeId = new DerivativeId(item.Currency);
+            var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+
+            var eventTypeId = new EventTypeId(item.EventType, new Dictionary<string, int>
+            {
+                { "1", (int)EventTypes.Dividend },
+                { "2", (int)EventTypes.TaxIncome }
+            });
+            var exchangeId = new ExchangeId(item.Exchange, new Dictionary<string, int>
+            {
+                { "1", (int)Exchanges.Spbex },
+                { "2", (int)Exchanges.Moex }
+            });
+
+            var value = decimal.Parse(item.Sum, _culture);
+            var date = DateOnly.Parse(item.Date, _culture);
+
+            var dealId = new DealId();
+
+            var income = new IncomeModel(dealId, derivativeId, derivativeCode, value, date);
+            var expense = new ExpenseModel(dealId, derivativeId, derivativeCode, value, date);
+
+            var model = new DealModel(
+                value
+                , date
+                , income
+                , expense
+                , AccountId
+                , UserId
+                , _providerId
+                , exchangeId
+                , new StateId(Shared.Persistense.Constants.Enums.States.Ready)
+                , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
+                , 0
+                , null);
+
+            result.Add(model);
+        }
+
+        return result.ToArray();
+    }
 }

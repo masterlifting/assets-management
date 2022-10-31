@@ -31,13 +31,13 @@ public sealed class AssetLoader : IEntityStepHandler<Asset>
         _moexWebclient = moexWebclient;
         _derivativeRepository = derivativeRepository;
     }
-    public async Task HandleAsync(IEnumerable<Asset> entities, CancellationToken cToken)
+    public async Task HandleStepAsync(IEnumerable<Asset> entities, CancellationToken cToken)
     {
         var assets = entities.ToArray();
 
         if (!assets.Any())
         {
-            _logger.LogWarn(Initiator, nameof(HandleAsync), "Data not found for processing");
+            _logger.LogWarn(Initiator, nameof(HandleStepAsync), "Data not found for processing");
             return;
         }
 

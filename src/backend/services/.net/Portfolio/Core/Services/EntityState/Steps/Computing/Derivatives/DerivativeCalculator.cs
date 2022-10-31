@@ -89,7 +89,7 @@ public sealed class DerivativeCalculator : IEntityStepHandler<Derivative>
     //    return (assetBalanceCost, lastDealCost);
     //}
 
-    public Task HandleAsync(IEnumerable<Derivative> entities, CancellationToken cToken)
+    public Task HandleStepAsync(IEnumerable<Derivative> entities, CancellationToken cToken)
     {
         throw new NotImplementedException();
     }

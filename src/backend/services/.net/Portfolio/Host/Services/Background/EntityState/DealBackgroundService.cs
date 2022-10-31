@@ -10,6 +10,6 @@ namespace AM.Services.Portfolio.Host.Services.Background.EntityState;
 
 public sealed class DealBackgroundService : EntityStateBackgroundService<Deal>
 {
-    public DealBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<AssetBackgroundService> logger)
+    public DealBackgroundService(IServiceScopeFactory scopeFactory, IOptionsMonitor<BackgroundTaskSection> options, ILogger<DealBackgroundService> logger)
          : base(options, logger, scopeFactory) { }
 }

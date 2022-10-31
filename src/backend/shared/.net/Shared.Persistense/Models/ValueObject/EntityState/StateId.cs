@@ -20,4 +20,10 @@ public sealed record StateId
         AsEnum = enumResult;
         AsString = enumResult.ToString().ToUpper();
     }
+    public StateId(States value)
+    {
+        AsInt = (int)value;
+        AsEnum = value;
+        AsString = value.ToString().ToUpper();
+    }
 }

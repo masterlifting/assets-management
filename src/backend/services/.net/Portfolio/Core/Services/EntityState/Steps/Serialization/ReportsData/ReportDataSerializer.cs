@@ -33,7 +33,7 @@ public sealed class ReportDataSerializer : IEntityStepHandler<ReportData>
         _eventRepository = eventRepository;
         _accountRepository = accountRepository;
     }
-    public async Task HandleAsync(IEnumerable<ReportData> entities, CancellationToken cToken)
+    public async Task HandleStepAsync(IEnumerable<ReportData> entities, CancellationToken cToken)
     {
         foreach (var reportFilesGroup in entities.GroupBy(x => x.ProviderId))
             switch (reportFilesGroup.Key)

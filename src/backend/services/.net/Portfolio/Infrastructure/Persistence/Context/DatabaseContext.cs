@@ -43,8 +43,8 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
-        Database.EnsureDeleted();
-        Database.EnsureCreated();
+        //Database.EnsureDeleted();
+        //Database.EnsureCreated();
     }
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -7,4 +7,5 @@ public sealed class BcsReportBalanceModel
     public string Sum { get; set; } = null!;
     public string Currency { get; set; } = null!;
     public string EventType { get; set; } = null!;
+    public string? Info { get; set; }
 }

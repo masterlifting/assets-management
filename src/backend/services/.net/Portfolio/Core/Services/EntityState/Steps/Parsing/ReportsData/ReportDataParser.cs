@@ -12,7 +12,7 @@ public sealed class ReportDataParser : IEntityStepHandler<ReportData>
     private readonly ILogger _logger;
     public ReportDataParser(ILogger logger) => _logger = logger;
 
-    public async Task HandleAsync(IEnumerable<ReportData> entities, CancellationToken cToken)
+    public async Task HandleStepAsync(IEnumerable<ReportData> entities, CancellationToken cToken)
     {
         foreach (var filesGroup in entities.GroupBy(x => x.ProviderId))
             switch (filesGroup.Key)

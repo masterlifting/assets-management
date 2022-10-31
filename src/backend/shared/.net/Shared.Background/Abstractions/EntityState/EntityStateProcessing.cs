@@ -6,6 +6,8 @@ using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Entities.EntityState;
 using Shared.Persistense.Models.ValueObject.EntityState;
 
+using System;
+
 using static Shared.Background.Constants;
 using static Shared.Persistense.Constants.Enums;
 
@@ -90,6 +92,9 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
 
                 foreach (var entity in entities.Where(x => x.StateId != (int)States.Error))
                     entity.StateId = (int)States.Processed;
+
+                foreach (var entity in entities.Where(x => x.StateId == (int)States.Error))
+                    _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, entity.Info ?? "Error has not description"));
 
                 _logger.LogDebug(taskName, action + Actions.EntityStates.HandleData, Actions.Success);
             }

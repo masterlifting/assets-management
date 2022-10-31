@@ -71,7 +71,7 @@ public sealed class RabbitMqProducer : IMqProducer
             exchangeName
             , $"{exchangeName}.{message.Queue.Name}"
             , new BasicProperties(message)
-            , Encoding.UTF8.GetBytes(message.Payload.SerializeToString()));
+            , Encoding.UTF8.GetBytes(message.Payload.Serialize()));
 
         _logger.LogTrace(_initiator, Constants.Actions.Post, Constants.Actions.Success, message.Id);
     }
