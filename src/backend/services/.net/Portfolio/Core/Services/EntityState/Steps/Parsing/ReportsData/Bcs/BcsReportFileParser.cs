@@ -35,26 +35,26 @@ public sealed class BcsReportFileParser
 
         _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "���������", (ParseDividend, EventTypes.Dividend) },
-            { "�������������� ������", (ParseComission, EventTypes.TaxProvider) },
-            { "�������������� ��������", (ParseComission, EventTypes.TaxProvider) },
-            { "�������������� �� ������������ ����� ����", (ParseComission, EventTypes.TaxDepositary) },
-            { "�������� ��", (ParseComission, EventTypes.TaxDepositary) },
-            { "����", (ParseComission, EventTypes.TaxCountry) },
-            { "������ ��", (ParseBalance, EventTypes.Increase) },
-            { "����� ��", (ParseBalance, EventTypes.Decrease) },
+            { "9", (ParseDividend, EventTypes.Dividend) },
+            { "14 6", (ParseComission, EventTypes.TaxProvider) },
+            { "14 8", (ParseComission, EventTypes.TaxProvider) },
+            { "14 2 12 5 4", (ParseComission, EventTypes.TaxDepositary) },
+            { "8 2", (ParseComission, EventTypes.TaxDepositary) },
+            { "4", (ParseComission, EventTypes.TaxCountry) },
+            { "6 2", (ParseBalance, EventTypes.Increase) },
+            { "5 2", (ParseBalance, EventTypes.Decrease) },
             { "ISIN:", (ParseTransactions, EventTypes.Default) },
-            { "������. ������:", (ParseExchangeRate, EventTypes.Default) },
-            { "�������������� �������� (����)", (ParseComission, EventTypes.TaxProvider) },
-            { "�������� �� ����� \"�������� ��\"", (ParseComission, EventTypes.TaxProvider) },
-            { "�������������� �������� (����)", (ParseComission, EventTypes.TaxProvider) },
-            { "�������� �������� ����", (ParseComission, EventTypes.TaxProvider) },
-            { "������ �� ����� �������� �������", (ParseComission, EventTypes.TaxProvider) },
-            { "���. ������ ����� ", (ParseStockMove, EventTypes.Increase) },
-            { "�������� �� ������ \"�������� ��\"", (ParseBalance, EventTypes.InterestProfit) },
-            { "�������� �� ������ \"��������\"", (ParseBalance, EventTypes.InterestProfit) },
-            { "������������� (4*)", (ParseComission, EventTypes.TaxDepositary) },
-            { "���������� ���������� �� ������", (ParseBalance, EventTypes.Dividend) }
+            { "6. 6:", (ParseExchangeRate, EventTypes.Default) },
+            { "14 8 (4) ", (ParseComission, EventTypes.TaxProvider) },
+            { "8 2 5 \"8 2\"", (ParseComission, EventTypes.TaxProvider) },
+            { "14 8 (4)", (ParseComission, EventTypes.TaxProvider) },
+            { "8 8 4", (ParseComission, EventTypes.TaxProvider) },
+            { "6 2 5 8 7", (ParseComission, EventTypes.TaxProvider) },
+            { "3. 6 5 ", (ParseStockMove, EventTypes.Increase) },
+            { "8 2 6 \"8 2\"", (ParseBalance, EventTypes.InterestProfit) },
+            { "8 2 6 \"8\"", (ParseBalance, EventTypes.InterestProfit) },
+            { "13 (4*)", (ParseComission, EventTypes.TaxDepositary) },
+            { "10 10 2 6", (ParseBalance, EventTypes.Dividend) }
         };
 
         _dividends = new List<BcsReportDividendModel>(_excelDocument.RowsCount);

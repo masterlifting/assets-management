@@ -88,7 +88,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
         if (step is null)
             return UpdateRangeAsync(array, cToken);
 
-        foreach (var entity in array)
+        foreach (var entity in array.Where(x => x.StateId == (int)States.Processed))
             entity.StepId = step.Id;
 
         return UpdateRangeAsync(array, cToken);

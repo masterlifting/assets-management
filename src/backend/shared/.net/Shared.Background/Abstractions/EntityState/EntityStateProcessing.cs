@@ -39,6 +39,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             try
             {
                 _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Start);
+
                 ids = await _handler.Repository.PrepareDataAsync(step, settings.Limit, cToken);
 
                 if (ids.Any())
@@ -76,7 +77,9 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             try
             {
                 _logger.LogTrace(taskName, action + Actions.EntityStates.GetData, Actions.Start);
+
                 entities = await _handler.Repository.GetDataAsync(step, ids, cToken);
+                
                 _logger.LogDebug(taskName, action + Actions.EntityStates.GetData, Actions.Success);
             }
             catch (Exception exception)
@@ -88,6 +91,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             try
             {
                 _logger.LogTrace(taskName, action + Actions.EntityStates.HandleData, Actions.Start);
+
                 await _handler.HandleDataAsync(step, entities, cToken);
 
                 foreach (var entity in entities.Where(x => x.StateId != (int)States.Error))
@@ -121,11 +125,13 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
                         entity.StateId = (int)States.Ready;
 
                     await _handler.Repository.SaveResultAsync(nextStep, entities, cToken);
+
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
                 }
                 else
                 {
                     await _handler.Repository.SaveResultAsync(null, entities, cToken);
+
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
                 }
             }
