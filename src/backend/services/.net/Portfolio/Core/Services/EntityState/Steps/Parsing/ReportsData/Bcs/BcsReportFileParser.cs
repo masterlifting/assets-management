@@ -468,7 +468,7 @@ public sealed class BcsReportFileParser
     {
         var structure = new Dictionary<string, int>(BcsReportFileStructure.Points.Length);
 
-        while (!_excelDocument.TryGetCellValue(rowId++, 1, "���� ����������� ������:", out _))
+        while (!_excelDocument.TryGetCellValue(rowId++, 1, "Дата составления отчета:", out _))
             if (_excelDocument.TryGetCellValue(rowId, 1, BcsReportFileStructure.Points, out var cellValue))
                 if (cellValue is not null)
                     structure.Add(cellValue, rowId);
@@ -481,7 +481,7 @@ public sealed class BcsReportFileParser
     {
         string? period = null;
 
-        while (!_excelDocument.TryGetCellValue(rowId++, 1, "������:", out _))
+        while (!_excelDocument.TryGetCellValue(rowId++, 1, "Период:", out _))
             period = _excelDocument.GetCellValue(rowId, 5);
 
         if (string.IsNullOrWhiteSpace(period))
@@ -501,7 +501,7 @@ public sealed class BcsReportFileParser
     {
         string? agreement = null;
 
-        while (!_excelDocument.TryGetCellValue(rowId++, 1, "����������� ����������:", out _))
+        while (!_excelDocument.TryGetCellValue(rowId++, 1, "Генеральное соглашение:", out _))
             agreement = _excelDocument.GetCellValue(rowId, 5);
 
         return string.IsNullOrWhiteSpace(agreement)

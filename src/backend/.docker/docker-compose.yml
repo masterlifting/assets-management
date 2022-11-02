@@ -1,5 +1,5 @@
 version: '3.7'
-name: asset-management-infractructure
+#name: asset-management-infractructure
 
 services:
   postgres:

@@ -6,12 +6,13 @@ internal static class BcsReportFileStructure
 {
     internal static readonly string[] Points =
     {
+        "1.1.1. Движение денежных средств по совершенным сделкам (иным операциям) с ценными бумагами, а также по срочным сделкам:",
         "1.1.1. �������� �������� ������� �� ����������� ������� (���� ���������) � ������� ��������",
         "1.2. �����:",
         "�����/������ (�������� �����):",
         "2.1. ������:",
         "2.3. Незавершенные сделки",
-        "3. ������:"
+        "3. Активы:"
     };
     internal static readonly Dictionary<string, Exchanges> ExchangeTypes = new(StringComparer.OrdinalIgnoreCase)
     {
