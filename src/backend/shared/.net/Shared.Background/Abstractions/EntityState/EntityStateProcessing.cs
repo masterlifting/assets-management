@@ -122,7 +122,10 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
                 if (isNextStep)
                 {
                     foreach (var entity in entities.Where(x => x.StateId == (int)States.Processed))
+                    {
                         entity.StateId = (int)States.Ready;
+                        entity.Info = $"Previous step was '{step.Name}'";
+                    }
 
                     await _handler.Repository.SaveResultAsync(nextStep, entities, cToken);
 

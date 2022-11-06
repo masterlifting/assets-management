@@ -21,14 +21,14 @@ public sealed class BcsReportDataParser
         {
             try
             {
-                var parser = new BcsReportFileParser(file.Payload);
+                var parser = new BcsReportParser(file.Payload);
                 var reportModel = parser.GetReportModel();
                 file.Json = JsonDocument.Parse(reportModel.Serialize());
             }
             catch (Exception exception)
             {
                 file.StateId = (int)States.Error;
-                file.Info = exception.Message;
+                file.Info = $"File: {file.Name}. " + exception.Message;
             }
         }, cToken)));
 }

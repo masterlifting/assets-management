@@ -6,20 +6,23 @@ SELECT
 	, "state"."Name" as "state"
 	, "rd"."Info"
 	, "rd"."Attempt"
-	, "rd"."Json" FROM public."ReportData" as "rd"
+	, "rd"."Json" 
+FROM public."ReportData" as "rd"
 JOIN public."Steps" as "step" on "rd"."StepId" = "step"."Id"
 JOIN public."States" as "state" on "rd"."StateId" = "state"."Id"
- 
+WHERE "StateId" = 4
+
+SELECT 
+	"rd"."Info"
+FROM public."ReportData" as "rd"
+JOIN public."Steps" as "step" on "rd"."StepId" = "step"."Id"
+JOIN public."States" as "state" on "rd"."StateId" = "state"."Id"
+WHERE "rd"."Info" IS NOT NULL AND "StateId" != 4
+
 DELETE FROM public."ReportData"
+
+SELECT * FROM "States"
  
-UPDATE "ReportData" SET
-        "StateId" = 1
-    , "Attempt" = 0
-    , "UpdateTime" = NOW()
-WHERE "Id" = 
-    ( SELECT "Id"
-        FROM "ReportData"
-        WHERE "StepId" = 2 AND "StateId" = 3 
-        LIMIT  1
-        FOR UPDATE SKIP LOCKED )
+UPDATE public."ReportData" SET "StateId" = 2, "Attempt" = 0, "UpdateTime" = NOW(), "Info" = NULL
+WHERE "Id" IN ( SELECT "Id" FROM "ReportData" FOR UPDATE SKIP LOCKED )
 RETURNING "Id";

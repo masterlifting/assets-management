@@ -26,7 +26,8 @@ public static class Constants
     {
         public enum States
         {
-            Ready = 1,
+            Draft = 1,
+            Ready,
             Processing,
             Processed,
             Error = -1
@@ -36,6 +37,7 @@ public static class Constants
             Loading = 1,
             Parsing,
             Serialization,
+            Validation,
             Computing,
             Sending
         }
@@ -55,6 +57,7 @@ public static class Constants
     {
         public static readonly Catalog[] States =
         {
+            new((int) Enums.States.Draft, nameof(Enums.States.Draft)) { Info = "Draft" },
             new((int) Enums.States.Ready, nameof(Enums.States.Ready)) { Info = "Ready to processing data" },
             new((int) Enums.States.Processing, nameof(Enums.States.Processing)) { Info = "Processing data" },
             new((int) Enums.States.Processed, nameof(Enums.States.Processed)) { Info = "Processed data" },
@@ -65,6 +68,7 @@ public static class Constants
             new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
             new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
             new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
+            new((int) Enums.Steps.Validation, nameof(Enums.Steps.Validation)),
             new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
             new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
         };

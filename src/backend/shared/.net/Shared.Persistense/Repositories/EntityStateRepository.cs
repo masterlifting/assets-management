@@ -25,7 +25,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
 
     public override Task CreateAsync(TEntity entity, CancellationToken? ctToken = null)
     {
-        entity.StateId = (int)States.Ready;
+        entity.StateId = (int)States.Draft;
 
         return base.CreateAsync(entity, ctToken);
     }
@@ -33,7 +33,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
     public override Task CreateRangeAsync(IReadOnlyCollection<TEntity> entities, CancellationToken? cToken = null)
     {
         foreach (var entity in entities)
-            entity.StateId = (int)States.Ready;
+            entity.StateId = (int)States.Draft;
 
         return base.CreateRangeAsync(entities, cToken);
     }
@@ -88,7 +88,7 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
         if (step is null)
             return UpdateRangeAsync(array, cToken);
 
-        foreach (var entity in array.Where(x => x.StateId == (int)States.Processed))
+        foreach (var entity in array.Where(x => x.StateId != (int)States.Error))
             entity.StepId = step.Id;
 
         return UpdateRangeAsync(array, cToken);

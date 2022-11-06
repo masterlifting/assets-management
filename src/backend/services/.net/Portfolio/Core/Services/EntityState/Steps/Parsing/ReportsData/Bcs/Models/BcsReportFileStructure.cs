@@ -6,21 +6,21 @@ internal static class BcsReportFileStructure
 {
     internal static readonly string[] Points =
     {
-        "1.1.1. Движение денежных средств по совершенным сделкам (иным операциям) с ценными бумагами, а также по срочным сделкам:",
-        "1.1.1. �������� �������� ������� �� ����������� ������� (���� ���������) � ������� ��������",
-        "1.2. �����:",
-        "�����/������ (�������� �����):",
-        "2.1. ������:",
+        "1.1.1. Движение денежных средств по совершенным сделкам (иным операциям) с ценными бумагами",
+        "1.2. Займы:",
+        "сборы/штрафы (итоговые суммы)",
+        "2.1. Сделки:",
         "2.3. Незавершенные сделки",
         "3. Активы:"
     };
     internal static readonly Dictionary<string, Exchanges> ExchangeTypes = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "�������(�������� �����)", Exchanges.Moex },
-        { "����", Exchanges.Moex },
-        { "���", Exchanges.Spbex },
-        { "�������(FORTS)", Exchanges.Moex },
-        { "�������.", Exchanges.Moex }
+        { "МосБирж(Валютный рынок)", Exchanges.Moex },
+        { "МосБирж(ВР/ДМ)", Exchanges.Moex },
+        { "ММВБ", Exchanges.Moex },
+        { "СПБ", Exchanges.Spbex },
+        { "МосБирж(FORTS)", Exchanges.Moex },
+        { "Внебирж.", Exchanges.Moex }
     };
     internal static readonly Dictionary<string, (string Income, string Expense)> ExchangeCurrencies = new(StringComparer.OrdinalIgnoreCase)
     {

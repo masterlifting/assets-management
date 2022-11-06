@@ -23,6 +23,8 @@ namespace AM.Services.Portfolio.Host.Controllers;
 [ApiController, Route("[controller]")]
 public sealed class ReportsController : ControllerBase
 {
+    private const string UserId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
+    
     private readonly ILogger<ReportsController> _logger;
     private readonly IReportDataRepository _reportDataRepository;
     private readonly IUserRepository _userRepository;
@@ -46,19 +48,18 @@ public sealed class ReportsController : ControllerBase
     {
         try
         {
-            const string userId = "0f9075e9-bbcf-4eef-a52d-d9dcad816f5e";
-            await CreateUserAsync(userId);
+            await CreateUserAsync(UserId);
 
             foreach (var file in files)
             {
                 var payload = new byte[file.Length];
                 await using var stream = file.OpenReadStream();
-                var _ = await stream.ReadAsync(payload, 0, (int)file.Length);
+                var _ = await stream.ReadAsync(payload.AsMemory(0, (int)file.Length));
 
                 var reportData = new ReportData
                 {
                     Id = Convert.ToBase64String(SHA256.HashData(payload)),
-                    UserId = userId,
+                    UserId = UserId,
                     ProviderId = GetProviderId(file.FileName),
                     Name = file.FileName,
                     Source = nameof(ReportsController),
@@ -95,7 +96,7 @@ public sealed class ReportsController : ControllerBase
     private async Task CreateUserAsync(string userId)
     {
         var user = await _userRepository.FindAsync(userId);
-        
+
         if (user is null)
             await _userRepository.CreateAsync(new()
             {

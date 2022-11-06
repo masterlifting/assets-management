@@ -19,26 +19,13 @@ public sealed class ExcelDocument
     }
     public bool TryGetCellValue(int rowId, int columnId, string pattern, out string? value)
     {
-        value = null;
-
-        var cellValue = GetCellValue(rowId, columnId);
-        var result = cellValue is not null && cellValue.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) > -1;
-
-        if (result)
-            value = cellValue!;
-
-        return result;
+        value = GetCellValue(rowId, columnId);
+        return value is not null && value.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) > -1;
     }
     public bool TryGetCellValue(int rowId, int columnId, IEnumerable<string> patterns, out string? value)
     {
-        value = null;
-
         var cellValue = GetCellValue(rowId, columnId);
-        var result = cellValue is not null && patterns.Any(x => cellValue.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1);
-
-        if (result)
-            value = cellValue!;
-
-        return result;
+        value = cellValue;
+        return cellValue is not null && patterns.Any(x => cellValue.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1);
     }
 }
