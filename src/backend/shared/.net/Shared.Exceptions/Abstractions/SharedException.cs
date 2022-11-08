@@ -1,15 +1,15 @@
-﻿namespace Shared.Exceptions.Abstractions;
+﻿using Shared.Exceptions.Models;
+
+using System.Text.Json;
+
+namespace Shared.Exceptions.Abstractions;
 
 public abstract class SharedException : Exception
 {
-    private readonly string _initiator;
-    private readonly string _action;
+    public ExceptionModel Model { get; }
 
-    protected SharedException(string initiator, string action)
-    {
-        _initiator = initiator;
-        _action = action;
-    }
+    protected SharedException(string initiator, string action, ExceptionDescription description) => 
+        Model = new(initiator, action, description.Value);
 
-    public override string Message => $"Initiator: {_initiator}; Action: {_action}; Description: ";
+    public override string Message => Model.ToString();
 }

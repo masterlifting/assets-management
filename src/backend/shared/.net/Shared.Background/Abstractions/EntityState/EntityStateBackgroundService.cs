@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Shared.Background.Exceptions;
 using Shared.Background.Settings;
 using Shared.Background.Settings.Sections;
@@ -86,7 +87,7 @@ public abstract class EntityStateBackgroundService<TEntity> : BackgroundService 
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(_task.Name, Action, exception));
+                _logger.LogError(new SharedBackgroundException(_task.Name, Action, new(exception)));
             }
             finally
             {

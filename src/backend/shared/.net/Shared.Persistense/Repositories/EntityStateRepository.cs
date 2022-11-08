@@ -20,7 +20,8 @@ public class EntityStateRepository<TEntity, TContext> : Repository<TEntity, TCon
     protected EntityStateRepository(ILogger logger, TContext context) : base(logger, context)
     {
         _context = context;
-        _tableName = context.Model.FindEntityType(typeof(TEntity))?.ShortName() ?? throw new SharedPersistenseEntityStateException(typeof(TEntity).Name, "Searching a table name", "Table name not found");
+        _tableName = context.Model.FindEntityType(typeof(TEntity))?.ShortName() 
+            ?? throw new SharedPersistenseEntityStateException(typeof(TEntity).Name, "Searching a table name", new("Table name not found"));
     }
 
     public override Task CreateAsync(TEntity entity, CancellationToken? ctToken = null)

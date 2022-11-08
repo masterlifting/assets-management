@@ -11,7 +11,7 @@ public sealed record UserId
     public UserId(string? value)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > 40)
-            throw new PortfolioCoreException(nameof(UserId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(UserId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsString = value.ToUpper();
     }

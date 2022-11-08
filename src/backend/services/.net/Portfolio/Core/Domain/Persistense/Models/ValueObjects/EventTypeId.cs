@@ -14,7 +14,7 @@ public sealed record EventTypeId
     public EventTypeId(int value)
     {
         if (!Enum.TryParse<EventTypes>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = value;
         AsEnum = enumResult;
@@ -29,15 +29,15 @@ public sealed record EventTypeId
     public EventTypeId(string value, IDictionary<string, int> eventTypeDictionary)
     {
         if (!eventTypeDictionary.ContainsKey(value))
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         var asInt = eventTypeDictionary[value];
 
         if (asInt <= 0)
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         if (!Enum.TryParse<EventTypes>(asInt.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = asInt;
         AsEnum = enumResult;

@@ -2,6 +2,7 @@ using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.EntityState.Steps.Parsing.ReportsData.Bcs.Models;
 
 using Shared.Data.Excel;
+using Shared.Exceptions.Models;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
@@ -15,21 +16,21 @@ public sealed class BcsReportParser
     private readonly ExcelDocument _excelDocument;
     private int _rowId;
 
-    private const string DividendsAction = nameof(DividendsAction);
-    private const string ComissionsAction = nameof(ComissionsAction);
-    private const string BalanceAction = nameof(BalanceAction);
-    private const string ExchangeRatesAction = nameof(ExchangeRatesAction);
-    private const string TransactionsAction = nameof(TransactionsAction);
-    private const string StockMoveAction = nameof(StockMoveAction);
+    private const string DividendsParsing = nameof(DividendsParsing);
+    private const string ComissionsParsing = nameof(ComissionsParsing);
+    private const string BalanceParsing = nameof(BalanceParsing);
+    private const string ExchangeRatesParsing = nameof(ExchangeRatesParsing);
+    private const string TransactionsParsing = nameof(TransactionsParsing);
+    private const string StockActionsParsing = nameof(StockActionsParsing);
 
     private readonly List<BcsReportDividendModel> _dividends;
     private readonly List<BcsReportComissionModel> _comissions;
     private readonly List<BcsReportBalanceModel> _balances;
     private readonly List<BcsReportExchangeRateModel> _exchangeRates;
     private readonly List<BcsReportTransactionModel> _transactions;
-    private readonly List<BcsReportStockMoveModel> _stockMoves;
+    private readonly List<BcsReportStockActionModel> _stockActions;
 
-    private readonly Dictionary<string, (Action<string, Currencies?> Action, EventTypes EventType)> _reportPatterns;
+    private readonly Dictionary<string, Action<string, Currencies?>> _reportPatterns;
 
     public BcsReportParser(byte[] payload)
     {
@@ -37,31 +38,32 @@ public sealed class BcsReportParser
 
         _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "Приход ДС", (ParseBalance, EventTypes.Increase) },
-            { "Вывод ДС", (ParseBalance, EventTypes.Decrease) },
-            { "Возмещение дивидендов по сделке", (ParseBalance, EventTypes.Dividend) },
-            { "Проценты по займам \"овернайт\"", (ParseBalance, EventTypes.InterestProfit) },
-            { "Проценты по займам \"овернайт ЦБ\"", (ParseBalance, EventTypes.InterestProfit) },
+            { "Приход ДС", ParseBalance },
+            { "Вывод ДС", ParseBalance },
+            { "Возмещение дивидендов по сделке", ParseBalance },
+            { "Проценты по займам \"овернайт\"", ParseBalance },
+            { "Проценты по займам \"овернайт ЦБ\"", ParseBalance },
 
-            { "Дивиденды", (ParseDividend, EventTypes.Dividend) },
+            { "Дивиденды", ParseDividend },
 
-            { "ISIN:", (ParseTransactions, EventTypes.Default) },
+            { "ISIN:", ParseTransactions },
 
-            { "Сопряж. валюта:", (ParseExchangeRate, EventTypes.Default) },
+            { "Сопряж. валюта:", ParseExchangeRate },
 
-            { "3. 6 5 ", (ParseStockMove, EventTypes.Increase) },
+            { "Доп. выпуск", ParseStockShare },
+            { "Сплит акций", ParseStockSplit },
 
-            { "Урегулирование сделок", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение компании", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение за обслуживание счета депо", (ParseComission, EventTypes.TaxDepositary) },
-            { "Хранение ЦБ", (ParseComission, EventTypes.TaxDepositary) },
-            { "НДФЛ", (ParseComission, EventTypes.TaxCountry) },
-            { "Вознаграждение компании (СВОП)", (ParseComission, EventTypes.TaxProvider) },
-            { "Комиссия за займы \"овернайт ЦБ\"", (ParseComission, EventTypes.TaxProvider) },
-            { "Вознаграждение компании (репо)", (ParseComission, EventTypes.TaxProvider) },
-            { "Комиссия Биржевой гуру", (ParseComission, EventTypes.TaxProvider) },
-            { "Оплата за вывод денежных средств", (ParseComission, EventTypes.TaxProvider) },
-            { "Распределение (4*)", (ParseComission, EventTypes.TaxDepositary) }
+            { "Урегулирование сделок", ParseComission },
+            { "Вознаграждение компании", ParseComission },
+            { "Вознаграждение за обслуживание счета депо", ParseComission },
+            { "Хранение ЦБ", ParseComission },
+            { "НДФЛ", ParseComission },
+            { "Вознаграждение компании (СВОП)", ParseComission },
+            { "Комиссия за займы \"овернайт ЦБ\"", ParseComission },
+            { "Вознаграждение компании (репо)", ParseComission },
+            { "Комиссия Биржевой гуру", ParseComission },
+            { "Оплата за вывод денежных средств", ParseComission },
+            { "Распределение (4*)", ParseComission }
         };
 
         _dividends = new List<BcsReportDividendModel>(_excelDocument.RowsCount);
@@ -69,8 +71,9 @@ public sealed class BcsReportParser
         _balances = new List<BcsReportBalanceModel>(_excelDocument.RowsCount);
         _exchangeRates = new List<BcsReportExchangeRateModel>(_excelDocument.RowsCount);
         _transactions = new List<BcsReportTransactionModel>(_excelDocument.RowsCount);
-        _stockMoves = new List<BcsReportStockMoveModel>(_excelDocument.RowsCount);
+        _stockActions = new List<BcsReportStockActionModel>(_excelDocument.RowsCount);
     }
+
 
     public BcsReportModel GetReportModel()
     {
@@ -86,17 +89,8 @@ public sealed class BcsReportParser
 
         var fileStructure = GetFileStructure(0);
 
-        string? cellValue;
-        bool IsCheckPattern(string? value)
-        {
-            if (value is null)
-                return false;
+        string? patternKey;
 
-            var a = value.Split(' ');
-
-            return a.Length > 2 && a[0].Length > 2 && a[0].IndexOf('.') > 0;
-        }
-            
         var firstBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[0], StringComparison.OrdinalIgnoreCase) > -1);
         if (firstBlock is not null)
         {
@@ -104,28 +98,26 @@ public sealed class BcsReportParser
 
             var border = fileStructure.Skip(1).First().Key;
 
-            while (!_excelDocument.TryGetCellValue(_rowId++, 1, border, out cellValue))
-                if (cellValue is not null)
-                    switch (cellValue)
+            while (!_excelDocument.TryGetCellValue(++_rowId, 1, border, out patternKey))
+                if (patternKey is not null)
+                    switch (patternKey)
                     {
                         case "USD":
-                            GetAction("USD", Currencies.Usd);
+                            GetAction(patternKey, Currencies.Usd);
                             break;
                         case "Рубль":
-                            GetAction("Рубль", Currencies.Rub);
+                            GetAction(patternKey, Currencies.Rub);
                             break;
                     }
 
             void GetAction(string value, Currencies currency)
             {
-                while (!_excelDocument.TryGetCellValue(_rowId++, 1, new[] { $"Итого по валюте {value}:", border }, out _))
+                while (!_excelDocument.TryGetCellValue(++_rowId, 1, new[] { $"Итого по валюте {value}:", border }, out _))
                 {
-                    cellValue = _excelDocument.GetCellValue(_rowId, 2);
-                    
-                    var isCheck = IsCheckPattern(cellValue); // delete
+                    patternKey = _excelDocument.GetCellValue(_rowId, 2);
 
-                    if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
-                        _reportPatterns[cellValue].Action(cellValue, currency);
+                    if (patternKey is not null && _reportPatterns.ContainsKey(patternKey))
+                        _reportPatterns[patternKey](patternKey, currency);
                 }
             }
         }
@@ -135,18 +127,9 @@ public sealed class BcsReportParser
         {
             _rowId = fileStructure[secondBlock] + 3;
 
-            while (!_excelDocument.TryGetCellValue(_rowId++, 1, "Итого по валюте Рубль:", out cellValue))
-            {
-                if (cellValue is not null)
-                {
-                    var isCheck = IsCheckPattern(cellValue); // delete
-
-                    if (_reportPatterns.ContainsKey(cellValue))
-                        _reportPatterns[cellValue].Action(cellValue, Currencies.Rub);
-                    else if (cellValue != "Вид сбора/штрафа")
-                        throw new PortfolioCoreException(_initiator, $"Parsing: {secondBlock}", $"Comission: '{cellValue}' was not recognezed");
-                }
-            }
+            while (!_excelDocument.TryGetCellValue(++_rowId, 1, "Итого по валюте Рубль:", out patternKey))
+                if (patternKey is not null && !_reportPatterns.ContainsKey(patternKey))
+                    throw new PortfolioCoreException(_initiator, $"Parsing: {secondBlock}", new($"Comission: '{patternKey}' was not recognezed"));
         }
 
         var thirdBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[3], StringComparison.OrdinalIgnoreCase) > -1);
@@ -157,28 +140,42 @@ public sealed class BcsReportParser
             var borders = fileStructure.Keys
                 .Where(x =>
                     BcsReportFileStructure.Points[4].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1
+                    || BcsReportFileStructure.Points[5].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1
                     || BcsReportFileStructure.Points[5].IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1)
                 .ToArray();
 
-            while (!_excelDocument.TryGetCellValue(_rowId++, 1, borders, out _))
+            while (!_excelDocument.TryGetCellValue(++_rowId, 1, borders, out _))
             {
-                cellValue = _excelDocument.GetCellValue(_rowId, 6);
-                
-                var isCheck = IsCheckPattern(cellValue); // delete
+                patternKey = _excelDocument.GetCellValue(_rowId, 6);
 
-                if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
-                    _reportPatterns[cellValue].Action(cellValue, null);
+                if (patternKey is not null && _reportPatterns.ContainsKey(patternKey))
+                    _reportPatterns[patternKey](patternKey, null);
             }
         }
 
-        while (!_excelDocument.TryGetCellValue(_rowId++, 1, "Дата составления отчета:", out _))
+        var fourthBlock = fileStructure.Keys.FirstOrDefault(x => x.IndexOf(BcsReportFileStructure.Points[6], StringComparison.OrdinalIgnoreCase) > -1);
+        if (fourthBlock is not null)
         {
-            cellValue = _excelDocument.GetCellValue(_rowId, 12);
+            _rowId = fileStructure[fourthBlock];
 
-            var isCheck = IsCheckPattern(cellValue); // delete
+            while (!_excelDocument.TryGetCellValue(++_rowId, 1, "Дата составления отчета:", out _))
+            {
+                patternKey = _excelDocument.GetCellValue(_rowId, 12);
 
-            if (cellValue is not null && _reportPatterns.ContainsKey(cellValue))
-                _reportPatterns[cellValue].Action(_excelDocument.GetCellValue(_rowId, 1)!, null);
+                if (patternKey is not null
+                    && patternKey.Length > 5
+                    && !int.TryParse(patternKey[0..3], out _)
+                    && !BcsReportFileStructure.FourthBlockExceptedWords.Any(x => patternKey.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1))
+                    if (_reportPatterns.Keys.Any(x => patternKey.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1))
+                    {
+                        var _patternKey = string.Join(' ', patternKey.Split(' ')[0..2]);
+                        var value = _excelDocument.GetCellValue(_rowId, 1)!;
+
+                        _reportPatterns[_patternKey](value, null);
+                    }
+                    else
+                        throw new PortfolioCoreException(_initiator, $"Parsing row number: {_rowId + 1}", new($"Action: '{patternKey}' was not recognezed"));
+            }
         }
 
         model.Dividends = _dividends;
@@ -186,7 +183,7 @@ public sealed class BcsReportParser
         model.Comissions = _comissions;
         model.ExchangeRates = _exchangeRates;
         model.Transactions = _transactions;
-        model.StockMoves = _stockMoves;
+        model.StockMoves = _stockActions;
 
         return model;
     }
@@ -194,25 +191,25 @@ public sealed class BcsReportParser
     private void ParseDividend(string value, Currencies? currency)
     {
         if (!currency.HasValue)
-            throw new PortfolioCoreException(_initiator, DividendsAction, "Currency not found");
+            throw new PortfolioCoreException(_initiator, DividendsParsing, new("Currency not found"));
 
         var currencyValue = currency.Value.ToString();
-        var exchange = GetExchangeName(DividendsAction, _rowId);
+        var exchange = GetExchangeName(DividendsParsing, _rowId);
 
         var info = _excelDocument.GetCellValue(_rowId, 14);
 
         if (info is null)
-            throw new PortfolioCoreException(_initiator, DividendsAction, "Description not found");
+            throw new PortfolioCoreException(_initiator, DividendsParsing, new("Description not found"));
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
 
         if (date is null)
-            throw new PortfolioCoreException(_initiator, DividendsAction, "Date not found");
+            throw new PortfolioCoreException(_initiator, DividendsParsing, new("Date not found"));
 
         var sum = _excelDocument.GetCellValue(_rowId, 6);
 
         if (sum is null)
-            throw new PortfolioCoreException(_initiator, DividendsAction, "Sum not found");
+            throw new PortfolioCoreException(_initiator, DividendsParsing, new("Sum not found"));
 
         _dividends.Add(new()
         {
@@ -238,64 +235,56 @@ public sealed class BcsReportParser
             Exchange = exchange,
             Sum = taxSum,
             Currency = currencyValue,
-            EventType = nameof(EventTypes.TaxCountry)
+            EventType = nameof(EventTypes.TaxIncome)
         });
     }
     private void ParseComission(string value, Currencies? currency)
     {
         if (!currency.HasValue)
-            throw new PortfolioCoreException(_initiator, ComissionsAction, "Currency not found");
+            throw new PortfolioCoreException(_initiator, ComissionsParsing, new("Currency not found"));
         var currencyName = currency.Value.ToString();
 
-        var exchange = GetExchangeName(ComissionsAction, _rowId);
+        var exchange = GetExchangeName(ComissionsParsing, _rowId);
 
         var sum = _excelDocument.GetCellValue(_rowId, 7);
 
         if (sum is null)
-            throw new PortfolioCoreException(_initiator, ComissionsAction, "Sum not found");
+            throw new PortfolioCoreException(_initiator, ComissionsParsing, new("Sum not found"));
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
 
         if (date is null)
-            throw new PortfolioCoreException(_initiator, ComissionsAction, "Date not found");
-
+            throw new PortfolioCoreException(_initiator, ComissionsParsing, new("Date not found"));
+        
         _comissions.Add(new()
         {
             Date = date,
             Exchange = exchange,
             Sum = sum,
             Currency = currencyName,
-            EventType = value
+            EventType = BcsReportFileStructure.ComissionEvents[value]
         });
     }
     private void ParseBalance(string value, Currencies? currency)
     {
         if (!currency.HasValue)
-            throw new PortfolioCoreException(_initiator, BalanceAction, "Currency not found");
+            throw new PortfolioCoreException(_initiator, BalanceParsing, new("Currency not found"));
 
         var currencyValue = currency.Value.ToString();
-        var exchange = GetExchangeName(BalanceAction, _rowId);
+        var exchange = GetExchangeName(BalanceParsing, _rowId);
 
-        var eventType = _reportPatterns[value].EventType;
+        if (!BcsReportFileStructure.BalanceEvents.ContainsKey(value))
+            throw new PortfolioCoreException(_initiator, BalanceParsing, new($"Event type '{value}' not recognized"));
 
-        var columnNo = eventType switch
-        {
-            EventTypes.Increase => 6,
-            EventTypes.Decrease => 7,
-            EventTypes.InterestProfit => 6,
-            EventTypes.Dividend => 6,
-            _ => throw new PortfolioCoreException(_initiator, BalanceAction, "Event type not recognized")
-        };
-
-        var sum = _excelDocument.GetCellValue(_rowId, columnNo);
+        var sum = _excelDocument.GetCellValue(_rowId, BcsReportFileStructure.BalanceEvents[value].columnNo);
 
         if (sum is null)
-            throw new PortfolioCoreException(_initiator, BalanceAction, "Sum not found");
+            throw new PortfolioCoreException(_initiator, BalanceParsing, new("Sum not found"));
 
         var date = _excelDocument.GetCellValue(_rowId, 1);
 
         if (date is null)
-            throw new PortfolioCoreException(_initiator, BalanceAction, "Date not found");
+            throw new PortfolioCoreException(_initiator, BalanceParsing, new("Date not found"));
 
         _balances.Add(new()
         {
@@ -303,7 +292,7 @@ public sealed class BcsReportParser
             Exchange = exchange,
             Sum = sum,
             Currency = currencyValue,
-            EventType = value
+            EventType = BcsReportFileStructure.BalanceEvents[value].eventType
         });
     }
     private void ParseExchangeRate(string value, Currencies? currency = null)
@@ -311,7 +300,7 @@ public sealed class BcsReportParser
         var currencyCode = _excelDocument.GetCellValue(_rowId, 1);
 
         if (currencyCode is null || !BcsReportFileStructure.ExchangeCurrencies.ContainsKey(currencyCode))
-            throw new PortfolioCoreException(_initiator, ExchangeRatesAction, "Currency not recognized");
+            throw new PortfolioCoreException(_initiator, ExchangeRatesParsing, new("Currency not recognized"));
 
         var incomeCurrency = BcsReportFileStructure.ExchangeCurrencies[currencyCode].Income;
         var expenseCurrency = BcsReportFileStructure.ExchangeCurrencies[currencyCode].Expense;
@@ -321,15 +310,15 @@ public sealed class BcsReportParser
             var incomeValue = _excelDocument.GetCellValue(_rowId, 5);
             if (incomeValue is not null && decimal.TryParse(incomeValue, out _))
             {
-                var exchange = GetExchangeName(ExchangeRatesAction, _rowId);
+                var exchange = GetExchangeName(ExchangeRatesParsing, _rowId);
 
                 var date = _excelDocument.GetCellValue(_rowId, 1);
                 if (date is null)
-                    throw new PortfolioCoreException(_initiator, ExchangeRatesAction, "Date not found");
+                    throw new PortfolioCoreException(_initiator, ExchangeRatesParsing, new("Date not found"));
 
                 var sum = _excelDocument.GetCellValue(_rowId, 4);
                 if (sum is null)
-                    throw new PortfolioCoreException(_initiator, ExchangeRatesAction, "Sum not found");
+                    throw new PortfolioCoreException(_initiator, ExchangeRatesParsing, new("Sum not found"));
 
                 _exchangeRates.Add(new()
                 {
@@ -338,7 +327,7 @@ public sealed class BcsReportParser
                     Value = incomeValue,
                     Sum = sum,
                     Currency = incomeCurrency,
-                    EventType = "������� ������"
+                    EventType = nameof(EventTypes.Increase),
                 });
 
                 continue;
@@ -347,15 +336,15 @@ public sealed class BcsReportParser
             var expenseValue = _excelDocument.GetCellValue(_rowId, 8);
             if (expenseValue is not null && decimal.TryParse(expenseValue, out _))
             {
-                var exchange = GetExchangeName(ExchangeRatesAction, _rowId);
+                var exchange = GetExchangeName(ExchangeRatesParsing, _rowId);
 
                 var date = _excelDocument.GetCellValue(_rowId, 1);
                 if (date is null)
-                    throw new PortfolioCoreException(_initiator, ExchangeRatesAction, "Date not found");
+                    throw new PortfolioCoreException(_initiator, ExchangeRatesParsing, new("Date not found"));
 
                 var sum = _excelDocument.GetCellValue(_rowId, 7);
                 if (sum is null)
-                    throw new PortfolioCoreException(_initiator, ExchangeRatesAction, "Sum not found");
+                    throw new PortfolioCoreException(_initiator, ExchangeRatesParsing, new("Sum not found"));
 
                 _exchangeRates.Add(new()
                 {
@@ -364,7 +353,7 @@ public sealed class BcsReportParser
                     Value = expenseValue,
                     Sum = sum,
                     Currency = expenseCurrency,
-                    EventType = "������� ������"
+                    EventType = nameof(EventTypes.Decrease),
                 });
             }
         }
@@ -374,7 +363,7 @@ public sealed class BcsReportParser
         var isin = _excelDocument.GetCellValue(_rowId, 7);
 
         if (isin is null)
-            throw new PortfolioCoreException(_initiator, TransactionsAction, "ISIN not recognized");
+            throw new PortfolioCoreException(_initiator, TransactionsParsing, new("ISIN not recognized"));
 
         var name = _excelDocument.GetCellValue(_rowId, 1);
 
@@ -383,25 +372,25 @@ public sealed class BcsReportParser
             var incomeValue = _excelDocument.GetCellValue(_rowId, 4);
             if (incomeValue is not null && decimal.TryParse(incomeValue, out _))
             {
-                var exchange = GetExchangeName(TransactionsAction, _rowId);
+                var exchange = GetExchangeName(TransactionsParsing, _rowId);
 
                 var date = _excelDocument.GetCellValue(_rowId, 1);
                 if (date is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Date not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Date not found"));
 
                 var currencyCode = _excelDocument.GetCellValue(_rowId, 10);
                 if (currencyCode is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Currency not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Currency not found"));
                 var currencyName = currencyCode switch
                 {
                     "USD" => Currencies.Usd.ToString(),
                     "Рубль" => Currencies.Rub.ToString(),
-                    _ => throw new PortfolioCoreException(_initiator, TransactionsAction, "Currency not recognized")
+                    _ => throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Currency not recognized"))
                 };
 
                 var sum = _excelDocument.GetCellValue(_rowId, 5);
                 if (sum is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Sum not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Sum not found"));
 
                 _transactions.Add(new()
                 {
@@ -410,7 +399,7 @@ public sealed class BcsReportParser
                     Value = incomeValue,
                     Sum = sum,
                     Currency = currencyName,
-                    EventType = "������� �����",
+                    EventType = nameof(EventTypes.Increase),
                     Info = isin
                 });
 
@@ -420,25 +409,25 @@ public sealed class BcsReportParser
             var expenseValue = _excelDocument.GetCellValue(_rowId, 7);
             if (expenseValue is not null && decimal.TryParse(expenseValue, out _))
             {
-                var exchange = GetExchangeName(TransactionsAction, _rowId);
+                var exchange = GetExchangeName(TransactionsParsing, _rowId);
 
                 var date = _excelDocument.GetCellValue(_rowId, 1);
                 if (date is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Date not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Date not found"));
 
                 var currencyCode = _excelDocument.GetCellValue(_rowId, 10);
                 if (currencyCode is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Currency not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Currency not found"));
                 var currencyName = currencyCode switch
                 {
                     "USD" => Currencies.Usd.ToString(),
                     "Рубль" => Currencies.Rub.ToString(),
-                    _ => throw new PortfolioCoreException(_initiator, TransactionsAction, "Cirrency not recognized")
+                    _ => throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Cirrency not recognized"))
                 };
 
                 var sum = _excelDocument.GetCellValue(_rowId, 8);
                 if (sum is null)
-                    throw new PortfolioCoreException(_initiator, TransactionsAction, "Sum not found");
+                    throw new PortfolioCoreException(_initiator, TransactionsParsing, new("Sum not found"));
 
                 _transactions.Add(new()
                 {
@@ -447,35 +436,69 @@ public sealed class BcsReportParser
                     Value = expenseValue,
                     Sum = sum,
                     Currency = currencyName,
-                    EventType = "������� �����",
+                    EventType = nameof(EventTypes.Decrease),
                     Info = isin
                 });
             }
         }
     }
-    private void ParseStockMove(string value, Currencies? currency = null)
+    private void ParseStockShare(string value, Currencies? currency = null)
     {
         var date = _excelDocument.GetCellValue(_rowId, 4);
 
         if (date is null)
-            throw new PortfolioCoreException(_initiator, StockMoveAction, "Date not found");
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Date not found"));
 
-        var moveValue = _excelDocument.GetCellValue(_rowId, 7);
+        var shareValue = _excelDocument.GetCellValue(_rowId, 7);
 
-        if (moveValue is null)
-            throw new PortfolioCoreException(_initiator, StockMoveAction, "Value not found");
+        if (shareValue is null)
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Value not found"));
 
         var info = _excelDocument.GetCellValue(_rowId, 12);
 
         if (info is null)
-            throw new PortfolioCoreException(_initiator, StockMoveAction, "Information not found");
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Information not found"));
 
-        _stockMoves.Add(new()
+        _stockActions.Add(new()
         {
             Ticker = value.Trim(),
             Date = date,
-            Value = moveValue,
-            Info = info
+            Value = shareValue,
+            Exchange = GetExchangeName(StockActionsParsing, _rowId),
+            Info = info,
+            EventType = nameof(EventTypes.Increase)
+        });
+    }
+    private void ParseStockSplit(string value, Currencies? currency)
+    {
+        var date = _excelDocument.GetCellValue(_rowId, 4);
+
+        if (date is null)
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Date not found"));
+
+        var valueBefore = _excelDocument.GetCellValue(_rowId, 6);
+        if (valueBefore is null || !int.TryParse(valueBefore, out var _valueBefore))
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Value before was not recognized"));
+        
+        var valueAfter = _excelDocument.GetCellValue(_rowId, 7);
+        if (valueAfter is null || !int.TryParse(valueAfter, out var _valueAfter))
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Value after was not recognized"));
+
+        var info = _excelDocument.GetCellValue(_rowId, 12);
+
+        if (info is null)
+            throw new PortfolioCoreException(_initiator, StockActionsParsing, new("Information not found"));
+
+        var splitValue = _valueAfter - _valueBefore;
+
+        _stockActions.Add(new()
+        {
+            Ticker = value.Trim(),
+            Date = date,
+            Value = splitValue.ToString(),
+            Exchange = GetExchangeName(StockActionsParsing, _rowId),
+            Info = info,
+            EventType = nameof(EventTypes.Split)
         });
     }
 
@@ -488,7 +511,7 @@ public sealed class BcsReportParser
         }
         catch (Exception exception)
         {
-            throw new PortfolioCoreException(_initiator, nameof(GetExcelDocument), exception.Message);
+            throw new PortfolioCoreException(_initiator, nameof(GetExcelDocument), new(exception));
         }
     }
     private Dictionary<string, int> GetFileStructure(int rowId)
@@ -500,7 +523,7 @@ public sealed class BcsReportParser
                 structure.Add(cellValue, rowId);
 
         return !structure.Any()
-            ? throw new PortfolioCoreException(_initiator, nameof(GetFileStructure), "The structure of the file was not recognized")
+            ? throw new PortfolioCoreException(_initiator, nameof(GetFileStructure), new("The structure of the file was not recognized"))
             : structure;
     }
     private (string DateStart, string DateEnd) GetReportPeriod(int rowId)
@@ -511,7 +534,7 @@ public sealed class BcsReportParser
             period = _excelDocument.GetCellValue(rowId, 5);
 
         if (string.IsNullOrWhiteSpace(period))
-            throw new PortfolioCoreException(_initiator, nameof(GetReportPeriod), "The period was not found");
+            throw new PortfolioCoreException(_initiator, nameof(GetReportPeriod), new("The period was not found"));
 
         try
         {
@@ -520,7 +543,7 @@ public sealed class BcsReportParser
         }
         catch (Exception exception)
         {
-            throw new PortfolioCoreException(_initiator, nameof(GetReportPeriod), exception);
+            throw new PortfolioCoreException(_initiator, nameof(GetReportPeriod), new(exception));
         }
     }
     private string GetReportAgreement(int rowId)
@@ -531,12 +554,12 @@ public sealed class BcsReportParser
             agreement = _excelDocument.GetCellValue(rowId, 5);
 
         return string.IsNullOrWhiteSpace(agreement)
-            ? throw new PortfolioCoreException(_initiator, nameof(GetReportAgreement), "The agreement was not found")
+            ? throw new PortfolioCoreException(_initiator, nameof(GetReportAgreement), new("The agreement was not found"))
             : agreement;
     }
     private string GetExchangeName(string actionName, int rowId)
     {
-        for (var columnNo = 8; columnNo < 20; columnNo++)
+        for (var columnNo = 10; columnNo < 20; columnNo++)
         {
             var exchange = _excelDocument.GetCellValue(rowId, columnNo);
 
@@ -547,6 +570,6 @@ public sealed class BcsReportParser
                 return BcsReportFileStructure.ExchangeTypes[exchange].ToString().ToUpper();
         }
 
-        throw new PortfolioCoreException(_initiator, actionName, $"The exchange name was not recognized in the row number: {rowId}");
+        throw new PortfolioCoreException(_initiator, actionName, new($"The exchange name was not recognized in the row number: {rowId+1}"));
     }
 }

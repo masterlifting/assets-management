@@ -14,7 +14,7 @@ public sealed record ExchangeId
     public ExchangeId(int value)
     {
         if (!Enum.TryParse<Exchanges>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = value;
         AsEnum = enumResult;
@@ -29,15 +29,15 @@ public sealed record ExchangeId
     public ExchangeId(string value, IDictionary<string, int> exchangeDictionary)
     {
         if (!exchangeDictionary.ContainsKey(value))
-            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         var asInt = exchangeDictionary[value];
 
         if (asInt <= 0)
-            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         if (!Enum.TryParse<Exchanges>(asInt.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(ExchangeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = asInt;
         AsEnum = enumResult;

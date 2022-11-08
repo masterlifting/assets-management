@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using RabbitMQ.Client;
 
@@ -10,6 +8,8 @@ using Shared.MessagesQueue.Abstractions.Connection;
 using Shared.MessagesQueue.Abstractions.Domain;
 using Shared.MessagesQueue.Exceptions;
 using Shared.MessagesQueue.Settings.RabbitMq;
+
+using System.Text;
 
 namespace Shared.MessagesQueue.Domain.RabbitMq.Connection;
 
@@ -42,7 +42,7 @@ public sealed class RabbitMqProducer : IMqProducer
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedMessagesQueueException("", Constants.Actions.Post, exception));
+            _logger.LogError(new SharedMessagesQueueException(nameof(RabbitMqProducer), Constants.Actions.Post, new(exception)));
 
             return false;
         }

@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Logging;
 
 using Shared.Contracts.Models.Results;
+using Shared.Exceptions.Models;
+using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities;
 using Shared.Persistense.Abstractions.Repositories;
 using Shared.Persistense.Exceptions;
-using Shared.Extensions.Logging;
 
 namespace Shared.Persistense.Repositories;
 
@@ -90,7 +91,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
     public virtual async Task UpdateAsync(object[] id, TEntity entity, CancellationToken? ctToken = null)
     {
         if (await _context.Set<TEntity>().FindAsync(id) is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
 
         if (!ctToken.HasValue)
         {
@@ -157,7 +158,7 @@ public class Repository<TEntity, TContext> : IRepository<TEntity> where TEntity 
         var entity = await _context.Set<TEntity>().FindAsync(id);
 
         if (entity is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, $"Entity by Id: '{id}' not found");
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
 
         if (!cToken.HasValue)
         {

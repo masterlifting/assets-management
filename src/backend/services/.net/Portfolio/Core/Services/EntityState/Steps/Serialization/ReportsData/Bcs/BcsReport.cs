@@ -222,7 +222,7 @@ public sealed class BcsReport
 
         return result.ToArray();
     }
-    private EventModel[] GetEventModels(BcsReportStockMoveModel[] items)
+    private EventModel[] GetEventModels(BcsReportStockActionModel[] items)
     {
         var result = new List<EventModel>(items.Length);
 

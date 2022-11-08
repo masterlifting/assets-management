@@ -24,7 +24,7 @@ public sealed record DealModel
     {
         EntityStateId = income.DealId.Equals(expense.DealId)
             ? income.DealId.AsEntityStateId
-            : throw new PortfolioCoreException(nameof(DealModel), "Receiving DealId", "DealId from Income and DealId from Expence are not comparision");
+            : throw new PortfolioCoreException(nameof(DealModel), "Receiving DealId", new("DealId from Income and DealId from Expence are not comparision"));
         Income = income;
         Expense = expense;
         Date = date;

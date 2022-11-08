@@ -14,7 +14,7 @@ public sealed record OperationTypeId
     public OperationTypeId(int value)
     {
         if (!Enum.TryParse<OperationTypes>(value.ToString(), true, out var enumResult))
-            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(EventTypeId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = value;
         AsEnum = enumResult;

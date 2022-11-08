@@ -30,7 +30,7 @@ public sealed class MoexWebclient : IMoexWebclient
 
         var response = await _httpClient.GetFromJsonAsync<MoexIsinData>($"{_baseUri}/{urlIsinPath}/securities/{ticker}.json");
 
-        return response ?? throw new PortfolioInfrastructureException(nameof(MoexWebclient), nameof(GetIsinsAsync), "No response");
+        return response ?? throw new PortfolioInfrastructureException(nameof(MoexWebclient), nameof(GetIsinsAsync), new("No response"));
     }
     public async Task<MoexIsinData> GetIsinsAsync(Countries country)
     {
@@ -38,7 +38,7 @@ public sealed class MoexWebclient : IMoexWebclient
 
         var response = await _httpClient.GetFromJsonAsync<MoexIsinData>($"{_baseUri}/{urlIsinPath}/securities.json");
 
-        return response ?? throw new PortfolioInfrastructureException(nameof(MoexWebclient), nameof(GetIsinsAsync), "No response");
+        return response ?? throw new PortfolioInfrastructureException(nameof(MoexWebclient), nameof(GetIsinsAsync), new("No response"));
     }
 
     private static string GetExchangeUrlPath(Countries country) => country switch

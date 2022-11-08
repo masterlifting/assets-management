@@ -61,7 +61,7 @@ public sealed class AssetLoader : IEntityStepHandler<Asset>
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Receiving ISIN list by country: {countryId.AsString}", exception));
+                _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Receiving ISIN list by country: {countryId.AsString}", new(exception)));
                 foreach (var asset in assetsGroup)
                 {
                     asset.StateId = (int)States.Error;
@@ -86,7 +86,7 @@ public sealed class AssetLoader : IEntityStepHandler<Asset>
                     asset.StateId = (int)States.Error;
                     asset.Info = $"The ISIN not recognized by: '{ticker}'";
 
-                    _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Recognizing the ISIN by '{ticker}'", "Not recognized"));
+                    _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Recognizing the ISIN by '{ticker}'", new("Not recognized")));
 
                     continue;
                 }
@@ -108,7 +108,7 @@ public sealed class AssetLoader : IEntityStepHandler<Asset>
                 asset.StateId = (int)States.Error;
                 asset.Info = createdResult.Error!;
 
-                _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Receiving the derivative by: {asset.Name}", createdResult.Error!));
+                _logger.LogError(new SharedPersistenseEntityStepException(Initiator, $"Receiving the derivative by: {asset.Name}", new(createdResult.Error!)));
             }
         }
     }

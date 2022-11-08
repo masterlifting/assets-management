@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+
 using Shared.Background.Exceptions;
 using Shared.Background.Settings;
 using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities.EntityState;
 using Shared.Persistense.Entities.EntityState;
 using Shared.Persistense.Models.ValueObject.EntityState;
-
-using System;
 
 using static Shared.Background.Constants;
 using static Shared.Persistense.Constants.Enums;
@@ -63,7 +62,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.PrepareData, exception));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.PrepareData, new(exception)));
                 continue;
             }
 
@@ -84,7 +83,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.GetData, exception));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.GetData, new(exception)));
                 continue;
             }
 
@@ -98,7 +97,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
                     entity.StateId = (int)States.Processed;
 
                 foreach (var entity in entities.Where(x => x.StateId == (int)States.Error))
-                    _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, entity.Info ?? "Error has not description"));
+                    _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, new(entity.Info ?? "Error has not description")));
 
                 _logger.LogDebug(taskName, action + Actions.EntityStates.HandleData, Actions.Success);
             }
@@ -110,7 +109,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
                     entity.Info = exception.Message;
                 }
 
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, exception));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, new(exception)));
             }
 
             var isNextStep = steps.TryPeek(out var nextStep);
@@ -140,7 +139,7 @@ public sealed class EntityStateProcessing<TEntity> where TEntity : class, IEntit
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.UpdateData, exception));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.UpdateData, new(exception)));
             }
         }
     }

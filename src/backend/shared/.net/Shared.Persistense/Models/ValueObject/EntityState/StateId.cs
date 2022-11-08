@@ -14,7 +14,7 @@ public sealed record StateId
     public StateId(int value)
     {
         if (!Enum.TryParse<States>(value.ToString(), true, out var enumResult))
-            throw new SharedPersistenseEntityStateException(nameof(StateId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new SharedPersistenseEntityStateException(nameof(StateId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsInt = value;
         AsEnum = enumResult;

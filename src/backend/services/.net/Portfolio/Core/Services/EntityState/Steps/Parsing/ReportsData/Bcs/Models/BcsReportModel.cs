@@ -11,5 +11,5 @@ public sealed class BcsReportModel
     public IEnumerable<BcsReportBalanceModel>? Balances { get; set; }
     public IEnumerable<BcsReportExchangeRateModel>? ExchangeRates { get; set; }
     public IEnumerable<BcsReportTransactionModel>? Transactions { get; set; }
-    public IEnumerable<BcsReportStockMoveModel>? StockMoves { get; set; }
+    public IEnumerable<BcsReportStockActionModel>? StockMoves { get; set; }
 }

@@ -11,6 +11,7 @@ using Shared.MessagesQueue.Settings.RabbitMq;
 using Shared.MessagesQueue.Abstractions.Settings;
 using Shared.MessagesQueue.Abstractions.Connection;
 using Shared.MessagesQueue.Abstractions.Domain;
+using Shared.Exceptions.Models;
 
 namespace Shared.MessagesQueue.Domain.RabbitMq.Connection;
 
@@ -91,7 +92,7 @@ public sealed class RabbitMqConsumer : IMqConsumer
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedMessagesQueueException(_initiator, "Processing incoming messages", exception));
+            _logger.LogError(new SharedMessagesQueueException(_initiator, "Processing incoming messages", new(exception)));
         }
         finally
         {

@@ -11,7 +11,7 @@ public sealed record AssetId
     public AssetId(string value)
     {
         if (value.Length > 5)
-            throw new PortfolioCoreException(nameof(AssetId), Actions.ValueObject.Set, Actions.ValueObject.ValueNotValidError(value));
+            throw new PortfolioCoreException(nameof(AssetId), Actions.ValueObject.Set, new(Actions.ValueObject.ValueNotValidError(value)));
 
         AsString = value.ToUpper();
     }

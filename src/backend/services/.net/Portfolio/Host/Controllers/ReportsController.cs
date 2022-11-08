@@ -70,7 +70,7 @@ public sealed class ReportsController : ControllerBase
                 var createdResult = await _reportDataRepository.TryCreateAsync(reportData);
 
                 if (!createdResult.IsSuccess)
-                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"Saving report: '{file.FileName}'", createdResult.Error!));
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"Saving report: '{file.FileName}'", new(createdResult.Error!)));
             }
 
             return Ok();
@@ -91,7 +91,7 @@ public sealed class ReportsController : ControllerBase
                 return providerId;
         }
 
-        throw new PortfolioCoreException(nameof(ReportsController), nameof(GetProviderId), $"Report provider not recognized for '{fileName}'");
+        throw new PortfolioCoreException(nameof(ReportsController), nameof(GetProviderId), new($"Report provider not recognized for '{fileName}'"));
     }
     private async Task CreateUserAsync(string userId)
     {
