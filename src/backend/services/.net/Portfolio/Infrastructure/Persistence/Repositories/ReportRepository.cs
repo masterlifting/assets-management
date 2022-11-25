@@ -9,7 +9,7 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class ReportRepository<TContext> : Repository<Report, TContext>, IReportRepository
+public sealed class ReportRepository<TContext> : EntityRepository<Report, TContext>, IReportRepository
     where TContext : DbContext, IEntityStateDbContext
 {
     private readonly TContext _context;

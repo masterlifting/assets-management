@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Shared.Persistense.Entities;
+using Shared.Persistense.Abstractions.Entities;
 
 namespace Shared.Persistense.Abstractions.Context;
 
 public interface IEntityStateDbContext
 {
-    DbSet<StringId> StringIds { get; set; }
+    DbSet<GuidId> GuidIds { get; set; }
 }

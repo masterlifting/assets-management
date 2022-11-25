@@ -1,5 +1,4 @@
-﻿using Shared.Persistense.Entities;
-
+﻿using Shared.Persistense.Abstractions.Entities.Catalogs;
 using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense;
@@ -17,14 +16,14 @@ public static class Constants
         public const string NoData = "Data not found";
         public static class ValueObject
         {
-            public const string Set = "Setting ValueObject properties";
+            public const string Validate = "Validation property";
             public static string ValueNotValidError(string? value) => value is null ? "Value was not found" : $"Value: '{value}' is not valid";
             public static string ValueNotValidError(int value) => $"Value: '{value}' is not valid";
         }
     }
     public static class Enums
     {
-        public enum States
+        public enum Statuses
         {
             Draft = 1,
             Ready,
@@ -55,32 +54,32 @@ public static class Constants
     }
     public static class Catalogs
     {
-        public static readonly Catalog[] States =
+        public static readonly Catalog[] Statuses =
         {
-            new((int) Enums.States.Draft, nameof(Enums.States.Draft)) { Info = "Draft" },
-            new((int) Enums.States.Ready, nameof(Enums.States.Ready)) { Info = "Ready to processing data" },
-            new((int) Enums.States.Processing, nameof(Enums.States.Processing)) { Info = "Processing data" },
-            new((int) Enums.States.Processed, nameof(Enums.States.Processed)) { Info = "Processed data" },
-            new((int) Enums.States.Error, nameof(Enums.States.Error)) { Info = "Error of processing" }
-        };
+        new((int) Enums.Statuses.Draft, nameof(Enums.Statuses.Draft)) { Info = "Draft" },
+        new((int) Enums.Statuses.Ready, nameof(Enums.Statuses.Ready)) { Info = "Ready to processing data" },
+        new((int) Enums.Statuses.Processing, nameof(Enums.Statuses.Processing)) { Info = "Processing data" },
+        new((int) Enums.Statuses.Processed, nameof(Enums.Statuses.Processed)) { Info = "Processed data" },
+        new((int) Enums.Statuses.Error, nameof(Enums.Statuses.Error)) { Info = "Error of processing" }
+    };
         public static readonly Catalog[] Steps =
         {
-            new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
-            new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
-            new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
-            new((int) Enums.Steps.Validation, nameof(Enums.Steps.Validation)),
-            new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
-            new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
-        };
+        new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
+        new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
+        new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
+        new((int) Enums.Steps.Validation, nameof(Enums.Steps.Validation)),
+        new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
+        new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
+    };
         public static readonly Catalog[] ContentTypes =
         {
-            new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
-            new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }
-        };
+        new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
+        new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }
+    };
 
         public static readonly Dictionary<string, ContentTypes> ContentTypeDictionary = new()
-        {
-            {"application/vnd.ms-excel", Enums.ContentTypes.Excel}
-        };
+    {
+        {"application/vnd.ms-excel", Enums.ContentTypes.Excel}
+    };
     }
 }

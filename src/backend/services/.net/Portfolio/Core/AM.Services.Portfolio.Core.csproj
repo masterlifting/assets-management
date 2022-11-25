@@ -7,14 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\EntityState\Steps\Serialization\ReportsData\ReportFileTask.cs" />
+    <None Remove="Domain\Persistense\ProcessingEntities\Event.cs~RF4d86e099.TMP" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Data\Shared.Data.csproj" />
-    <ProjectReference Include="..\..\..\..\shared\.net\Shared.MessagesQueue\Shared.MessagesQueue.csproj" />
-    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Persistense\Shared.Persistense.csproj" />
     <ProjectReference Include="..\..\Common\Contracts\AM.Services.Common.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\EntityState\" />
   </ItemGroup>
 
 </Project>

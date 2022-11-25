@@ -1,4 +1,4 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Shared.Persistense.Abstractions.Entities;
 
@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Income : SharedEntity
+public sealed class Income : IEntity
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; init; }
@@ -24,4 +24,6 @@ public sealed class Income : SharedEntity
     public decimal Value { get; set; }
 
     public DateOnly Date { get; set; }
+    public DateTime Created { get; init; }
+    public string? Info { get; set; }
 }

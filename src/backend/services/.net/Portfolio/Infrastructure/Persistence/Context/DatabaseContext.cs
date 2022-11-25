@@ -1,15 +1,15 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
+using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
 using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
+using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Microsoft.EntityFrameworkCore;
 
 using Shared.Persistense.Abstractions.Context;
-using Shared.Persistense.Entities;
-using Shared.Persistense.Entities.EntityData;
-using Shared.Persistense.Entities.EntityState;
+using Shared.Persistense.Abstractions.Entities;
+using Shared.Persistense.Abstractions.Entities.Catalogs;
+using Shared.Persistense.Entities.Catalogs;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Context;
 
@@ -23,7 +23,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
     public DbSet<Exchange> Exchanges { get; set; } = null!;
     public DbSet<Provider> Providers { get; set; } = null!;
 
-    public DbSet<State> States { get; set; } = null!;
+    public DbSet<Status> States { get; set; } = null!;
     public DbSet<Step> Steps { get; set; } = null!;
     public DbSet<ContentType> ContentTypes { get; set; } = null!;
     #endregion
@@ -32,14 +32,14 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
     public DbSet<Derivative> Derivatives { get; set; } = null!;
     public DbSet<Deal> Deals { get; set; } = null!;
     public DbSet<Event> Events { get; set; } = null!;
-    public DbSet<ReportData> ReportData { get; set; } = null!;
+    public DbSet<Report> ReportData { get; set; } = null!;
     #endregion
     public DbSet<Report> Reports { get; set; } = null!;
     public DbSet<Income> Incomes { get; set; } = null!;
     public DbSet<Expense> Expenses { get; set; } = null!;
     public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<StringId> StringIds { get; set; } = null!;
+    public DbSet<GuidId> GuidIds { get; set; } = null!;
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
@@ -50,15 +50,18 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
     {
         builder.UseSerialColumns();
 
-        builder.Entity<StringId>().HasNoKey();
+        builder.Entity<GuidId>().HasNoKey();
 
         builder.Entity<Asset>().HasKey(x => new { x.Id, x.TypeId });
         builder.Entity<Derivative>().HasKey(x => new { x.Id, x.Code });
 
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
 
+        builder.Entity<Catalog>().HasKey(x => x.Id);
+
+
         #region Catalogs
-        builder.Entity<State>().HasData(Shared.Persistense.Constants.Catalogs.States);
+        builder.Entity<Status>().HasData(Shared.Persistense.Constants.Catalogs.Statuses);
         builder.Entity<Step>().HasData(Shared.Persistense.Constants.Catalogs.Steps);
         builder.Entity<ContentType>().HasData(Shared.Persistense.Constants.Catalogs.ContentTypes);
 
@@ -67,36 +70,31 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
         builder.Entity<Exchange>().HasData(Common.Contracts.Constants.Persistense.Catalogs.Exchanges);
 
         builder.Entity<EventType>().HasData(
-            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Default))
-            {
-                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Default,
-                Info = "Not defined"
-            },
-            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Increase))
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Adding))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
-                Info = "Increase in asset balance"
+                Info = "Increasing the asset balance"
             },
-            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Decrease))
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Withdrawing))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Decrease in asset balance"
+                Info = "Decreasing the asset balance"
             },
 
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.BankInvestments))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Investments in bank products"
+                Info = "Investing in bank products"
             },
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.CrowdfundingInvestments))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Investments in crowdfunding"
+                Info = "Investing in crowdfunding"
             },
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.CrowdlendingInvestments))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Investments in crowdlending"
+                Info = "Investing in crowdlending"
             },
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.VentureInvestments))
             {
@@ -120,11 +118,18 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
                 Info = "Returning of investment body"
             },
 
-            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Split))
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Splitting))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
                 Info = "Increasing an asset by dividing it"
             },
+
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Donation))
+            {
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
+                Info = "Increasing an asset by donation it"
+            },
+
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.Coupon))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Income,
@@ -159,20 +164,34 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.TaxDeal))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Commission for a deal"
+                Info = "Tax for a deal"
             },
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.TaxProvider))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
-                Info = "Commission to provider"
+                Info = "Tax to provider"
             },
             new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.TaxDepositary))
+            {
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Info = "Tax to depositary of an asset"
+            },
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.ComissionDeal))
+            {
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Info = "Commission for a deal"
+            },
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.ComissionProvider))
+            {
+                OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
+                Info = "Commission to provider"
+            },
+            new(new EventTypeId(Core.Constants.Persistense.Enums.EventTypes.ComissionDepositary))
             {
                 OperationTypeId = (int)Core.Constants.Persistense.Enums.OperationTypes.Expense,
                 Info = "Commission to depositary of an asset"
             });
         builder.Entity<OperationType>().HasData(
-            new(new OperationTypeId(Core.Constants.Persistense.Enums.OperationTypes.Default)) { Info = "Not defined" },
             new(new OperationTypeId(Core.Constants.Persistense.Enums.OperationTypes.Income)) { Info = "Income" },
             new(new OperationTypeId(Core.Constants.Persistense.Enums.OperationTypes.Expense)) { Info = "Expense" });
         builder.Entity<Provider>().HasData(
@@ -181,7 +200,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
             new(new ProviderId(Core.Constants.Persistense.Enums.Providers.Tinkoff)) { Info = "Broker/Bank" },
             new(new ProviderId(Core.Constants.Persistense.Enums.Providers.Vtb)) { Info = "Broker/Bank" },
             new(new ProviderId(Core.Constants.Persistense.Enums.Providers.Bitokk)) { Info = "Сrypto exchange https://bitokk.biz/" },
-            new(new ProviderId(Core.Constants.Persistense.Enums.Providers.XChange)){ Info = "Сrypto exchange https://xchange.cash/" },
+            new(new ProviderId(Core.Constants.Persistense.Enums.Providers.XChange)) { Info = "Сrypto exchange https://xchange.cash/" },
             new(new ProviderId(Core.Constants.Persistense.Enums.Providers.JetLend)) { Info = "Crowdlending platform https://jetlend.ru/" });
         #endregion
     }

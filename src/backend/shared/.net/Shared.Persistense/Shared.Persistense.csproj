@@ -7,14 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Shared.Contracts\Shared.Contracts.csproj" />
     <ProjectReference Include="..\Shared.Exceptions\Shared.Exceptions.csproj" />
     <ProjectReference Include="..\Shared.Extensions\Shared.Extensions.csproj" />
+    <ProjectReference Include="..\Shared.Persistense.Abstractions\Shared.Persistense.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.EntityState;
+using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -22,7 +22,7 @@ public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TCont
     {
         foreach (var item in entities)
         {
-            item.StateId = (int)States.Ready;
+            item.StatusId = (int)Statuses.Ready;
             item.StepId = (int)Steps.Computing;
         }
 

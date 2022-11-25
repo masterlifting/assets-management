@@ -3,6 +3,6 @@ using Shared.Persistense.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 
-public interface IExpenseRepository : IRepository<Expense>
+public interface IExpenseRepository : IEntityRepository<Expense>
 {
 }

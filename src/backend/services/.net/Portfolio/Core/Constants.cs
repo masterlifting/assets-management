@@ -8,47 +8,54 @@ public static class Constants
         {
             public enum EventTypes
             {
-                Default = -1,
+                Adding = 1,
+                Withdrawing,
 
-                Increase = 1,
-                Decrease = 2,
+                BankInvestments,
+                CrowdlendingInvestments,
+                CrowdfundingInvestments,
+                VentureInvestments,
 
-                BankInvestments = 3,
-                CrowdlendingInvestments = 4,
-                CrowdfundingInvestments = 5,
-                VentureInvestments = 6,
+                InterestProfit,
+                InvestmentProfit,
+                InvestmentBody,
 
-                InterestProfit = 7,
-                InvestmentProfit = 8,
-                InvestmentBody = 9,
+                Splitting,
+                Donation,
 
-                Split = 10,
-                Dividend = 11,
-                Coupon = 12,
+                Dividend,
+                Coupon,
 
-                Delisting = 13,
-                Loss = 14,
-                TaxCountry = 15,
-                TaxDeal = 16,
-                TaxIncome = 17,
-                TaxProvider = 18,
-                TaxDepositary = 19
+                Delisting,
+                Loss,
+                TaxCountry,
+                TaxDeal,
+                TaxIncome,
+                TaxProvider,
+                TaxDepositary,
+                ComissionDeal,
+                ComissionProvider,
+                ComissionDepositary
             }
             public enum OperationTypes
             {
-                Default = -1,
                 Income = 1,
-                Expense = 2
+                Expense
             }
             public enum Providers
             {
                 Safe = 1,
-                Bcs = 2,
-                Tinkoff = 3,
-                Vtb = 4,
-                JetLend = 5,
-                Bitokk = 6,
-                XChange = 7
+                Bcs,
+                Tinkoff,
+                Vtb,
+                JetLend,
+                Bitokk,
+                XChange
+            }
+            public enum ProcessSteps
+            {
+                ParseBcsReportToJson,
+                ParseBcsJsonModelToEntities
             }
         }
     }

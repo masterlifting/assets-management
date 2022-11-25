@@ -4,7 +4,7 @@ using Shared.Persistense.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 
-public interface IUserRepository : IRepository<User>
+public interface IUserRepository : IEntityRepository<User>
 {
-    ValueTask<User?> FindAsync(string userId);
+    ValueTask<User?> FindAsync(Guid userId);
 }
