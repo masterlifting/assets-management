@@ -11,8 +11,8 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class DealRepository<TContext> : EntityStateRepository<Deal, TContext>, IDealRepository
-    where TContext : DbContext, IEntityStateDbContext
+public sealed class DealRepository<TContext> : SqlProcessableEntityRepository<Deal, TContext>, IDealRepository
+    where TContext : DbContext, IProcessableDbContext
 {
     public DealRepository(ILogger<Deal> logger, TContext context) : base(logger, context)
     {

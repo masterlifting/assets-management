@@ -8,7 +8,7 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class UserRepository<TContext> : EntityRepository<User, TContext>, IUserRepository
+public sealed class UserRepository<TContext> : SqlEntityRepository<User, TContext>, IUserRepository
     where TContext : DbContext
 {
     private readonly TContext _context;

@@ -1,19 +1,17 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.Models.ValueObjects;
 using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Microsoft.EntityFrameworkCore;
 
-using Shared.Persistense.Abstractions.Context;
 using Shared.Persistense.Abstractions.Entities;
 using Shared.Persistense.Abstractions.Entities.Catalogs;
-using Shared.Persistense.Entities.Catalogs;
+using Shared.Persistense.Contexts;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Context;
 
-public sealed class DatabaseContext : DbContext, IEntityStateDbContext
+public sealed class DatabaseContext : PostgresqContext
 {
     #region Catalogs
     public DbSet<AssetType> AssetTypes { get; set; } = null!;
@@ -34,14 +32,12 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
     public DbSet<Event> Events { get; set; } = null!;
     public DbSet<Report> ReportData { get; set; } = null!;
     #endregion
-    public DbSet<Report> Reports { get; set; } = null!;
     public DbSet<Income> Incomes { get; set; } = null!;
     public DbSet<Expense> Expenses { get; set; } = null!;
     public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<GuidId> GuidIds { get; set; } = null!;
 
-    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+    public DatabaseContext(DbContextOptions<PostgresqContext> options) : base(options)
     {
         //Database.EnsureDeleted();
         //Database.EnsureCreated();
@@ -57,7 +53,7 @@ public sealed class DatabaseContext : DbContext, IEntityStateDbContext
 
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
 
-        builder.Entity<Catalog>().HasKey(x => x.Id);
+        builder.Entity<EntityCatalog>().HasKey(x => x.Id);
 
 
         #region Catalogs

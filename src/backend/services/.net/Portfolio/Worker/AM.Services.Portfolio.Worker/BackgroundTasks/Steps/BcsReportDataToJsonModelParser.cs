@@ -10,11 +10,14 @@ using System.Text.Json;
 
 using static AM.Services.Portfolio.Core.Constants;
 using static Shared.Persistense.Abstractions.Constants.Enums;
+using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
 namespace AM.Services.Portfolio.Worker.BackgroundTaskStepHandlers.Steps;
 
 public class BcsReportDataToJsonModelParser : IProcessableStepHandler<DataAsBytes>
 {
+    public const int StepId = (int)ProcessSteps.ParseBcsReportToJson;
+
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly IExcelService _excelService;
     private readonly IDataAsJsonRepository _processedModelRepository;
@@ -39,8 +42,8 @@ public class BcsReportDataToJsonModelParser : IProcessableStepHandler<DataAsByte
                     UserId = x.UserId,
                     Json = JsonDocument.Parse(reportModel.Serialize()),
                     JsonVersion = reportModel.Version,
-                    ProcessStatusId = (int)ProcessStatuses.Ready,
-                    ProcessStepId = (int)Persistense.Enums.ProcessSteps.ParseBcsJsonModelToEntities
+                    ProcessStatusId = (int)ProcessableEntityStatuses.Ready,
+                    ProcessStepId = (int)ProcessSteps.ParseBcsJsonModelToEntities
                 };
 
                 await _semaphore.WaitAsync(cToken);
@@ -49,7 +52,7 @@ public class BcsReportDataToJsonModelParser : IProcessableStepHandler<DataAsByte
             }
             catch (Exception exception)
             {
-                x.ProcessStatusId = (int)ProcessStatuses.Error;
+                x.ProcessStatusId = (int)ProcessableEntityStatuses.Error;
                 x.Info = $"File: {x.PayloadSource}. " + exception.Message;
             }
         }, cToken)));

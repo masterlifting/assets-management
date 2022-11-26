@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
-public sealed class Deal : IEntityProcessable
+public sealed class Deal : IProcessableEntity
 {
     public DateOnly Date { get; init; }
 

@@ -10,7 +10,7 @@ using Shared.Persistense.Abstractions.Entities;
 
 namespace Shared.Background.Core.Base;
 
-public abstract class BackgroundServiceBase<T> : BackgroundService where T : class, IEntityProcessable
+public abstract class BackgroundServiceBase<T> : BackgroundService where T : class, IProcessableEntity
 {
     private int _count;
     private const int Limit = 5_000;

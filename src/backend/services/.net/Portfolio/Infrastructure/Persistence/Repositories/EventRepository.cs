@@ -11,8 +11,8 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class EventRepository<TContext> : EntityStateRepository<Event, TContext>, IEventRepository
-    where TContext : DbContext, IEntityStateDbContext
+public sealed class EventRepository<TContext> : SqlProcessableEntityRepository<Event, TContext>, IEventRepository
+    where TContext : DbContext, IProcessableDbContext
 {
     public EventRepository(ILogger<Event> logger, TContext context) : base(logger, context)
     {

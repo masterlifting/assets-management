@@ -54,7 +54,7 @@ public static class Constants
     }
     public static class Catalogs
     {
-        public static readonly Catalog[] Statuses =
+        public static readonly EntityCatalog[] Statuses =
         {
         new((int) Enums.Statuses.Draft, nameof(Enums.Statuses.Draft)) { Info = "Draft" },
         new((int) Enums.Statuses.Ready, nameof(Enums.Statuses.Ready)) { Info = "Ready to processing data" },
@@ -62,7 +62,7 @@ public static class Constants
         new((int) Enums.Statuses.Processed, nameof(Enums.Statuses.Processed)) { Info = "Processed data" },
         new((int) Enums.Statuses.Error, nameof(Enums.Statuses.Error)) { Info = "Error of processing" }
     };
-        public static readonly Catalog[] Steps =
+        public static readonly EntityCatalog[] Steps =
         {
         new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
         new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
@@ -71,7 +71,7 @@ public static class Constants
         new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
         new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
     };
-        public static readonly Catalog[] ContentTypes =
+        public static readonly EntityCatalog[] ContentTypes =
         {
         new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
         new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }

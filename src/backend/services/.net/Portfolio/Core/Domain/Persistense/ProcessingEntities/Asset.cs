@@ -5,7 +5,7 @@ using Shared.Persistense.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
-public sealed class Asset : IAsset, IEntityProcessable, IBalance
+public sealed class Asset : IAsset, IProcessableEntity, IBalance
 {
     public int TypeId { get; init; }
     public int CountryId { get; set; }

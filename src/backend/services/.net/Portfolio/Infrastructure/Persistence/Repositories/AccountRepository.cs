@@ -5,16 +5,16 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Shared.Persistense.Contexts;
 using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class AccountRepository<TContext> : EntityRepository<Account, TContext>, IAccountRepository
-    where TContext : DbContext
+public sealed class AccountRepository : PostgresqlRepository, IAccountRepository
 {
-    private readonly TContext _context;
+    private readonly PostgresqContext _context;
 
-    public AccountRepository(ILogger<Account> logger, TContext context) : base(logger, context)
+    public AccountRepository(ILogger<AccountRepository> logger, PostgresqContext context) : base(logger, context)
     {
         _context = context;
     }

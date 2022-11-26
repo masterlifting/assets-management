@@ -3,12 +3,14 @@
 using Shared.Background.Interfaces;
 using Shared.Background.Settings;
 using Shared.Persistense.Abstractions.Entities;
+using Shared.Persistense.Abstractions.Entities.Catalogs;
 
 namespace Shared.Background.Core.Base;
 
-public abstract class BackgroundTaskServiceBase<TEntity, TTask> : IBackgroundTaskService
-    where TEntity : class, IEntityProcessable
-    where TTask : BackgroundTaskBase
+public abstract class BackgroundTaskServiceBase<TEntity, TStep, TTask> : IBackgroundTaskService
+    where TEntity : class, IProcessableEntity
+    where TStep : class, IProcessableEntityStep
+    where TTask : BackgroundTaskBase<TStep>
 {
     public string TaskName { get; }
 

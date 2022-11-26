@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 
-public sealed class ProcessStep : IProcessingStep
+public sealed class ProcessStep : IProcessableEntityStep
 {
     public int Id { get; init; }
     public string Name { get; init; }

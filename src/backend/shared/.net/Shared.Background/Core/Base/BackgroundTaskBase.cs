@@ -10,17 +10,15 @@ using System.Collections.Concurrent;
 
 namespace Shared.Background.Core.Base
 {
-    public abstract class BackgroundTaskBase
+    public abstract class BackgroundTaskBase<TSTep> where TSTep : class, IProcessableEntityStep
     {
         private readonly ILogger _logger;
-        private readonly ICatalogRepository<IProcessingStep> _stepCatalogRepository;
+        private readonly IRepository _repository;
 
-        protected BackgroundTaskBase(
-            ILogger logger
-            , ICatalogRepository<IProcessingStep> stepCatalogRepository)
+        protected BackgroundTaskBase(ILogger logger, IRepository _repository)
         {
             _logger = logger;
-            _stepCatalogRepository = stepCatalogRepository;
+            this._repository = _repository;
         }
 
         public async Task StartAsync(string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
@@ -30,26 +28,26 @@ namespace Shared.Background.Core.Base
 
 
             if (settings.Steps.IsParallelProcessing)
-                await ParallelHandleStepsAsync(new ConcurrentQueue<IProcessingStep>(steps), taskName, taskCount, settings, cToken);
+                await ParallelHandleStepsAsync(new ConcurrentQueue<TSTep>(steps), taskName, taskCount, settings, cToken);
             else
                 await SuccessivelyHandleStepsAsync(steps, taskName, taskCount, settings, cToken);
         }
 
-        internal async Task<Queue<IProcessingStep>> GetQueueProcessStepsAsync(string[] configurationSteps)
+        internal async Task<Queue<TSTep>> GetQueueProcessStepsAsync(string[] configurationSteps)
         {
-            var result = new Queue<IProcessingStep>(configurationSteps.Length);
-            var dbStepNames = await _stepCatalogRepository.GetDictionaryByNameAsync();
+            var result = new Queue<TSTep>(configurationSteps.Length);
+            var dbStepNames = await _repository.GetCatalogsDictionaryByNameAsync<TSTep>();
 
             foreach (var configurationStepName in configurationSteps)
                 if (dbStepNames.ContainsKey(configurationStepName))
                     result.Enqueue(dbStepNames[configurationStepName]);
                 else
-                    throw new SharedBackgroundException(nameof(BackgroundTaskBase), nameof(GetQueueProcessStepsAsync), new($"Step from configuration: {configurationStepName} not found"));
+                    throw new SharedBackgroundException(nameof(BackgroundTaskBase<TSTep>), nameof(GetQueueProcessStepsAsync), new($"Step from configuration: {configurationStepName} not found"));
 
             return result;
         }
 
-        internal abstract Task SuccessivelyHandleStepsAsync(Queue<IProcessingStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken);
-        internal abstract Task ParallelHandleStepsAsync(ConcurrentQueue<IProcessingStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken);
+        internal abstract Task SuccessivelyHandleStepsAsync(Queue<TSTep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken);
+        internal abstract Task ParallelHandleStepsAsync(ConcurrentQueue<TSTep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken);
     }
 }

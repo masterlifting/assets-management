@@ -9,8 +9,8 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class DerivativeRepository<TContext> : EntityStateRepository<Derivative, TContext>, IDerivativeRepository
-    where TContext : DbContext, IEntityStateDbContext
+public sealed class DerivativeRepository<TContext> : SqlProcessableEntityRepository<Derivative, TContext>, IDerivativeRepository
+    where TContext : DbContext, IProcessableDbContext
 {
     private readonly TContext _context;
 

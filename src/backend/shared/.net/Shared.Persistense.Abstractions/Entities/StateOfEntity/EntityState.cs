@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Persistense.Abstractions.Entities.StateOfEntity;
 
-public abstract class EntityState : IEntityProcessable
+public abstract class EntityState : IProcessableEntity
 {
     [Key, StringLength(50)]
     public string Id { get; init; } = null!;

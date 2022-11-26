@@ -5,7 +5,7 @@ using Shared.Persistense.Abstractions.Entities.Catalogs;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 
-public sealed class Provider : Catalog
+public sealed class Provider : EntityCatalog
 {
     public IEnumerable<Deal>? Deals { get; set; }
     public IEnumerable<Event>? Events { get; set; }

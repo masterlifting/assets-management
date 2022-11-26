@@ -54,7 +54,7 @@ public sealed class Startup
 
         services.AddRabbitMq(Configuration);
 
-        services.AddScoped(typeof(CatalogRepository<,>));
+        services.AddScoped(typeof(SqlCatalogRepository<,>));
         services.AddTransient<IUserRepository, UserRepository<DatabaseContext>>();
         services.AddTransient<IAccountRepository, AccountRepository<DatabaseContext>>();
         services.AddTransient<IAssetRepository, AssetRepository<DatabaseContext>>();

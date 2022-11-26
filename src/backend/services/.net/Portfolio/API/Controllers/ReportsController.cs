@@ -69,7 +69,7 @@ public sealed class ReportsController : ControllerBase
                     PayloadSource = file.FileName,
                     PayloadContentTypeId = (int)ContentTypeDictionary[file.ContentType],
                     ProcessStepId = (int)ProcessSteps.ParseBcsReportToJson,
-                    ProcessStatusId = (int)ProcessStatuses.Draft
+                    ProcessStatusId = (int)ProcessableEntityStatuses.Draft
                 };
 
                 var createdResult = await _dataAsBytesRepository.TryCreateAsync(reportData);

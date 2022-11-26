@@ -1,7 +1,7 @@
 ﻿namespace Shared.Persistense.Abstractions.Entities.Catalogs;
 
 //[Index(nameof(Name), IsUnique = true)]
-public abstract class Catalog : IEntityCatalog
+public abstract class EntityCatalog : IEntityCatalog
 {
 
     // [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]

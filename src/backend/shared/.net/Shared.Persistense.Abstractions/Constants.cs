@@ -4,7 +4,7 @@ public static class Constants
 {
     public static class Enums
     {
-        public enum ProcessStatuses
+        public enum ProcessableEntityStatuses
         {
             Error = -1,
             Draft = 1,

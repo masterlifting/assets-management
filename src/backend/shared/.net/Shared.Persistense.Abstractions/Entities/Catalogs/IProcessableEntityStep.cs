@@ -1,5 +1,5 @@
 ﻿namespace Shared.Persistense.Abstractions.Entities.Catalogs;
 
-public interface IProcessingStatus : IEntityCatalog
+public interface IProcessableEntityStep : IEntityCatalog
 {
 }

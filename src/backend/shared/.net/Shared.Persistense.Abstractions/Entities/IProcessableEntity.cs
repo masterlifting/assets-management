@@ -1,6 +1,6 @@
 ﻿namespace Shared.Persistense.Abstractions.Entities;
 
-public interface IEntityProcessable : IEntity
+public interface IProcessableEntity : IEntity
 {
     Guid Id { get; init; }
     int ProcessStatusId { get; set; }

@@ -16,26 +16,27 @@ using static Shared.Persistense.Abstractions.Constants.Enums;
 
 namespace Shared.Background.Core.BackgroundTasks;
 
-public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase where T : class, IEntityProcessable
+public abstract class EntitiesProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskBase<TStep> 
+    where TEntity : class, IProcessableEntity
+    where TStep : class, IProcessableEntityStep
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
-    private readonly ILogger<T> _logger;
-    private readonly IEntityStateRepository<T> _entityStateRepository;
-    private readonly BackgroundTaskStepHandler<T> _handler;
+    private readonly ILogger _logger;
+    private readonly IRepository _repository;
+    private readonly BackgroundTaskStepHandler<TEntity> _handler;
 
     public EntitiesProcessingBackgroundTask(
-        ILogger<T> logger
-        , IEntityStateRepository<T> entityStateRepository
-        , ICatalogRepository<IProcessingStep> stepCatalogRepository
-        , BackgroundTaskStepHandler<T> handler) : base(logger, stepCatalogRepository)
+        ILogger logger
+        , IRepository repository
+        , BackgroundTaskStepHandler<TEntity> handler) : base(logger, repository)
     {
         _logger = logger;
-        _entityStateRepository = entityStateRepository;
+        _repository = repository;
         _handler = handler;
     }
 
-    internal override async Task SuccessivelyHandleStepsAsync(Queue<IProcessingStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
+    internal override async Task SuccessivelyHandleStepsAsync(Queue<TStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         for (var i = 0; i <= steps.Count; i++)
         {
@@ -47,7 +48,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
             if (ids is null)
                 continue;
 
-            T[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
+            TEntity[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
 
             if (entities is null)
                 continue;
@@ -62,19 +63,19 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
 
                 if (isNextStep)
                 {
-                    foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Processed))
+                    foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessableEntityStatuses.Processed))
                     {
-                        entity.ProcessStatusId = (int)ProcessStatuses.Ready;
+                        entity.ProcessStatusId = (int)ProcessableEntityStatuses.Ready;
                         entity.Info = $"Previous step was '{step.Name}'";
                     }
 
-                    await _entityStateRepository.SaveResultAsync(nextStep, entities, cToken);
+                    await _repository.SaveProcessableEntityResultAsync(nextStep, entities, cToken);
 
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
                 }
                 else
                 {
-                    await _entityStateRepository.SaveResultAsync(null, entities, cToken);
+                    await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
 
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
                 }
@@ -85,13 +86,13 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
             }
         }
     }
-    internal override Task ParallelHandleStepsAsync(ConcurrentQueue<IProcessingStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
+    internal override Task ParallelHandleStepsAsync(ConcurrentQueue<TStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         var tasks = Enumerable.Range(0, steps.Count).Select(x => ParallelHandleStepAsync(steps, taskName, taskCount, settings, cToken));
         return Task.WhenAll(tasks);
     }
 
-    private async Task ParallelHandleStepAsync(ConcurrentQueue<IProcessingStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
+    private async Task ParallelHandleStepAsync(ConcurrentQueue<TStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         var isDequeue = steps.TryDequeue(out var step);
 
@@ -105,7 +106,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
         if (ids is null)
             return;
 
-        T[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
+        TEntity[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
 
         if (entities is null)
             return;
@@ -117,7 +118,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
             _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
 
             await _semaphore.WaitAsync();
-            await _entityStateRepository.SaveResultAsync(null, entities, cToken);
+            await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
             _semaphore.Release();
 
             _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
@@ -128,7 +129,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
         }
     }
 
-    private async Task<Guid[]?> GetPreparedIdsAsync(IProcessingStep step, string taskName, string action, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
+    private async Task<Guid[]?> GetPreparedIdsAsync(TStep step, string taskName, string action, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         Guid[]? ids = null;
         try
@@ -136,25 +137,25 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
             _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Start);
 
             if (!settings.Steps.IsParallelProcessing)
-                ids = await _entityStateRepository.PrepareDataAsync(step, settings.Steps.ProcessingMaxCount, cToken);
+                ids = await _repository.PrepareProcessableEntityDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
             else
             {
                 await _semaphore.WaitAsync();
-                ids = await _entityStateRepository.PrepareDataAsync(step, settings.Steps.ProcessingMaxCount, cToken);
+                ids = await _repository.PrepareProcessableEntityDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
                 _semaphore.Release();
             }
 
             if (ids.Any())
                 _logger.LogDebug(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Success, ids.Length);
 
-            if (taskCount % settings.RetryPolicy.EveryTime == 0)
+            if (settings.RetryPolicy is not null && taskCount % settings.RetryPolicy.EveryTime == 0)
             {
                 _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareUnhandledData, Actions.Start);
 
                 var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.RetryPolicy.EveryTime;
                 var retryDate = DateTime.UtcNow.Add(-retryTime);
 
-                var retryIds = await _entityStateRepository.PrepareRetryDataAsync(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
+                var retryIds = await _repository.PrepareProcessableEntityRetryDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
 
                 if (retryIds.Any())
                 {
@@ -175,19 +176,19 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
 
         return ids;
     }
-    private async Task<T[]?> GetEntitiesAsync(IProcessingStep step, string taskName, string action, Guid[] ids, bool isParallel, CancellationToken cToken)
+    private async Task<TEntity[]?> GetEntitiesAsync(TStep step, string taskName, string action, Guid[] ids, bool isParallel, CancellationToken cToken)
     {
-        T[]? entities = null;
+        TEntity[]? entities = null;
         try
         {
             _logger.LogTrace(taskName, action + Actions.EntityStates.GetData, Actions.Start);
 
             if (!isParallel)
-                entities = await _entityStateRepository.GetDataAsync(step, ids, cToken);
+                entities = await _repository.GetProcessableEntityDataAsync<TEntity>(step, ids, cToken);
             else
             {
                 await _semaphore.WaitAsync();
-                entities = await _entityStateRepository.GetDataAsync(step, ids, cToken);
+                entities = await _repository.GetProcessableEntityDataAsync<TEntity>(step, ids, cToken);
                 _semaphore.Release();
             }
 
@@ -200,7 +201,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
 
         return entities;
     }
-    private async Task HandleDataAsync(IProcessingStep step, string taskName, string action, T[] entities, bool isParallel, CancellationToken cToken)
+    private async Task HandleDataAsync(TStep step, string taskName, string action, TEntity[] entities, bool isParallel, CancellationToken cToken)
     {
         try
         {
@@ -215,10 +216,10 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
                 _semaphore.Release();
             }
 
-            foreach (var entity in entities.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
-                entity.ProcessStatusId = (int)ProcessStatuses.Processed;
+            foreach (var entity in entities.Where(x => x.ProcessStatusId != (int)ProcessableEntityStatuses.Error))
+                entity.ProcessStatusId = (int)ProcessableEntityStatuses.Processed;
 
-            foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
+            foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessableEntityStatuses.Error))
                 _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, new(entity.Info ?? "Error has not description")));
 
             _logger.LogDebug(taskName, action + Actions.EntityStates.HandleData, Actions.Success);
@@ -227,7 +228,7 @@ public sealed class EntitiesProcessingBackgroundTask<T> : BackgroundTaskBase whe
         {
             foreach (var entity in entities)
             {
-                entity.ProcessStatusId = (int)ProcessStatuses.Error;
+                entity.ProcessStatusId = (int)ProcessableEntityStatuses.Error;
                 entity.Info = exception.Message;
             }
 

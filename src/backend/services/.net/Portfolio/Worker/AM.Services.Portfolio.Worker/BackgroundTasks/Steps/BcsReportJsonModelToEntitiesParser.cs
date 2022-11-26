@@ -7,12 +7,15 @@ using Shared.Background.Interfaces;
 
 using System.Text.Json;
 
+using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 using static Shared.Persistense.Abstractions.Constants.Enums;
 
 namespace AM.Services.Portfolio.Worker.BackgroundTaskStepHandlers.Steps;
 
 public class BcsReportJsonModelToEntitiesParser : IProcessableStepHandler<DataAsJson>
 {
+    public const int StepId = (int)ProcessSteps.ParseBcsReportToJson;
+
     private readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly IAccountRepository _accountRepository;
@@ -55,7 +58,7 @@ public class BcsReportJsonModelToEntitiesParser : IProcessableStepHandler<DataAs
             }
             catch (Exception exception)
             {
-                x.ProcessStatusId = (int)ProcessStatuses.Error;
+                x.ProcessStatusId = (int)ProcessableEntityStatuses.Error;
                 x.Info = exception.Message;
             }
         }, cToken)));

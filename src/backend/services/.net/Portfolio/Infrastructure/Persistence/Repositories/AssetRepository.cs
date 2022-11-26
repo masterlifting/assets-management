@@ -11,8 +11,8 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class AssetRepository<TContext> : EntityStateRepository<Asset, TContext>, IAssetRepository
-    where TContext : DbContext, IEntityStateDbContext
+public sealed class AssetRepository<TContext> : SqlProcessableEntityRepository<Asset, TContext>, IAssetRepository
+    where TContext : DbContext, IProcessableDbContext
 {
     private readonly TContext _context;
 
