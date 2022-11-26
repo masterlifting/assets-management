@@ -12,5 +12,6 @@ services:
       - 1002:1002
     environment:
       - ASPNETCORE_URLS=http://+:1002
-      - DatabaseConnections__Postgres__Password=${POSTGRES_PASSWORD}
+      - DatabaseConnections__PostgreSQL__Password=${POSTGRES_PASSWORD}
+      - DatabaseConnections__MongoDB__Password=${MONGO_PASSWORD}
 

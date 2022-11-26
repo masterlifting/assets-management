@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.EntityValueObjects;
-using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.EntityModels;
 

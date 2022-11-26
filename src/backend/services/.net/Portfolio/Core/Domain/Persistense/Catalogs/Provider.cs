@@ -1,5 +1,4 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Shared.Persistense.Abstractions.Entities.Catalogs;
 

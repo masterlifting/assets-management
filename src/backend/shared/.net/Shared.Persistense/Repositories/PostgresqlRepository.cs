@@ -1,29 +1,33 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Shared.Contracts.Models.Results;
 using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities;
-using Shared.Contracts.Models.Results;
 using Shared.Persistense.Abstractions.Entities.Catalogs;
-using Shared.Persistense.Contexts;
-using Microsoft.EntityFrameworkCore;
-using static Shared.Persistense.Constants.Enums;
-using Shared.Persistense.Exceptions;
 using Shared.Persistense.Abstractions.Repositories;
+using Shared.Persistense.Contexts;
+using Shared.Persistense.Exceptions;
+
+using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.Repositories
 {
-    public class PostgresqlRepository : IPostgresqlRepository
+    public class PostgreSQLRepository : IPostgreSQLRepository
     {
         private readonly string _initiator;
         private readonly ILogger _logger;
-        private readonly PostgresqContext _context;
+        private readonly PostgreSQLContext _context;
 
-        public PostgresqlRepository(ILogger logger, PostgresqContext context)
+        public PostgreSQLRepository(ILogger logger, PostgreSQLContext context)
         {
             _logger = logger;
             _context = context;
             var objectId = base.GetHashCode();
-            _initiator = $"{nameof(PostgresqlRepository)} ({objectId})";
+            _initiator = $"{nameof(PostgreSQLRepository)} ({objectId})";
         }
+
+        public IQueryable<T> Set<T>() where T : class, IEntity => _context.Set<T>();
 
         public virtual async Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity
         {
@@ -224,7 +228,7 @@ namespace Shared.Persistense.Repositories
         public Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToArrayAsync();
         public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Id);
         public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Name);
-        public ValueTask<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog => _context.Set<T>().FindAsync(id);
+        public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog => _context.Set<T>().FindAsync(id).AsTask();
         public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
 
         public async Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessableEntityStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity
@@ -288,5 +292,8 @@ namespace Shared.Persistense.Repositories
 
             return UpdateRangeAsync(array, cToken);
         }
+
+        public Task<T?> FindAsync<T>(params object[] id) where T : class, IEntity => _context.Set<T>().FindAsync(id).AsTask();
+        public Task<T?> FindAsync<T, TId>(TId id) where T : class, IEntity where TId : struct => _context.Set<T>().FindAsync(id).AsTask();
     }
 }

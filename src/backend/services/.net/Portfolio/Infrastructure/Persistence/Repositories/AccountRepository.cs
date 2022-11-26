@@ -10,11 +10,11 @@ using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 
-public sealed class AccountRepository : PostgresqlRepository, IAccountRepository
+public sealed class AccountRepository : PostgreSQLRepository, IAccountRepository
 {
-    private readonly PostgresqContext _context;
+    private readonly PostgreSQLContext _context;
 
-    public AccountRepository(ILogger<AccountRepository> logger, PostgresqContext context) : base(logger, context)
+    public AccountRepository(ILogger<AccountRepository> logger, PostgreSQLContext context) : base(logger, context)
     {
         _context = context;
     }

@@ -1,5 +1,5 @@
 ﻿using AM.Services.Portfolio.Core.Domain.EntityModels;
-using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
 using Shared.Persistense.Abstractions.Repositories;
 

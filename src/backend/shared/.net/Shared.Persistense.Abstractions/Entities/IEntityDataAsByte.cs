@@ -4,5 +4,5 @@ public interface IEntityDataAsByte : IEntityData
 {
     byte[] Payload { get; init; }
     string PayloadSource { get; init; }
-    int PayloadContentTypeId { get; init; }
+    string PayloadContentType { get; init; }
 }

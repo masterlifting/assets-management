@@ -1,4 +1,4 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Services.ControllersApi;
 
 using Microsoft.AspNetCore.Mvc;

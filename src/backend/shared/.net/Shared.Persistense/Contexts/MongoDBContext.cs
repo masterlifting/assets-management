@@ -1,39 +1,23 @@
 ﻿using MongoDB.Driver;
 
 using Shared.Persistense.Abstractions.Entities;
-using Shared.Persistense.Abstractions.Entities.Catalogs;
+using Shared.Persistense.Settings.Connections;
 
 namespace Shared.Persistense.Contexts
 {
-    public class MongoDBContext 
+    public abstract class MongoDBContext
     {
-        private readonly MongoClient _client;
+        internal IMongoDatabase DataBase { get; }
+        protected MongoDBContext(MongoDBConnectionSettings connectionSettings) => 
+            DataBase = new MongoClient(connectionSettings.GetConnectionString()).GetDatabase(connectionSettings.Database);
 
-        public MongoDBContext(MongoClient client)
-        {
-            _client = client;
-        }
-        public Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog
-        {
-            throw new NotImplementedException();
-        }
-        public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog
-        {
-            throw new NotImplementedException();
-        }
-        public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog
-        {
-            throw new NotImplementedException();
-        }
-        public ValueTask<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog
-        {
-            throw new NotImplementedException();
-        }
-        public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog
-        {
-            throw new NotImplementedException();
-        }
-        
+        //var collection = db.GetCollection<TestMongoDbModel>("test_collection"){}
+        //collection.InsertOne(new TestMongoDbModel()){}
+        //collection.InsertMany(Enumerable.Range(0, 5).Select(x => new TestMongoDbModel())){}
+
+        public IQueryable<T> Set<T>() where T : class, IEntity =>
+            DataBase.GetCollection<T>(typeof(T).Name).AsQueryable();
+
         public Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity
         {
             throw new NotImplementedException();
@@ -42,7 +26,7 @@ namespace Shared.Persistense.Contexts
         {
             throw new NotImplementedException();
         }
-        
+
         public Task UpdateAsync<T>(object[] id, T entity, CancellationToken? ctToken = null) where T : class, IEntity
         {
             throw new NotImplementedException();
@@ -51,29 +35,12 @@ namespace Shared.Persistense.Contexts
         {
             throw new NotImplementedException();
         }
-        
+
         public Task<T> DeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IEntity
         {
             throw new NotImplementedException();
         }
         public Task DeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            throw new NotImplementedException();
-        }
-        
-        public Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessableEntityStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity
-        {
-            throw new NotImplementedException();
-        }
-        public Task<Guid[]> PrepareProcessableEntityRetryDataAsync<T>(IProcessableEntityStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IProcessableEntity
-        {
-            throw new NotImplementedException();
-        }
-        public Task<T[]> GetProcessableEntityDataAsync<T>(IProcessableEntityStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IProcessableEntity
-        {
-            throw new NotImplementedException();
-        }
-        public Task SaveProcessableEntityResultAsync<T>(IProcessableEntityStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IProcessableEntity
         {
             throw new NotImplementedException();
         }

@@ -7,15 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Domain\Persistense\ProcessingEntities\Event.cs~RF4d86e099.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Common\Contracts\AM.Services.Common.Contracts.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\EntityState\" />
   </ItemGroup>
 
 </Project>

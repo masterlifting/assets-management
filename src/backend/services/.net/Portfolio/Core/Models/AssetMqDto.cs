@@ -1,7 +1,4 @@
-﻿using Shared.MessagesQueue.Abstractions.Domain;
-using Shared.MessagesQueue.Abstractions.Settings;
-
-namespace AM.Services.Portfolio.Core.Models;
+﻿namespace AM.Services.Portfolio.Core.Models;
 
 public sealed class AssetMqDto : IMqProducerMessage<string>
 {

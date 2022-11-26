@@ -2,8 +2,10 @@ using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Domain.EntityModels;
 using AM.Services.Portfolio.Core.Domain.EntityStateModels.Report.Bcs;
 using AM.Services.Portfolio.Core.Domain.EntityValueObjects;
-using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Exceptions;
+
+using Shared.Persistense.Abstractions.Repositories;
 
 using System.Globalization;
 
@@ -29,22 +31,22 @@ public sealed class BcsReportJsonSerializer
     public BcsReportJsonSerializer(
         BcsReportModel reportModel
         , Guid userId
-        , IAccountRepository accountDictionary
-        , IDerivativeRepository derivativeRepository)
-    {
-        _reportModel = reportModel;
-        _derivativeDictionary = derivativeDictionary;
+        , IRepository repository)
+        {
+            _reportModel = reportModel;
 
-        UserId = userId;
+            UserId = userId;
 
-        if (!accountDictionary.ContainsKey(reportModel.Agreement))
-            throw new PortfolioCoreException(nameof(AccountId), Actions.ValueObject.Validate, new(Actions.ValueObject.ValueNotValidError(value)));
+        var a = repository.
 
-        AccountId = accountDictionary[reportModel.Agreement];
+            if (!accountDictionary.ContainsKey(reportModel.Agreement))
+                throw new PortfolioCoreException(nameof(AccountId), Actions.ValueObject.Validate, new(Actions.ValueObject.ValueNotValidError(value)));
 
-        //DateStart = DateOnly.Parse(reportModel.DateStart, _culture);
-        //DateEnd = DateOnly.Parse(reportModel.DateEnd, _culture);
-    }
+            AccountId = accountDictionary[reportModel.Agreement];
+
+            //DateStart = DateOnly.Parse(reportModel.DateStart, _culture);
+            //DateEnd = DateOnly.Parse(reportModel.DateEnd, _culture);
+        }
 
 
     public Event[] GetEvents()

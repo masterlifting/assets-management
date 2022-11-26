@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Shared.Contracts.Models.Results;
 using Shared.Extensions.Logging;
 using Shared.Persistense.Abstractions.Entities;
-using Shared.Contracts.Models.Results;
 using Shared.Persistense.Abstractions.Entities.Catalogs;
-using Shared.Persistense.Contexts;
 using Shared.Persistense.Abstractions.Repositories;
+using Shared.Persistense.Contexts;
 
 namespace Shared.Persistense.Repositories;
 
@@ -14,15 +16,15 @@ public class MongoDBRepository : IMongoDBRepository
     private readonly ILogger _logger;
     private readonly MongoDBContext _context;
 
-    //MongoClient _client{}
     public MongoDBRepository(ILogger logger, MongoDBContext context)
     {
         _logger = logger;
         _context = context;
         var objectId = base.GetHashCode();
         _initiator = $"{nameof(MongoDBRepository)} ({objectId})";
-        //_client = new MongoClient("mongodb://localhost:27017"){}
     }
+
+    public IQueryable<T> Set<T>() where T : class, IEntity => _context.Set<T>();
 
     public virtual async Task CreateAsync<T>(T entity, CancellationToken? ctToken = null) where T : class, IEntity
     {
@@ -174,28 +176,35 @@ public class MongoDBRepository : IMongoDBRepository
         }
     }
 
-    public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog => _context.GetCatalogsDictionaryByIdAsync<T>();
-    public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog => _context.GetCatalogsDictionaryByNameAsync<T>();
-    public ValueTask<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog => _context.GetCatalogByIdAsync<T>(id);
-    public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog => _context.GetCatalogByNameAsync<T>(name);
-    public Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog => _context.GetCatalogsAsync<T>();
+    public Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToArrayAsync();
+    public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Id);
+    public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Name);
+    public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+    public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
 
     public Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessableEntityStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity
-        => _context.PrepareProcessableEntityDataAsync<T>(step, limit, cToken);
-    public Task<Guid[]> PrepareProcessableEntityRetryDataAsync<T>(IProcessableEntityStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IProcessableEntity
-        => _context.PrepareProcessableEntityRetryDataAsync<T>(step, limit, updateTime, maxAttempts, cToken);
-
-    public Task<T[]> GetProcessableEntityDataAsync<T>(IProcessableEntityStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IProcessableEntity 
-        => _context.GetProcessableEntityDataAsync<T>(step, ids, cToken);
-
-    public Task SaveProcessableEntityResultAsync<T>(IProcessableEntityStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IProcessableEntity 
-        => _context.SaveProcessableEntityResultAsync(step, entities, cToken);
-
-    public void Test()
     {
-        //var db = _client.GetDatabase("test_db"){}
-        //var collection = db.GetCollection<TestMongoDbModel>("test_collection"){}
-        //collection.InsertOne(new TestMongoDbModel()){}
-        //collection.InsertMany(Enumerable.Range(0, 5).Select(x => new TestMongoDbModel())){}
+        throw new NotImplementedException();
+    }
+    public Task<Guid[]> PrepareProcessableEntityRetryDataAsync<T>(IProcessableEntityStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IProcessableEntity
+    {
+        throw new NotImplementedException();
+    }
+    public Task<T[]> GetProcessableEntityDataAsync<T>(IProcessableEntityStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IProcessableEntity
+    {
+        throw new NotImplementedException();
+    }
+    public Task SaveProcessableEntityResultAsync<T>(IProcessableEntityStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IProcessableEntity
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<T?> FindAsync<T>(params object[] id) where T : class, IEntity
+    {
+        throw new NotImplementedException();
+    }
+    public Task<T?> FindAsync<T, TId>(TId id) where T : class, IEntity where TId : struct
+    {
+        throw new NotImplementedException();
     }
 }

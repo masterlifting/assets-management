@@ -54,8 +54,8 @@ public static class Constants
             }
             public enum ProcessSteps
             {
-                ParseBcsReportToJson,
-                ParseBcsJsonModelToEntities
+                ParseBcsReportDataToJson,
+                ParseBcsJsonToEntities
             }
         }
     }

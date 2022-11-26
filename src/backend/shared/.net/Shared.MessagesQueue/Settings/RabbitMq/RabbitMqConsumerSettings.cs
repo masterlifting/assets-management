@@ -7,7 +7,7 @@ public sealed class RabbitMqConsumerSettings : IMqConsumerSettings
 {
     public string Queue { get; set; } = null!;
     public int Limit { get; set; }
-    public BackgroundTaskSchedulerSettings Scheduler { get; set; } = new();
+    public TaskSchedulerSettings Scheduler { get; set; } = new();
 
     public bool IsExclusiveQueue { get; set; }
     public bool IsAutoAck { get; set; }

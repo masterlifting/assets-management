@@ -6,6 +6,9 @@ namespace Shared.Persistense.Abstractions.Repositories
 {
     public interface IRepository
     {
+        Task<T?> FindAsync<T>(params object[] id) where T : class, IEntity;
+        Task<T?> FindAsync<T, TId>(TId id) where T : class, IEntity where TId : struct;
+
         Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity;
         Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity;
         Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity;
@@ -24,7 +27,7 @@ namespace Shared.Persistense.Abstractions.Repositories
         Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog;
         Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog;
         Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog;
-        ValueTask<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog;
+        Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog;
         Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog;
 
         Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessableEntityStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity;
