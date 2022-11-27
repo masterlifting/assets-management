@@ -4,6 +4,7 @@ using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 using Shared.Persistense.Abstractions.Entities;
 using Shared.Persistense.Abstractions.Entities.Catalogs;
@@ -36,7 +37,7 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
     public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
 
-    public PostgreSQLPortfolioContext(DatabaseConnectionSection connectionSection) : base(connectionSection.PostgreSQL)
+    public PostgreSQLPortfolioContext(IOptions<DatabaseConnectionSection> options) : base(options.Value.PostgreSQL)
     {
         //Database.EnsureDeleted();
         //Database.EnsureCreated();

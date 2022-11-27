@@ -1,9 +1,8 @@
-using AM.Services.Portfolio.Core.Abstractions.Persistense.Repositories;
 using AM.Services.Portfolio.Core.Domain.EntityModels;
 using AM.Services.Portfolio.Core.Domain.EntityStateModels.Report.Bcs;
 using AM.Services.Portfolio.Core.Domain.EntityValueObjects;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Exceptions;
+using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Persistense.Abstractions.Repositories;
 
@@ -11,47 +10,19 @@ using System.Globalization;
 
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.BcsServices;
+namespace AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 
-public sealed class BcsReportJsonSerializer
+public sealed class BcsReportJsonToEntitiesService : IBcsReportJsonToEntitiesService
 {
-    private readonly ProviderId _providerId = new(Providers.Bcs);
     private readonly IFormatProvider _culture = new CultureInfo("ru-RU");
+    private readonly ProviderId _providerId = new(Providers.Bcs);
+    private readonly IPostgreSQLRepository _repository;
 
-    private readonly BcsReportModel _reportModel;
+    public BcsReportJsonToEntitiesService(IPostgreSQLRepository repository) => _repository = repository;
 
-    private readonly IDictionary<string, string[]> _derivativeDictionary;
-
-    public Guid UserId { get; }
-    public int AccountId { get; }
-
-    public DateOnly DateStart { get; }
-    public DateOnly DateEnd { get; }
-
-    public BcsReportJsonSerializer(
-        BcsReportModel reportModel
-        , Guid userId
-        , IRepository repository)
-        {
-            _reportModel = reportModel;
-
-            UserId = userId;
-
-        var a = repository.
-
-            if (!accountDictionary.ContainsKey(reportModel.Agreement))
-                throw new PortfolioCoreException(nameof(AccountId), Actions.ValueObject.Validate, new(Actions.ValueObject.ValueNotValidError(value)));
-
-            AccountId = accountDictionary[reportModel.Agreement];
-
-            //DateStart = DateOnly.Parse(reportModel.DateStart, _culture);
-            //DateEnd = DateOnly.Parse(reportModel.DateEnd, _culture);
-        }
-
-
-    public Event[] GetEvents()
+    public Event[] GetEvents(BcsReportModel reportModel)
     {
-        var eventModels = _reportModel.Events.ToArray();
+        var eventModels = reportModel.Events.ToArray();
 
         var result = new List<Event>(eventModels.Length);
 
@@ -69,8 +40,8 @@ public sealed class BcsReportJsonSerializer
                 , eventTypeId
                 , derivativeId
                 , derivativeCode
-                , AccountId
-                , UserId
+                , _accountId
+                , _userId
                 , _providerId
                 , exchangeId
                 , new StateId(Shared.Persistense.Constants.Enums.Statuses.Ready)
@@ -83,9 +54,9 @@ public sealed class BcsReportJsonSerializer
 
         return result.ToArray();
     }
-    public Deal[] GetDeals()
+    public Deal[] GetDeals(BcsReportModel reportModel)
     {
-        var dealModels = _reportModel.Deals.ToArray();
+        var dealModels = reportModel.Deals.ToArray();
 
         var result = new List<Deal>(dealModels.Length);
 
@@ -120,8 +91,8 @@ public sealed class BcsReportJsonSerializer
                 , date
                 , income
                 , expense
-                , AccountId
-                , UserId
+                , _accountId
+                , _userId
                 , _providerId
                 , exchangeId
                 , new StateId(Shared.Persistense.Constants.Enums.Statuses.Ready)

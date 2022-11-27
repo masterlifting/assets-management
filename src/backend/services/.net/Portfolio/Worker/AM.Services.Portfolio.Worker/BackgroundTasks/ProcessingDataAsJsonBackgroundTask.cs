@@ -1,5 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Worker.BackgroundTasksSteps;
 
 using Shared.Background.Core.BackgroundTasks;
@@ -12,10 +13,13 @@ namespace AM.Services.Portfolio.Worker.BackgroundTasks;
 
 public sealed class ProcessingDataAsJsonBackgroundTask : ProcessingBackgroundTask<DataAsJson, ProcessStep>
 {
-    public ProcessingDataAsJsonBackgroundTask(ILogger logger, IPostgreSQLRepository repository) 
+    public ProcessingDataAsJsonBackgroundTask(
+        ILogger<ProcessingDataAsJsonBackgroundTask> logger
+        , IBcsReportJsonToEntitiesService service
+        , IPostgreSQLRepository repository) 
         : base(logger, repository, new BackgroundTaskStepHandler<DataAsJson>(new()
         {
-            {(int)ProcessSteps.ParseBcsJsonToEntities, new BcsReportJsonToEntities(repository)}
+            {(int)ProcessSteps.ParseBcsJsonToEntities, new BcsReportJsonToEntities(service, repository)}
         }))
     {
     }

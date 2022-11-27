@@ -1,67 +1,65 @@
 using AM.Services.Portfolio.Core.Abstractions.Excel;
 using AM.Services.Portfolio.Core.Domain.EntityStateModels.Report.Bcs;
 using AM.Services.Portfolio.Core.Exceptions;
+using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.Helpers;
+using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Core.Services.BcsServices;
+namespace AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 
-public sealed class BcsReportDataParser
+public sealed class BcsReportDataToJsonService : IBcsReportDataToJsonService
 {
-    private string _initiator = nameof(BcsReportDataParser);
+    private readonly string _initiator = nameof(BcsReportDataToJsonService);
 
-    private readonly IExcelService _excelService;
-    private readonly IExcelDocument _excelDocument;
+    private readonly IPortfolioExcelService _excelService;
     private int _rowId;
-
-    private readonly List<BcsEventTypeModel> _events;
-    private readonly List<BcsDealTypeModel> _deals;
 
     private readonly Dictionary<string, Action<string, Currencies?>> _reportPatterns;
 
-    public BcsReportDataParser(IExcelService excelService, byte[] payload)
+    public BcsReportDataToJsonService(IPortfolioExcelService excelService)
     {
-        _excelDocument = GetExcelDocument(payload);
-
-        _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "Приход ДС", ParseBalance },
-        { "Вывод ДС", ParseBalance },
-        { "Возмещение дивидендов по сделке", ParseBalance },
-        { "Проценты по займам \"овернайт\"", ParseBalance },
-        { "Проценты по займам \"овернайт ЦБ\"", ParseBalance },
-
-        { "Дивиденды", ParseDividend },
-
-        { "ISIN:", ParseTransactions },
-
-        { "Сопряж. валюта:", ParseExchangeRate },
-
-        { "Доп. выпуск", ParseStockShare },
-        { "Сплит акций", ParseStockSplit },
-
-        { "Урегулирование сделок", ParseComission },
-        { "Вознаграждение компании", ParseComission },
-        { "Вознаграждение за обслуживание счета депо", ParseComission },
-        { "Хранение ЦБ", ParseComission },
-        { "НДФЛ", ParseComission },
-        { "Вознаграждение компании (СВОП)", ParseComission },
-        { "Комиссия за займы \"овернайт ЦБ\"", ParseComission },
-        { "Вознаграждение компании (репо)", ParseComission },
-        { "Комиссия Биржевой гуру", ParseComission },
-        { "Оплата за вывод денежных средств", ParseComission },
-        { "Распределение (4*)", ParseComission }
-    };
-
-        _events = new List<BcsEventTypeModel>(_excelDocument.RowsCount);
-        _deals = new List<BcsDealTypeModel>(_excelDocument.RowsCount);
         _excelService = excelService;
+        _reportPatterns = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Приход ДС", ParseBalance },
+            { "Вывод ДС", ParseBalance },
+            { "Возмещение дивидендов по сделке", ParseBalance },
+            { "Проценты по займам \"овернайт\"", ParseBalance },
+            { "Проценты по займам \"овернайт ЦБ\"", ParseBalance },
+
+            { "Дивиденды", ParseDividend },
+
+            { "ISIN:", ParseTransactions },
+
+            { "Сопряж. валюта:", ParseExchangeRate },
+
+            { "Доп. выпуск", ParseStockShare },
+            { "Сплит акций", ParseStockSplit },
+
+            { "Урегулирование сделок", ParseComission },
+            { "Вознаграждение компании", ParseComission },
+            { "Вознаграждение за обслуживание счета депо", ParseComission },
+            { "Хранение ЦБ", ParseComission },
+            { "НДФЛ", ParseComission },
+            { "Вознаграждение компании (СВОП)", ParseComission },
+            { "Комиссия за займы \"овернайт ЦБ\"", ParseComission },
+            { "Вознаграждение компании (репо)", ParseComission },
+            { "Комиссия Биржевой гуру", ParseComission },
+            { "Оплата за вывод денежных средств", ParseComission },
+            { "Распределение (4*)", ParseComission }
+        };
     }
 
 
-    public BcsReportModel GetReportModel()
+    public BcsReportModel GetReportModel(byte[] payload)
     {
+        var _excelDocument = GetExcelDocument(payload);
+        var _events = new List<BcsEventTypeModel>(_excelDocument.RowsCount);
+        var _deals = new List<BcsDealTypeModel>(_excelDocument.RowsCount);
+
+
         var model = new BcsReportModel
         {
             Agreement = GetReportAgreement(_rowId)
@@ -536,7 +534,7 @@ public sealed class BcsReportDataParser
     }
     #endregion
 
-    private IExcelDocument GetExcelDocument(byte[] payload)
+    private IPortfolioExcelDocument GetExcelDocument(byte[] payload)
     {
         try
         {

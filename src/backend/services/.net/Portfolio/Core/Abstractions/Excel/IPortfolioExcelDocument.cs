@@ -1,6 +1,6 @@
 ﻿namespace AM.Services.Portfolio.Core.Abstractions.Excel;
 
-public interface IExcelDocument
+public interface IPortfolioExcelDocument
 {
     int RowsCount { get; }
 

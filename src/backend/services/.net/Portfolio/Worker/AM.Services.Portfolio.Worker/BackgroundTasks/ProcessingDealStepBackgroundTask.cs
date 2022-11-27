@@ -9,7 +9,7 @@ namespace AM.Services.Portfolio.Worker.BackgroundTasks;
 
 public sealed class ProcessingDealStepBackgroundTask : ProcessingBackgroundTask<Deal, ProcessStep>
 {
-    public ProcessingDealStepBackgroundTask(ILogger logger, IRepository repository)
+    public ProcessingDealStepBackgroundTask(ILogger<ProcessingDealStepBackgroundTask> logger, IRepository repository)
         : base(logger, repository, new BackgroundTaskStepHandler<Deal>(new() { }))
     {
     }

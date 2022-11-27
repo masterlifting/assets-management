@@ -7,7 +7,7 @@ public sealed class BcsReportModel
     public string Agreement { get; init; } = null!;
     public string DateStart { get; set; } = null!;
     public string DateEnd { get; set; } = null!;
-
+    public Guid userId { get; set; }
     public IEnumerable<BcsEventTypeModel>? Events { get; set; }
     public IEnumerable<BcsDealTypeModel>? Deals { get; set; }
 }

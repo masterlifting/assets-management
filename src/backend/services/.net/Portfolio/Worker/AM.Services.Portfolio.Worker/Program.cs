@@ -1,3 +1,5 @@
+using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
+using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 using AM.Services.Portfolio.Infrastructure.Settings;
 using AM.Services.Portfolio.Worker.BackgroundServices;
@@ -28,9 +30,11 @@ public class Program
 
             services.AddHostedService<ProcessingDataAsBytesBackgroundService>();
             services.AddTransient<ProcessingDataAsBytesBackgroundTask>();
-            
+            services.AddTransient<IBcsReportDataToJsonService, BcsReportDataToJsonService>();
+
             services.AddHostedService<ProcessingDataAsJsonBackgroundService>();
             services.AddTransient<ProcessingDataAsJsonBackgroundTask>();
+            services.AddTransient<IBcsReportJsonToEntitiesService, BcsReportJsonToEntitiesService>();
         })
         .Build()
         .Run();

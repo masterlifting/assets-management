@@ -1,6 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Abstractions.Excel;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Services.BcsServices;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Background.Interfaces;
 using Shared.Extensions.Serialization;
@@ -16,13 +15,13 @@ namespace AM.Services.Portfolio.Worker.BackgroundTasksSteps;
 public class BcsReportDataToJson : IProcessableStepHandler<DataAsBytes>
 {
     private readonly SemaphoreSlim _semaphore = new(1);
-    
-    private readonly IRepository _repository;
-    private readonly IExcelService _excelService;
 
-    public BcsReportDataToJson(IExcelService excelService, IRepository repository)
+    private readonly IPostgreSQLRepository _repository;
+    private readonly IBcsReportDataToJsonService _service;
+
+    public BcsReportDataToJson(IBcsReportDataToJsonService service, IPostgreSQLRepository repository)
     {
-        _excelService = excelService;
+        _service = service;
         _repository = repository;
     }
 
@@ -31,28 +30,27 @@ public class BcsReportDataToJson : IProcessableStepHandler<DataAsBytes>
         {
             try
             {
-                var parser = new BcsReportDataParser(_excelService, x.Payload);
-                var reportModel = parser.GetReportModel();
+                var reportModel = _service.GetReportModel(x.Payload);
 
-                var processedModel = new DataAsJson
+                await _semaphore.WaitAsync(cToken);
+
+                await _repository.CreateAsync(new DataAsJson
                 {
                     UserId = x.UserId,
                     Json = JsonDocument.Parse(reportModel.Serialize()),
                     JsonVersion = reportModel.Version,
                     ProcessStepId = (int)ProcessSteps.ParseBcsJsonToEntities,
-                    ProcessStatusId = (int)ProcessableEntityStatuses.Ready,
-                };
-
-                await _semaphore.WaitAsync(cToken);
-  
-                await _repository.CreateAsync(processedModel);
-                
-                _semaphore.Release();
+                    ProcessStatusId = (int)ProcessableEntityStatuses.Ready
+                });
             }
             catch (Exception exception)
             {
                 x.ProcessStatusId = (int)ProcessableEntityStatuses.Error;
                 x.Info = $"File: {x.PayloadSource}. " + exception.Message;
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }, cToken)));
 
