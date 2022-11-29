@@ -1,11 +1,11 @@
-﻿using AM.Services.Common.Contracts.Abstractions.Persistense.Entities;
+﻿using AM.Services.Common.Contracts.Persistense.Entities;
 using AM.Services.Portfolio.Core.Abstractions.Persistense.Entities;
 
 using Shared.Persistense.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Asset : IAsset, IProcessableEntity, IBalance
+public sealed class Asset : IAsset, IPersistensableProcess, IBalance
 {
     public int TypeId { get; init; }
     public int CountryId { get; set; }

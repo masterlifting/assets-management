@@ -7,7 +7,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.QueryFilters.PeriodsOfEntity;
 
-public sealed class EntityTimeFilter<T> : IEntityPeriodFilter<T> where T : class, IEntityTime, IEntity
+public sealed class EntityTimeFilter<T> : IEntityPeriodFilter<T> where T : class, IEntityTime, IPersistensable
 {
     public int Hour { get; }
     public int Minute { get; }

@@ -7,7 +7,7 @@ using static Shared.Persistense.Constants.Enums;
 
 namespace Shared.Persistense.QueryFilters.PeriodsOfEntity;
 
-public sealed class EntityDateFilter<T> : IEntityPeriodFilter<T> where T : class, IEntityDate, IEntity
+public sealed class EntityDateFilter<T> : IEntityPeriodFilter<T> where T : class, IEntityDate, IPersistensable
 {
     public int Year { get; }
     public int Month { get; }

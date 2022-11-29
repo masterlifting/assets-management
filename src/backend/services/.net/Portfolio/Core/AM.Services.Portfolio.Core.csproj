@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Exceptions\Shared.Exceptions.csproj" />
     <ProjectReference Include="..\..\Common\Contracts\AM.Services.Common.Contracts.csproj" />
   </ItemGroup>
 

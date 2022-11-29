@@ -1,6 +1,6 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
 using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
 using Microsoft.EntityFrameworkCore;
@@ -21,17 +21,15 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
     public DbSet<Country> Countries { get; set; } = null!;
     public DbSet<Exchange> Exchanges { get; set; } = null!;
     public DbSet<Provider> Providers { get; set; } = null!;
-
     public DbSet<ProcessStatus> States { get; set; } = null!;
     public DbSet<ProcessStep> Steps { get; set; } = null!;
     #endregion
-    #region States
+
     public DbSet<Asset> Assets { get; set; } = null!;
     public DbSet<Derivative> Derivatives { get; set; } = null!;
     public DbSet<Deal> Deals { get; set; } = null!;
     public DbSet<Event> Events { get; set; } = null!;
-    public DbSet<Report> ReportData { get; set; } = null!;
-    #endregion
+    public DbSet<Data> ReportData { get; set; } = null!;
     public DbSet<Income> Incomes { get; set; } = null!;
     public DbSet<Expense> Expenses { get; set; } = null!;
     public DbSet<Account> Accounts { get; set; } = null!;
@@ -54,7 +52,7 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
 
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
 
-        builder.Entity<EntityCatalog>().HasKey(x => x.Id);
+        builder.Entity<PersistensableCatalog>().HasKey(x => x.Id);
 
 
         #region Catalogs

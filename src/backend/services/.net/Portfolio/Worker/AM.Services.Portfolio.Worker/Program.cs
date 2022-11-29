@@ -1,13 +1,8 @@
-using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
-using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
-using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
-using AM.Services.Portfolio.Infrastructure.Settings;
+using AM.Services.Portfolio.Infrastructure;
 using AM.Services.Portfolio.Worker.BackgroundServices;
 using AM.Services.Portfolio.Worker.BackgroundTasks;
 
 using Shared.Background.Settings.Sections;
-using Shared.Persistense.Abstractions.Repositories;
-using Shared.Persistense.Repositories;
 
 namespace AM.Services.Portfolio.Worker;
 
@@ -19,22 +14,16 @@ public class Program
         {
             var configuration = hostContext.Configuration;
 
-            services.Configure<BackgroundTaskSection>(configuration.GetSection(BackgroundTaskSection.Name));
-            services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
+            services.AddPortfolioPersistance(configuration);
+            services.AddPortfolioCoreServices();
 
-            services.AddScoped<PostgreSQLPortfolioContext>();
-            services.AddScoped<IPostgreSQLRepository, PostgreSQLRepository>();
-            
-            services.AddScoped<MongoDBPortfolioContext>();
-            services.AddScoped<IMongoDBRepository, MongoDBRepository>();
+            services.Configure<BackgroundTaskSection>(configuration.GetSection(BackgroundTaskSection.Name));
 
             services.AddHostedService<ProcessingDataAsBytesBackgroundService>();
             services.AddTransient<ProcessingDataAsBytesBackgroundTask>();
-            services.AddTransient<IBcsReportDataToJsonService, BcsReportDataToJsonService>();
 
             services.AddHostedService<ProcessingDataAsJsonBackgroundService>();
             services.AddTransient<ProcessingDataAsJsonBackgroundTask>();
-            services.AddTransient<IBcsReportJsonToEntitiesService, BcsReportJsonToEntitiesService>();
         })
         .Build()
         .Run();

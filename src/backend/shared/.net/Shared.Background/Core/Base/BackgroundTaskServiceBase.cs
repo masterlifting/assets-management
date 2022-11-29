@@ -8,8 +8,8 @@ using Shared.Persistense.Abstractions.Entities.Catalogs;
 namespace Shared.Background.Core.Base;
 
 public abstract class BackgroundTaskServiceBase<TEntity, TStep, TTask> : IBackgroundTaskService
-    where TEntity : class, IProcessableEntity
-    where TStep : class, IProcessableEntityStep
+    where TEntity : class, IPersistensableProcess
+    where TStep : class, IProcessableStep
     where TTask : BackgroundTaskBase<TStep>
 {
     public string TaskName { get; }

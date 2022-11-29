@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Derivative : IProcessableEntity, IBalance
+public sealed class Derivative : IPersistensableProcess, IBalance
 {
     [StringLength(50, MinimumLength = 1)]
     public string Code { get; init; } = null!;

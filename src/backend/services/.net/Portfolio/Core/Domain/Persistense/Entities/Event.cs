@@ -1,13 +1,12 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
-
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using Shared.Persistense.Abstractions.Entities;
 
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Event : IProcessableEntity
+public sealed class Event : IPersistensableProcess
 {
     [Column(TypeName = "Decimal(18,10)")]
     public decimal Value { get; set; }

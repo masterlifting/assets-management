@@ -1,5 +1,4 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
-
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 using Shared.Persistense.Abstractions.Entities;
 
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Account : IEntity
+public sealed class Account : IPersistensable
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }

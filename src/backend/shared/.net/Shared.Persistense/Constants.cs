@@ -54,32 +54,32 @@ public static class Constants
     }
     public static class Catalogs
     {
-        public static readonly EntityCatalog[] Statuses =
+        public static readonly PersistensableCatalog[] Statuses =
         {
-        new((int) Enums.Statuses.Draft, nameof(Enums.Statuses.Draft)) { Info = "Draft" },
-        new((int) Enums.Statuses.Ready, nameof(Enums.Statuses.Ready)) { Info = "Ready to processing data" },
-        new((int) Enums.Statuses.Processing, nameof(Enums.Statuses.Processing)) { Info = "Processing data" },
-        new((int) Enums.Statuses.Processed, nameof(Enums.Statuses.Processed)) { Info = "Processed data" },
-        new((int) Enums.Statuses.Error, nameof(Enums.Statuses.Error)) { Info = "Error of processing" }
-    };
-        public static readonly EntityCatalog[] Steps =
+    new((int) Enums.Statuses.Draft, nameof(Enums.Statuses.Draft)) { Info = "Draft" },
+    new((int) Enums.Statuses.Ready, nameof(Enums.Statuses.Ready)) { Info = "Ready to processing data" },
+    new((int) Enums.Statuses.Processing, nameof(Enums.Statuses.Processing)) { Info = "Processing data" },
+    new((int) Enums.Statuses.Processed, nameof(Enums.Statuses.Processed)) { Info = "Processed data" },
+    new((int) Enums.Statuses.Error, nameof(Enums.Statuses.Error)) { Info = "Error of processing" }
+};
+        public static readonly PersistensableCatalog[] Steps =
         {
-        new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
-        new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
-        new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
-        new((int) Enums.Steps.Validation, nameof(Enums.Steps.Validation)),
-        new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
-        new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
-    };
-        public static readonly EntityCatalog[] ContentTypes =
+    new((int) Enums.Steps.Loading, nameof(Enums.Steps.Loading)),
+    new((int) Enums.Steps.Parsing, nameof(Enums.Steps.Parsing)),
+    new((int) Enums.Steps.Serialization, nameof(Enums.Steps.Serialization)),
+    new((int) Enums.Steps.Validation, nameof(Enums.Steps.Validation)),
+    new((int) Enums.Steps.Computing, nameof(Enums.Steps.Computing)),
+    new((int) Enums.Steps.Sending, nameof(Enums.Steps.Sending))
+};
+        public static readonly PersistensableCatalog[] ContentTypes =
         {
-        new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
-        new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }
-    };
+    new((int) Enums.ContentTypes.Excel, nameof(Enums.ContentTypes.Excel)) { Info = "Excel file" },
+    new((int) Enums.ContentTypes.Html, nameof(Enums.ContentTypes.Html)) { Info = "HTML page" }
+};
 
         public static readonly Dictionary<string, ContentTypes> ContentTypeDictionary = new()
-    {
-        {"application/vnd.ms-excel", Enums.ContentTypes.Excel}
-    };
+{
+    {"application/vnd.ms-excel", Enums.ContentTypes.Excel}
+};
     }
 }

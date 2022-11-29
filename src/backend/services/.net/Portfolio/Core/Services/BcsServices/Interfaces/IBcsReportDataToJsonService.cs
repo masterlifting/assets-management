@@ -1,9 +1,8 @@
-﻿using AM.Services.Portfolio.Core.Domain.EntityStateModels.Report.Bcs;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Collections.BcsReport;
 
-namespace AM.Services.Portfolio.Core.Services.BcsServices.Interfaces
+namespace AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
+
+public interface IBcsReportDataToJsonService
 {
-    public interface IBcsReportDataToJsonService
-    {
-        BcsReportModel GetReportModel(byte[] payload);
-    }
+    BcsReportModel GetReportModel(byte[] payload);
 }

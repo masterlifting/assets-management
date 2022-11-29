@@ -1,4 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Collections;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Background.Interfaces;
@@ -12,7 +13,7 @@ using static Shared.Persistense.Abstractions.Constants.Enums;
 
 namespace AM.Services.Portfolio.Worker.BackgroundTasksSteps;
 
-public class BcsReportDataToJson : IProcessableStepHandler<DataAsBytes>
+public class BcsReportDataToJson : IProcessableStepHandler<IncomingData>
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
@@ -25,7 +26,7 @@ public class BcsReportDataToJson : IProcessableStepHandler<DataAsBytes>
         _repository = repository;
     }
 
-    public Task HandleStepAsync(IEnumerable<DataAsBytes> entities, CancellationToken cToken) =>
+    public Task HandleStepAsync(IEnumerable<IncomingData> entities, CancellationToken cToken) =>
         Task.WhenAll(entities.Select(x => Task.Run(async () =>
         {
             try
@@ -54,7 +55,7 @@ public class BcsReportDataToJson : IProcessableStepHandler<DataAsBytes>
             }
         }, cToken)));
 
-    public Task<IReadOnlyCollection<DataAsBytes>> HandleStepAsync(CancellationToken cToken)
+    public Task<IReadOnlyCollection<IncomingData>> HandleStepAsync(CancellationToken cToken)
     {
         throw new NotImplementedException();
     }

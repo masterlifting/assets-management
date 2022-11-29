@@ -1,6 +1,5 @@
-﻿namespace Shared.Persistense.Abstractions.Repositories
+﻿namespace Shared.Persistense.Abstractions.Repositories;
+
+public interface IPostgreSQLRepository : IRepository
 {
-    public interface IPostgreSQLRepository : IRepository
-    {
-    }
 }

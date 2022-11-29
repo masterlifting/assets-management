@@ -5,7 +5,7 @@ using ExcelDataReader;
 
 namespace Shared.Data.Excel;
 
-public sealed class ExcelService
+public static class ExcelService
 {
     public static DataTable LoadTable(byte[] data)
     {

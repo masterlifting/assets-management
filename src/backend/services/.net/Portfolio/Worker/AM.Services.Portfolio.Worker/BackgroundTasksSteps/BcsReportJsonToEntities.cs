@@ -1,5 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Domain.EntityStateModels.Report.Bcs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+﻿using AM.Services.Portfolio.Core.Domain.Persistense.Collections;
+using AM.Services.Portfolio.Core.Domain.Persistense.Collections.BcsReport;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Background.Interfaces;

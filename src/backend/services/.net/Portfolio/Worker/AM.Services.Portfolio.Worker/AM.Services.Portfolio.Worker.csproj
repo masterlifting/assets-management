@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\shared\.net\Shared.Background\Shared.Background.csproj" />
     <ProjectReference Include="..\..\Core\AM.Services.Portfolio.Core.csproj" />
     <ProjectReference Include="..\..\Infrastructure\AM.Services.Portfolio.Infrastructure.csproj" />
   </ItemGroup>

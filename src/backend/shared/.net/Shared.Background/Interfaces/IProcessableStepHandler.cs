@@ -2,7 +2,7 @@
 
 namespace Shared.Background.Interfaces;
 
-public interface IProcessableStepHandler<T> where T : class, IProcessableEntity
+public interface IProcessableStepHandler<T> where T : class, IPersistensableProcess
 {
     Task HandleStepAsync(IEnumerable<T> entities, CancellationToken cToken);
     Task<IReadOnlyCollection<T>> HandleStepAsync(CancellationToken cToken);

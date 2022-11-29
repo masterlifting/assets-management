@@ -1,5 +1,4 @@
 ﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.ProcessingEntities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +29,9 @@ public sealed class ReportsController : ControllerBase
     private readonly IPostgreSQLRepository _repository;
 
     private static readonly Dictionary<string, Providers> ProviderPatterns = new()
-    {
-        { "^B_k-(.+)_ALL(.+).xls$", Providers.Bcs }
-    };
+{
+    { "^B_k-(.+)_ALL(.+).xls$", Providers.Bcs }
+};
 
     public ReportsController(ILogger<ReportsController> logger, IPostgreSQLRepository repository)
     {

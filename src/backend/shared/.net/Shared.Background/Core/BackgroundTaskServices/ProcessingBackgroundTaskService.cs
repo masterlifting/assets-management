@@ -7,8 +7,8 @@ using Shared.Persistense.Abstractions.Entities.Catalogs;
 namespace Shared.Background.Core.BackgroundTaskServices;
 
 internal sealed class ProcessingBackgroundTaskService<TEntity, TStep> : BackgroundTaskServiceBase<TEntity, TStep, ProcessingBackgroundTask<TEntity, TStep>>
-    where TEntity : class, IProcessableEntity
-    where TStep : class, IProcessableEntityStep
+    where TEntity : class, IPersistensableProcess
+    where TStep : class, IProcessableStep
 {
     internal ProcessingBackgroundTaskService(IServiceScopeFactory scopeFactory) : base(scopeFactory)
     {

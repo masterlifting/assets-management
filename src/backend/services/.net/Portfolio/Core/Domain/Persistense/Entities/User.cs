@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class User : IEntity
+public sealed class User : IPersistensable
 {
     [Key, StringLength(40)]
     public Guid Id { get; init; }

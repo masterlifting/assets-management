@@ -16,9 +16,9 @@ using static Shared.Persistense.Abstractions.Constants.Enums;
 
 namespace Shared.Background.Core.BackgroundTasks;
 
-public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskBase<TStep> 
-    where TEntity : class, IProcessableEntity
-    where TStep : class, IProcessableEntityStep
+public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskBase<TStep>
+    where TEntity : class, IPersistensableProcess
+    where TStep : class, IProcessableStep
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
@@ -69,13 +69,13 @@ public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskB
                         entity.Info = $"Previous step was '{step.Name}'";
                     }
 
-                    await _repository.SaveProcessableEntityResultAsync(nextStep, entities, cToken);
+                    await _repository.SaveProcessableEntitiesAsync(nextStep, entities, cToken);
 
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
                 }
                 else
                 {
-                    await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
+                    await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
 
                     _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
                 }
@@ -118,7 +118,7 @@ public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskB
             _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
 
             await _semaphore.WaitAsync();
-            await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
+            await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
             _semaphore.Release();
 
             _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
@@ -137,11 +137,11 @@ public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskB
             _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Start);
 
             if (!settings.Steps.IsParallelProcessing)
-                ids = await _repository.PrepareProcessableEntityDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
+                ids = await _repository.GetPreparedProcessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
             else
             {
                 await _semaphore.WaitAsync();
-                ids = await _repository.PrepareProcessableEntityDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
+                ids = await _repository.GetPreparedProcessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
                 _semaphore.Release();
             }
 
@@ -155,7 +155,7 @@ public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskB
                 var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.RetryPolicy.EveryTime;
                 var retryDate = DateTime.UtcNow.Add(-retryTime);
 
-                var retryIds = await _repository.PrepareProcessableEntityRetryDataAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
+                var retryIds = await _repository.GetPrepareUnprocessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
 
                 if (retryIds.Any())
                 {
@@ -184,11 +184,11 @@ public abstract class ProcessingBackgroundTask<TEntity, TStep> : BackgroundTaskB
             _logger.LogTrace(taskName, action + Actions.EntityStates.GetData, Actions.Start);
 
             if (!isParallel)
-                entities = await _repository.GetProcessableEntityDataAsync<TEntity>(step, ids, cToken);
+                entities = await _repository.GetProcessableEntitiesAsync<TEntity>(step, ids, cToken);
             else
             {
                 await _semaphore.WaitAsync();
-                entities = await _repository.GetProcessableEntityDataAsync<TEntity>(step, ids, cToken);
+                entities = await _repository.GetProcessableEntitiesAsync<TEntity>(step, ids, cToken);
                 _semaphore.Release();
             }
 

@@ -11,289 +11,288 @@ using Shared.Persistense.Exceptions;
 
 using static Shared.Persistense.Constants.Enums;
 
-namespace Shared.Persistense.Repositories
+namespace Shared.Persistense.Repositories;
+
+public class PostgreSQLRepository : IPostgreSQLRepository
 {
-    public class PostgreSQLRepository : IPostgreSQLRepository
+    private readonly string _initiator;
+    private readonly ILogger _logger;
+    private readonly PostgreSQLContext _context;
+
+    public PostgreSQLRepository(ILogger logger, PostgreSQLContext context)
     {
-        private readonly string _initiator;
-        private readonly ILogger _logger;
-        private readonly PostgreSQLContext _context;
+        _logger = logger;
+        _context = context;
+        var objectId = base.GetHashCode();
+        _initiator = $"{nameof(PostgreSQLRepository)} ({objectId})";
+    }
 
-        public PostgreSQLRepository(ILogger logger, PostgreSQLContext context)
+    public IQueryable<T> Set<T>() where T : class, IPersistensable => _context.Set<T>();
+
+    public virtual async Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        if (!cToken.HasValue)
         {
-            _logger = logger;
-            _context = context;
-            var objectId = base.GetHashCode();
-            _initiator = $"{nameof(PostgreSQLRepository)} ({objectId})";
+            await _context.Set<T>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            await _context.Set<T>().AddAsync(entity, cToken.Value);
+            await _context.SaveChangesAsync(cToken.Value);
         }
 
-        public IQueryable<T> Set<T>() where T : class, IEntity => _context.Set<T>();
-
-        public virtual async Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity
+        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
+    }
+    public virtual async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        if (!entities.Any())
         {
-            if (!cToken.HasValue)
-            {
-                await _context.Set<T>().AddAsync(entity);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                await _context.Set<T>().AddAsync(entity, cToken.Value);
-                await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
-        }
-        public virtual async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            if (!entities.Any())
-            {
-                _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
-                return;
-            }
-
-            int result;
-            if (!cToken.HasValue)
-            {
-                await _context.Set<T>().AddRangeAsync(entities);
-                result = await _context.SaveChangesAsync();
-            }
-            else
-            {
-                await _context.Set<T>().AddRangeAsync(entities, cToken.Value);
-                result = await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
-        }
-        public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            try
-            {
-                await CreateAsync(entity, cToken);
-                return new Result(true);
-            }
-            catch (Exception exception)
-            {
-                return new Result(false, exception.InnerException?.Message ?? exception.Message);
-            }
-        }
-        public virtual async Task<Result> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            try
-            {
-                await CreateRangeAsync(entities, cToken);
-                return new Result(true);
-            }
-            catch (Exception exception)
-            {
-                return new Result(false, exception.InnerException?.Message ?? exception.Message);
-            }
+            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
+            return;
         }
 
-        public virtual async Task UpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IEntity
+        int result;
+        if (!cToken.HasValue)
         {
-            if (await _context.Set<T>().FindAsync(id) is null)
-                throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
-
-            if (!cToken.HasValue)
-            {
-                _context.Set<T>().Update(entity);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                _context.Set<T>().Update(entity);
-                await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+            await _context.Set<T>().AddRangeAsync(entities);
+            result = await _context.SaveChangesAsync();
         }
-        public virtual async Task UpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
+        else
         {
-            if (!entities.Any())
-            {
-                _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
-                return;
-            }
-
-            int result;
-            if (!cToken.HasValue)
-            {
-                _context.Set<T>().UpdateRange(entities);
-                result = await _context.SaveChangesAsync();
-            }
-            else
-            {
-                _context.Set<T>().UpdateRange(entities);
-                result = await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
-        }
-        public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            try
-            {
-                await UpdateAsync(id, entity, cToken);
-                return new Result(true);
-            }
-            catch (Exception exception)
-            {
-                return new Result(false, exception.InnerException?.Message ?? exception.Message);
-            }
-        }
-        public virtual async Task<Result> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
-        {
-            try
-            {
-                await UpdateRangeAsync(entities, cToken);
-                return new Result(true);
-            }
-            catch (Exception exception)
-            {
-                return new Result(false, exception.InnerException?.Message ?? exception.Message);
-            }
+            await _context.Set<T>().AddRangeAsync(entities, cToken.Value);
+            result = await _context.SaveChangesAsync(cToken.Value);
         }
 
-        public virtual async Task<T> DeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IEntity
+        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
+    }
+    public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
         {
-            var entity = await _context.Set<T>().FindAsync(id);
-
-            if (entity is null)
-                throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
-
-            if (!cToken.HasValue)
-            {
-                _context.Set<T>().Remove(entity);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                _context.Set<T>().Remove(entity);
-                await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
-
-            return entity;
+            await CreateAsync(entity, cToken);
+            return new Result(true);
         }
-        public virtual async Task DeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
+        catch (Exception exception)
         {
-            if (!entities.Any())
-            {
-                _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
-                return;
-            }
-
-            int result;
-            if (!cToken.HasValue)
-            {
-                _context.Set<T>().RemoveRange(entities);
-                result = await _context.SaveChangesAsync();
-            }
-            else
-            {
-                _context.Set<T>().RemoveRange(entities);
-                result = await _context.SaveChangesAsync(cToken.Value);
-            }
-
-            _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
         }
-        public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IEntity
+    }
+    public virtual async Task<Result> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
         {
-            try
-            {
-                await DeleteRangeAsync(entities, cToken);
-                return new Result(true);
-            }
-            catch (Exception exception)
-            {
-                return new Result(false, exception.InnerException?.Message ?? exception.Message);
-            }
+            await CreateRangeAsync(entities, cToken);
+            return new Result(true);
         }
-        public virtual async Task<ResultData<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IEntity
+        catch (Exception exception)
         {
-            try
-            {
-                var entity = await DeleteAsync<T>(id, cToken);
-                return new ResultData<T>(new(true), entity);
-            }
-            catch (Exception exception)
-            {
-                return new ResultData<T>(new(false, exception.InnerException?.Message ?? exception.Message), null);
-            }
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+
+    public virtual async Task UpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        if (await _context.Set<T>().FindAsync(id) is null)
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+
+        if (!cToken.HasValue)
+        {
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync(cToken.Value);
         }
 
-        public Task<T[]> GetCatalogsAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToArrayAsync();
-        public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Id);
-        public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IEntityCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Name);
-        public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IEntityCatalog => _context.Set<T>().FindAsync(id).AsTask();
-        public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IEntityCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
-
-        public async Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessableEntityStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity
+        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+    }
+    public virtual async Task UpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        if (!entities.Any())
         {
-            var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-                ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            return;
+        }
 
-            var query = @$"
+        int result;
+        if (!cToken.HasValue)
+        {
+            _context.Set<T>().UpdateRange(entities);
+            result = await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _context.Set<T>().UpdateRange(entities);
+            result = await _context.SaveChangesAsync(cToken.Value);
+        }
+
+        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
+    }
+    public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
+        {
+            await UpdateAsync(id, entity, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+    public virtual async Task<Result> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
+        {
+            await UpdateRangeAsync(entities, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+
+    public virtual async Task<T> DeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        var entity = await _context.Set<T>().FindAsync(id);
+
+        if (entity is null)
+            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+
+        if (!cToken.HasValue)
+        {
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync(cToken.Value);
+        }
+
+        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
+
+        return entity;
+    }
+    public virtual async Task DeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        if (!entities.Any())
+        {
+            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            return;
+        }
+
+        int result;
+        if (!cToken.HasValue)
+        {
+            _context.Set<T>().RemoveRange(entities);
+            result = await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _context.Set<T>().RemoveRange(entities);
+            result = await _context.SaveChangesAsync(cToken.Value);
+        }
+
+        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
+    }
+    public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
+        {
+            await DeleteRangeAsync(entities, cToken);
+            return new Result(true);
+        }
+        catch (Exception exception)
+        {
+            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+        }
+    }
+    public virtual async Task<ResultData<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistensable
+    {
+        try
+        {
+            var entity = await DeleteAsync<T>(id, cToken);
+            return new ResultData<T>(new(true), entity);
+        }
+        catch (Exception exception)
+        {
+            return new ResultData<T>(new(false, exception.InnerException?.Message ?? exception.Message), null);
+        }
+    }
+
+    public Task<T[]> GetCatalogsAsync<T>() where T : class, IPersistensableCatalog => _context.Set<T>().ToArrayAsync();
+    public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IPersistensableCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Id);
+    public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IPersistensableCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Name);
+    public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistensableCatalog => _context.Set<T>().FindAsync(id).AsTask();
+    public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistensableCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
+
+    public async Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessableStep step, int limit, CancellationToken cToken) where T : class, IPersistensableProcess
+    {
+        var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
+            ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+
+        var query = @$"
                 UPDATE ""{tableName}"" SET
-	                  ""{nameof(IProcessableEntity.ProcessStatusId)}"" = {(int)Statuses.Processing}
-	                , ""{nameof(IProcessableEntity.ProcessAttempt)}"" = CASE WHEN ""{nameof(IProcessableEntity.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IProcessableEntity.ProcessAttempt)}"" + 1 ELSE ""{nameof(IProcessableEntity.ProcessAttempt)}"" END
-	                , ""{nameof(IProcessableEntity.Updated)}"" = NOW()
-                WHERE ""{nameof(IProcessableEntity.Id)}"" IN 
-	                ( SELECT ""{nameof(IProcessableEntity.Id)}""
+	                  ""{nameof(IPersistensableProcess.ProcessStatusId)}"" = {(int)Statuses.Processing}
+	                , ""{nameof(IPersistensableProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistensableProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistensableProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistensableProcess.ProcessAttempt)}"" END
+	                , ""{nameof(IPersistensableProcess.Updated)}"" = NOW()
+                WHERE ""{nameof(IPersistensableProcess.Id)}"" IN 
+	                ( SELECT ""{nameof(IPersistensableProcess.Id)}""
 	                  FROM ""{tableName}""
-	                  WHERE ""{nameof(IProcessableEntity.ProcessStepId)}"" = {step.Id} AND ""{nameof(IProcessableEntity.ProcessStatusId)}"" = {(int)Statuses.Ready} 
+	                  WHERE ""{nameof(IPersistensableProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistensableProcess.ProcessStatusId)}"" = {(int)Statuses.Ready} 
 	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
-                RETURNING ""{nameof(IProcessableEntity.Id)}"";";
+                RETURNING ""{nameof(IPersistensableProcess.Id)}"";";
 
-            var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
+        var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
 
-            return result.Select(x => x.Id).ToArray();
-        }
-        public async Task<Guid[]> PrepareProcessableEntityRetryDataAsync<T>(IProcessableEntityStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IProcessableEntity
-        {
-            var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-                ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+        return result.Select(x => x.Id).ToArray();
+    }
+    public async Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessableStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistensableProcess
+    {
+        var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
+            ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
 
-            var query = @$"
+        var query = @$"
                 UPDATE ""{tableName}"" SET
-	                  ""{nameof(IProcessableEntity.ProcessStatusId)}"" = {(int)Statuses.Processing}
-	                , ""{nameof(IProcessableEntity.ProcessAttempt)}"" = CASE WHEN ""{nameof(IProcessableEntity.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IProcessableEntity.ProcessAttempt)}"" + 1 ELSE ""{nameof(IProcessableEntity.ProcessAttempt)}"" END
-	                , ""{nameof(IProcessableEntity.Updated)}"" = NOW()
-                WHERE ""{nameof(IProcessableEntity.Id)}"" IN 
-	                ( SELECT ""{nameof(IProcessableEntity.Id)}""
+	                  ""{nameof(IPersistensableProcess.ProcessStatusId)}"" = {(int)Statuses.Processing}
+	                , ""{nameof(IPersistensableProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistensableProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistensableProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistensableProcess.ProcessAttempt)}"" END
+	                , ""{nameof(IPersistensableProcess.Updated)}"" = NOW()
+                WHERE ""{nameof(IPersistensableProcess.Id)}"" IN 
+	                ( SELECT ""{nameof(IPersistensableProcess.Id)}""
 	                  FROM ""{tableName}""
 	                  WHERE 
-                            ""{nameof(IProcessableEntity.ProcessStepId)}"" = {step.Id} 
-                            AND ((""{nameof(IProcessableEntity.ProcessStatusId)}"" = {(int)Statuses.Processing} AND ""{nameof(IProcessableEntity.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IProcessableEntity.ProcessStatusId)}"" = {(int)Statuses.Error}))
-			                AND ""{nameof(IProcessableEntity.ProcessAttempt)}"" < {maxAttempts}
+                            ""{nameof(IPersistensableProcess.ProcessStepId)}"" = {step.Id} 
+                            AND ((""{nameof(IPersistensableProcess.ProcessStatusId)}"" = {(int)Statuses.Processing} AND ""{nameof(IPersistensableProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistensableProcess.ProcessStatusId)}"" = {(int)Statuses.Error}))
+			                AND ""{nameof(IPersistensableProcess.ProcessAttempt)}"" < {maxAttempts}
 	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
-                RETURNING ""{nameof(IProcessableEntity.Id)}"";";
+                RETURNING ""{nameof(IPersistensableProcess.Id)}"";";
 
-            var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
+        var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
 
-            return result.Select(x => x.Id).ToArray();
-        }
-        public Task<T[]> GetProcessableEntityDataAsync<T>(IProcessableEntityStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IProcessableEntity =>
-        _context.Set<T>().Where(x => x.ProcessStepId == step.Id && ids.Contains(x.Id)).ToArrayAsync(cToken);
-        public Task SaveProcessableEntityResultAsync<T>(IProcessableEntityStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IProcessableEntity
-        {
-            var array = entities.ToArray();
-
-            if (step is null)
-                return UpdateRangeAsync(array, cToken);
-
-            foreach (var entity in array.Where(x => x.ProcessStatusId != (int)Statuses.Error))
-                entity.ProcessStepId = step.Id;
-
-            return UpdateRangeAsync(array, cToken);
-        }
-
-        public Task<T?> FindAsync<T>(params object[] id) where T : class, IEntity => _context.Set<T>().FindAsync(id).AsTask();
-        public Task<T?> FindAsync<T, TId>(TId id) where T : class, IEntity where TId : struct => _context.Set<T>().FindAsync(id).AsTask();
+        return result.Select(x => x.Id).ToArray();
     }
+    public Task<T[]> GetProcessableEntitiesAsync<T>(IProcessableStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IPersistensableProcess =>
+    _context.Set<T>().Where(x => x.ProcessStepId == step.Id && ids.Contains(x.Id)).ToArrayAsync(cToken);
+    public Task SaveProcessableEntitiesAsync<T>(IProcessableStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistensableProcess
+    {
+        var array = entities.ToArray();
+
+        if (step is null)
+            return UpdateRangeAsync(array, cToken);
+
+        foreach (var entity in array.Where(x => x.ProcessStatusId != (int)Statuses.Error))
+            entity.ProcessStepId = step.Id;
+
+        return UpdateRangeAsync(array, cToken);
+    }
+
+    public Task<T?> FindAsync<T>(params object[] id) where T : class, IPersistensable => _context.Set<T>().FindAsync(id).AsTask();
+    public Task<T?> FindAsync<T, TId>(TId id) where T : class, IPersistensable where TId : struct => _context.Set<T>().FindAsync(id).AsTask();
 }

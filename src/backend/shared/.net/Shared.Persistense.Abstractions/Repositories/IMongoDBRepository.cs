@@ -1,6 +1,5 @@
-﻿namespace Shared.Persistense.Abstractions.Repositories
+﻿namespace Shared.Persistense.Abstractions.Repositories;
+
+public interface IMongoDBRepository : IRepository
 {
-    public interface IMongoDBRepository : IRepository
-    {
-    }
 }

@@ -1,14 +1,13 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Catalogs;
+using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
 
 using Shared.Persistense.Abstractions.Entities;
-using Shared.Persistense.Abstractions.Entities.EntityState;
 
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistense.Entities;
 
-public sealed class Deal : IProcessableEntity
+public sealed class Deal : IPersistensableProcess
 {
     public DateOnly Date { get; init; }
 

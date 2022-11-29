@@ -16,9 +16,9 @@ using static Shared.Persistense.Abstractions.Constants.Enums;
 
 namespace Shared.Background.Core.BackgroundTasks;
 
-public abstract class LoadingBackgroundTask<TEntity, TStep> : BackgroundTaskBase<TStep> 
-    where TEntity : class, IProcessableEntity
-    where TStep : class, IProcessableEntityStep
+public abstract class LoadingBackgroundTask<TEntity, TStep> : BackgroundTaskBase<TStep>
+    where TEntity : class, IPersistensableProcess
+    where TStep : class, IProcessableStep
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
@@ -50,7 +50,7 @@ public abstract class LoadingBackgroundTask<TEntity, TStep> : BackgroundTaskBase
                 _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
 
 
-                await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
+                await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
 
                 _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
             }
@@ -82,7 +82,7 @@ public abstract class LoadingBackgroundTask<TEntity, TStep> : BackgroundTaskBase
             _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
 
             await _semaphore.WaitAsync();
-            await _repository.SaveProcessableEntityResultAsync(null, entities, cToken);
+            await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
             _semaphore.Release();
 
             _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);

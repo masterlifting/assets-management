@@ -10,9 +10,9 @@ using Shared.Persistense.Abstractions.Entities.Catalogs;
 
 namespace Shared.Background.Core.BackgroundServices;
 
-public abstract class ProcessingBackgroundService<TEntity, TStep> : BackgroundServiceBase<TEntity> 
-    where TEntity : class, IProcessableEntity
-    where TStep : class, IProcessableEntityStep
+public abstract class ProcessingBackgroundService<TEntity, TStep> : BackgroundServiceBase<TEntity>
+    where TEntity : class, IPersistensableProcess
+    where TStep : class, IProcessableStep
 {
     protected ProcessingBackgroundService(
         IOptionsMonitor<BackgroundTaskSection> options

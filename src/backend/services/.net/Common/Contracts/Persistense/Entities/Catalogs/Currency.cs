@@ -2,6 +2,6 @@
 
 namespace AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 
-public sealed class Currency : EntityCatalog
+public sealed class Currency : PersistensableCatalog
 {
 }

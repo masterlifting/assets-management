@@ -1,6 +1,5 @@
-﻿namespace Shared.Background.Interfaces
+﻿namespace Shared.Background.Interfaces;
+
+public interface IBackgroundTaskSettingsProvider
 {
-    public interface IBackgroundTaskSettingsProvider
-    {
-    }
 }

@@ -2,6 +2,6 @@
 
 namespace AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 
-public sealed class Exchange : EntityCatalog
+public sealed class Exchange : PersistensableCatalog
 {
 }
