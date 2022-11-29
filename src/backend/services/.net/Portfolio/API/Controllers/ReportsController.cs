@@ -1,11 +1,12 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
+﻿using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 using Shared.Extensions.Logging;
-using Shared.Persistense.Abstractions.Repositories;
+using Shared.Persistence.Abstractions.Repositories;
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
-using static Shared.Persistense.Abstractions.Constants.Enums;
+using static Shared.Persistence.Abstractions.Constants.Enums;
 
 using PortfolioCoreException = AM.Services.Portfolio.API.Exceptions.PortfolioHostException;
 
@@ -26,21 +27,21 @@ public sealed class ReportsController : ControllerBase
     private readonly Guid _userId = Guid.Parse("0f9075e9-bbcf-4eef-a52d-d9dcad816f5e");
 
     private readonly ILogger<ReportsController> _logger;
-    private readonly IPostgreSQLRepository _repository;
+    private readonly IMongoDBRepository _repository;
 
     private static readonly Dictionary<string, Providers> ProviderPatterns = new()
 {
     { "^B_k-(.+)_ALL(.+).xls$", Providers.Bcs }
 };
 
-    public ReportsController(ILogger<ReportsController> logger, IPostgreSQLRepository repository)
+    public ReportsController(ILogger<ReportsController> logger, IMongoDBRepository repository)
     {
         _logger = logger;
         _repository = repository;
     }
 
-    [HttpPost("bcs")]
-    public async Task<IActionResult> CreateBcsReport(IFormFileCollection files)
+    [HttpPost("{stepId}")]
+    public async Task<IActionResult> Post(IFormFileCollection files, int stepId)
     {
         try
         {
@@ -53,23 +54,28 @@ public sealed class ReportsController : ControllerBase
                 var _ = await stream.ReadAsync(payload.AsMemory(0, (int)file.Length));
 
                 if (GetProvider(file.FileName) == Providers.Bcs)
-                    _logger.LogError(new PortfolioCoreException("BCS" + nameof(ReportsController), $"Saving report: '{file.FileName}'", new("The provider is notn BCS")));
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"File: '{file.FileName}'", new("The provider is notn BCS")));
 
-                var reportData = new DataAsBytes
+                var reportData = new IncomingData
                 {
+                    Id = Guid.NewGuid(),
                     UserId = _userId,
+
                     Payload = payload,
-                    SHA256Hash = SHA256.HashData(payload),
+                    PayloadHash = SHA256.HashData(payload),
+                    PayloadHashAlgoritm = nameof(SHA256),
+                    
                     PayloadSource = file.FileName,
                     PayloadContentType = file.ContentType,
-                    ProcessStepId = (int)ProcessSteps.ParseBcsReportDataToJson,
-                    ProcessStatusId = (int)ProcessableEntityStatuses.Ready
+                    
+                    ProcessStepId = stepId,
+                    ProcessStatusId = (int)ProcessStatuses.Ready
                 };
 
                 var createdResult = await _repository.TryCreateAsync(reportData);
 
                 if (!createdResult.IsSuccess)
-                    _logger.LogError(new PortfolioCoreException("BCS" + nameof(ReportsController), $"Saving report: '{file.FileName}'", new(createdResult.Error!)));
+                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"File: '{file.FileName}'", new(createdResult.Error!)));
             }
 
             return Ok();

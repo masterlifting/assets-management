@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.Options;
 
-using Shared.Persistense.Contexts;
+using Shared.Persistence.Contexts;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 

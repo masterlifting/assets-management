@@ -1,14 +1,15 @@
 ﻿using AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Domain.Persistense.Entities.Catalogs;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-using Shared.Persistense.Abstractions.Entities;
-using Shared.Persistense.Abstractions.Entities.Catalogs;
-using Shared.Persistense.Contexts;
+using Shared.Persistence;
+using Shared.Persistence.Abstractions.Entities;
+using Shared.Persistence.Abstractions.Entities.Catalogs;
+using Shared.Persistence.Contexts;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 
@@ -52,13 +53,13 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
 
         builder.Entity<Account>().HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
 
-        builder.Entity<PersistensableCatalog>().HasKey(x => x.Id);
+        builder.Entity<PersistentCatalog>().HasKey(x => x.Id);
 
 
         #region Catalogs
-        builder.Entity<Status>().HasData(Shared.Persistense.Constants.Catalogs.Statuses);
-        builder.Entity<Step>().HasData(Shared.Persistense.Constants.Catalogs.Steps);
-        builder.Entity<ContentType>().HasData(Shared.Persistense.Constants.Catalogs.ContentTypes);
+        builder.Entity<Status>().HasData(Constants.Catalogs.Statuses);
+        builder.Entity<Step>().HasData(Constants.Catalogs.Steps);
+        builder.Entity<ContentType>().HasData(Constants.Catalogs.ContentTypes);
 
         builder.Entity<AssetType>().HasData(Common.Contracts.Constants.Persistense.Catalogs.AssetTypes);
         builder.Entity<Country>().HasData(Common.Contracts.Constants.Persistense.Catalogs.Countries);

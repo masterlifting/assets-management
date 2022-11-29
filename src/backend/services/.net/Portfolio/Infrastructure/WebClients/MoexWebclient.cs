@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
-using AM.Services.Portfolio.Core.Abstractions.Web;
-using AM.Services.Portfolio.Core.Models.Clients;
+
+using AM.Services.Portfolio.Core.Abstractions.WebServices;
+using AM.Services.Portfolio.Core.Models.WebClient;
 using AM.Services.Portfolio.Infrastructure.Exceptions;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
 
-namespace AM.Services.Portfolio.Infrastructure.Web;
+namespace AM.Services.Portfolio.Infrastructure.WebClients;
 
 public sealed class MoexWebclient : IMoexWebclient
 {

@@ -1,20 +1,19 @@
-﻿using AM.Services.Portfolio.Core.Abstractions.Excel;
-using AM.Services.Portfolio.Core.Abstractions.Web;
+﻿using AM.Services.Portfolio.Core.Abstractions.ExcelService;
+using AM.Services.Portfolio.Core.Abstractions.WebServices;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
-using AM.Services.Portfolio.Infrastructure.Excel;
+using AM.Services.Portfolio.Infrastructure.ExcelServices;
 using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 using AM.Services.Portfolio.Infrastructure.Settings;
-using AM.Services.Portfolio.Infrastructure.Web;
+using AM.Services.Portfolio.Infrastructure.WebClients;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Polly;
 
-using Shared.Persistense.Abstractions.Repositories;
-
-using Shared.Persistense.Repositories;
+using Shared.Persistence.Abstractions.Repositories;
+using Shared.Persistence.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure;
 
@@ -23,8 +22,7 @@ public static class PortfolioInfrastructureRegistration
     public static void AddPortfolioCoreServices(this IServiceCollection services)
     {
         services.AddTransient<IPortfolioExcelService, PortfolioExcelService>();
-        services.AddTransient<IBcsReportJsonToEntitiesService, BcsReportJsonToEntitiesService>();
-        services.AddTransient<IBcsReportDataToJsonService, BcsReportDataToJsonService>();
+        services.AddTransient<IBcsReportService, BcsReportService>();
     }
     public static void AddPortfolioPersistance(this IServiceCollection services, IConfiguration configuration)
     {

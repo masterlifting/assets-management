@@ -1,12 +1,12 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Models.Api.Http;
+﻿using AM.Services.Portfolio.API.Models;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
 using Shared.Contracts.Models.Pagination;
 
 using System;
 using System.Threading.Tasks;
 
-namespace AM.Services.Portfolio.Core.Services.ControllersApi;
+namespace AM.Services.Portfolio.API.Services;
 
 public sealed class DealApi
 {

@@ -3,19 +3,19 @@ using Shared.Extensions.Logging;
 
 using Shared.Background.Exceptions;
 using Shared.Background.Settings;
-using Shared.Persistense.Abstractions.Entities.Catalogs;
-using Shared.Persistense.Abstractions.Repositories;
 
 using System.Collections.Concurrent;
+using Shared.Persistence.Abstractions.Entities.Catalogs;
+using Shared.Persistence.Abstractions.Repositories;
 
 namespace Shared.Background.Core.Base;
 
-public abstract class BackgroundTaskBase<TSTep> where TSTep : class, IProcessableStep
+public abstract class BackgroundTaskBase<TSTep> where TSTep : class, IProcessStep
 {
     private readonly ILogger _logger;
-    private readonly IRepository _repository;
+    private readonly IPersistenceRepository _repository;
 
-    protected BackgroundTaskBase(ILogger logger, IRepository _repository)
+    protected BackgroundTaskBase(ILogger logger, IPersistenceRepository _repository)
     {
         _logger = logger;
         this._repository = _repository;

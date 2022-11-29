@@ -15,7 +15,7 @@
     <ProjectReference Include="..\..\..\..\shared\.net\Shared.Background\Shared.Background.csproj" />
     <ProjectReference Include="..\..\..\..\shared\.net\Shared.Data\Shared.Data.csproj" />
     <ProjectReference Include="..\..\..\..\shared\.net\Shared.Exceptions\Shared.Exceptions.csproj" />
-    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Persistense\Shared.Persistense.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\.net\Shared.Persistence\Shared.Persistence.csproj" />
     <ProjectReference Include="..\..\..\..\shared\.net\Shared.Web\Shared.Web.csproj" />
     <ProjectReference Include="..\Core\AM.Services.Portfolio.Core.csproj" />
   </ItemGroup>

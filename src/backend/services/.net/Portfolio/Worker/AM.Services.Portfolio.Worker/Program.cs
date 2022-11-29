@@ -19,11 +19,8 @@ public class Program
 
             services.Configure<BackgroundTaskSection>(configuration.GetSection(BackgroundTaskSection.Name));
 
-            services.AddHostedService<ProcessingDataAsBytesBackgroundService>();
-            services.AddTransient<ProcessingDataAsBytesBackgroundTask>();
-
-            services.AddHostedService<ProcessingDataAsJsonBackgroundService>();
-            services.AddTransient<ProcessingDataAsJsonBackgroundTask>();
+            services.AddHostedService<BackgroundServiceIncomingDataProcessing>();
+            services.AddTransient<BackgroundTaskIncomingDataProcessing>();
         })
         .Build()
         .Run();

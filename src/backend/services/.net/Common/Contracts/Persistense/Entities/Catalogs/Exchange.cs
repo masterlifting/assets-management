@@ -1,7 +1,7 @@
-﻿using Shared.Persistense.Abstractions.Entities.Catalogs;
+﻿using Shared.Persistence.Abstractions.Entities.Catalogs;
 
 namespace AM.Services.Common.Contracts.Persistense.Entities.Catalogs;
 
-public sealed class Exchange : PersistensableCatalog
+public sealed class Exchange : PersistentCatalog
 {
 }

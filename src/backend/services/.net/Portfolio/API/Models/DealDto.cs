@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AM.Services.Portfolio.Core.Models.Api.Http;
+namespace AM.Services.Portfolio.API.Models;
 
 public sealed record DealGetDto
 {

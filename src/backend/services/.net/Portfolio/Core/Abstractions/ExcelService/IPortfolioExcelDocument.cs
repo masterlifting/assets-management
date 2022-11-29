@@ -1,4 +1,4 @@
-﻿namespace AM.Services.Portfolio.Core.Abstractions.Excel;
+﻿namespace AM.Services.Portfolio.Core.Abstractions.ExcelService;
 
 public interface IPortfolioExcelDocument
 {

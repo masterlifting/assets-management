@@ -1,4 +1,4 @@
-﻿using Shared.Persistense.Abstractions.Entities.Catalogs;
+﻿using Shared.Persistence.Abstractions.Entities.Catalogs;
 
 namespace AM.Services.Common.Contracts;
 
@@ -59,7 +59,7 @@ public static class Constants
         }
         public static class Catalogs
         {
-            public static readonly PersistensableCatalog[] AssetTypes =
+            public static readonly PersistentCatalog[] AssetTypes =
             {
         new() {Id = (int) Enums.AssetTypes.Default, Name = nameof(Enums.AssetTypes.Default), Info = "Not defined" },
         new() {Id = (int) Enums.AssetTypes.Valuable, Name = nameof(Enums.AssetTypes.Valuable), Info = "Valuable" },
@@ -72,7 +72,7 @@ public static class Constants
         new() {Id = (int) Enums.AssetTypes.RealEstate, Name = nameof(Enums.AssetTypes.RealEstate), Info = "Real estates"},
         new() {Id = (int) Enums.AssetTypes.PersonalEstate, Name = nameof(Enums.AssetTypes.PersonalEstate), Info = "Personal estates"}
     };
-            public static readonly PersistensableCatalog[] Exchanges =
+            public static readonly PersistentCatalog[] Exchanges =
             {
         new() {Id = (int) Enums.Exchanges.Default, Name = nameof(Enums.Exchanges.Default) },
         new() {Id = (int) Enums.Exchanges.Nasdaq, Name = nameof(Enums.Exchanges.Nasdaq) },
@@ -87,7 +87,7 @@ public static class Constants
         new() {Id = (int) Enums.Exchanges.Ftx2, Name = nameof(Enums.Exchanges.Ftx2)},
         new() {Id = (int) Enums.Exchanges.Coinbase, Name = nameof(Enums.Exchanges.Coinbase)}
     };
-            public static readonly PersistensableCatalog[] Currencies =
+            public static readonly PersistentCatalog[] Currencies =
             {
         new() {Id = (int) Enums.Currencies.Default, Name = nameof(Enums.Currencies.Default), Info = "Not defined" },
         new() {Id = (int) Enums.Currencies.Rub, Name = nameof(Enums.Currencies.Rub), Info = "₽"},
@@ -96,7 +96,7 @@ public static class Constants
         new() {Id = (int) Enums.Currencies.Gbp, Name = nameof(Enums.Currencies.Gbp), Info = "£"},
         new() {Id = (int) Enums.Currencies.Chy, Name = nameof(Enums.Currencies.Chy), Info = "¥"}
     };
-            public static readonly PersistensableCatalog[] Countries =
+            public static readonly PersistentCatalog[] Countries =
             {
         new() { Id = (int) Enums.Countries.Default, Name = nameof(Enums.Countries.Default), Info = "Not defined" },
         new() { Id = (int) Enums.Countries.Rus, Name = nameof(Enums.Countries.Rus), Info = "Russia" },

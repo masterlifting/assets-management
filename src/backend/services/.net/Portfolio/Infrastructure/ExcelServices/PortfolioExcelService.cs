@@ -1,8 +1,9 @@
-﻿using AM.Services.Portfolio.Core.Abstractions.Excel;
+﻿using AM.Services.Portfolio.Core.Abstractions.ExcelService;
+using AM.Services.Portfolio.Infrastructure.Excel;
 
 using Shared.Data.Excel;
 
-namespace AM.Services.Portfolio.Infrastructure.Excel;
+namespace AM.Services.Portfolio.Infrastructure.ExcelServices;
 
 public class PortfolioExcelService : IPortfolioExcelService
 {

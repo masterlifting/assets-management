@@ -1,5 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistense.Entities;
-using AM.Services.Portfolio.Core.Services.ControllersApi;
+﻿using AM.Services.Portfolio.API.Services;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
 using Microsoft.AspNetCore.Mvc;
 
