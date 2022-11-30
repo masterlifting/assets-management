@@ -2,60 +2,57 @@
 
 public static class Constants
 {
-    public static class Persistense
+    public static class Enums
     {
-        public static class Enums
+        public enum EventTypes
         {
-            public enum EventTypes
-            {
-                Adding = 1,
-                Withdrawing,
+            Adding = 1,
+            Withdrawing,
 
-                BankInvestments,
-                CrowdlendingInvestments,
-                CrowdfundingInvestments,
-                VentureInvestments,
+            BankInvestments,
+            CrowdlendingInvestments,
+            CrowdfundingInvestments,
+            VentureInvestments,
 
-                InterestProfit,
-                InvestmentProfit,
-                InvestmentBody,
+            InterestProfit,
+            InvestmentProfit,
+            InvestmentBody,
 
-                Splitting,
-                Donation,
+            Splitting,
+            Donation,
 
-                Dividend,
-                Coupon,
+            Dividend,
+            Coupon,
 
-                Delisting,
-                Loss,
-                TaxCountry,
-                TaxDeal,
-                TaxIncome,
-                TaxProvider,
-                TaxDepositary,
-                ComissionDeal,
-                ComissionProvider,
-                ComissionDepositary
-            }
-            public enum OperationTypes
-            {
-                Income = 1,
-                Expense
-            }
-            public enum Providers
-            {
-                Safe = 1,
-                Bcs,
-                Tinkoff,
-                Vtb,
-                JetLend,
-                Bitokk,
-                XChange
-            }
-            public enum ProcessSteps
-            {
-                ParseBcsReport = 1
-            }
+            Delisting,
+            Loss,
+            TaxCountry,
+            TaxDeal,
+            TaxIncome,
+            TaxProvider,
+            TaxDepositary,
+            ComissionDeal,
+            ComissionProvider,
+            ComissionDepositary
+        }
+        public enum OperationTypes
+        {
+            Income = 1,
+            Expense
+        }
+        public enum Providers
+        {
+            Safe = 1,
+            Bcs,
+            Tinkoff,
+            Vtb,
+            JetLend,
+            Bitokk,
+            XChange
+        }
+        public enum ProcessSteps
+        {
+            ParseBcsReport = 1
         }
     }
 }

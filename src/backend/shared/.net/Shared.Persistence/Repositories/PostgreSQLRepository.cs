@@ -7,24 +7,24 @@ using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
 using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Contexts;
-using Shared.Persistense.Exceptions;
+using Shared.Persistence.Exceptions;
 
-using static Shared.Persistence.Constants.Enums;
+using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
 
-public class PostgreSQLRepository : IPostgreSQLRepository
+public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TContext : PostgreSQLContext
 {
     private readonly string _initiator;
     private readonly ILogger _logger;
-    private readonly PostgreSQLContext _context;
+    private readonly TContext _context;
 
-    public PostgreSQLRepository(ILogger logger, PostgreSQLContext context)
+    public PostgreSQLRepository(ILogger<PostgreSQLRepository<TContext>> logger, TContext context)
     {
         _logger = logger;
         _context = context;
         var objectId = base.GetHashCode();
-        _initiator = $"{nameof(PostgreSQLRepository)} ({objectId})";
+        _initiator = $"{nameof(PostgreSQLRepository<TContext>)} ({objectId})";
     }
 
     public IQueryable<T> Set<T>() where T : class, IPersistent => _context.Set<T>();
@@ -94,7 +94,7 @@ public class PostgreSQLRepository : IPostgreSQLRepository
     public virtual async Task UpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         if (await _context.Set<T>().FindAsync(id) is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+            throw new SharedPersistenceException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
 
         if (!cToken.HasValue)
         {
@@ -161,7 +161,7 @@ public class PostgreSQLRepository : IPostgreSQLRepository
         var entity = await _context.Set<T>().FindAsync(id);
 
         if (entity is null)
-            throw new SharedPersistenseEntityException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+            throw new SharedPersistenceException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
 
         if (!cToken.HasValue)
         {
@@ -234,17 +234,17 @@ public class PostgreSQLRepository : IPostgreSQLRepository
     public async Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
     {
         var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-            ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+            ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
 
         var query = @$"
                 UPDATE ""{tableName}"" SET
-	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)Statuses.Processing}
+	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
 	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistentProcess.ProcessAttempt)}"" END
 	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
                 WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
 	                ( SELECT ""{nameof(IPersistentProcess.Id)}""
 	                  FROM ""{tableName}""
-	                  WHERE ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)Statuses.Ready} 
+	                  WHERE ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Ready} 
 	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
                 RETURNING ""{nameof(IPersistentProcess.Id)}"";";
@@ -256,11 +256,11 @@ public class PostgreSQLRepository : IPostgreSQLRepository
     public async Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
     {
         var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-            ?? throw new SharedPersistenseEntityStateException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+            ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
 
         var query = @$"
                 UPDATE ""{tableName}"" SET
-	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)Statuses.Processing}
+	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
 	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistentProcess.ProcessAttempt)}"" END
 	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
                 WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
@@ -268,7 +268,7 @@ public class PostgreSQLRepository : IPostgreSQLRepository
 	                  FROM ""{tableName}""
 	                  WHERE 
                             ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} 
-                            AND ((""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)Statuses.Processing} AND ""{nameof(IPersistentProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)Statuses.Error}))
+                            AND ((""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing} AND ""{nameof(IPersistentProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Error}))
 			                AND ""{nameof(IPersistentProcess.ProcessAttempt)}"" < {maxAttempts}
 	                  LIMIT {limit}
 	                  FOR UPDATE SKIP LOCKED )
@@ -287,7 +287,7 @@ public class PostgreSQLRepository : IPostgreSQLRepository
         if (step is null)
             return UpdateRangeAsync(array, cToken);
 
-        foreach (var entity in array.Where(x => x.ProcessStatusId != (int)Statuses.Error))
+        foreach (var entity in array.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
             entity.ProcessStepId = step.Id;
 
         return UpdateRangeAsync(array, cToken);

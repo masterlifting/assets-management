@@ -4,8 +4,9 @@ using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.Helpers;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Core.Services.BcsServices.Models;
-using static AM.Services.Common.Contracts.Constants.Persistense.Enums;
-using static AM.Services.Portfolio.Core.Constants.Persistense.Enums;
+
+using static AM.Services.Common.Contracts.Constants.Enums;
+using static AM.Services.Portfolio.Core.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 

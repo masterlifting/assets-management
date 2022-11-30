@@ -19,7 +19,7 @@ public sealed class Startup
     {
         services.AddMemoryCache();
 
-        services.AddPortfolioPersistance(Configuration);
+        services.AddPortfolioPersistence(Configuration);
         services.AddPortfolioCoreServices();
 
         services.AddPortfolioHttpClients(Configuration);

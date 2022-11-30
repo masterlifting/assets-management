@@ -4,7 +4,7 @@ namespace Shared.Background.Settings;
 
 public sealed class BackgroundTaskSettings
 {
-    public ProcessingStepsSettings Steps { get; set; } = new();
+    public ProcessStepsSettings Steps { get; set; } = new();
     public TaskSchedulerSettings Scheduler { get; set; } = new();
-    public TaskRetryPolicySettings? RetryPolicy { get; set; };
+    public TaskRetryPolicySettings? RetryPolicy { get; set; }
 }

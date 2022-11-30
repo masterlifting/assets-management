@@ -11,19 +11,25 @@ public abstract class MongoDBContext
     internal IMongoDatabase DataBase { get; }
     protected MongoDBContext(MongoDBConnectionSettings connectionSettings)
     {
-        DataBase = new MongoClient(connectionSettings.GetConnectionString()).GetDatabase(connectionSettings.Database);
+        var connectionString = connectionSettings.GetConnectionString();
+        var client = new MongoClient(connectionString);
+        DataBase = client.GetDatabase(connectionSettings.Database);
+        OnModelCreating(new MongoDBModelBuilder(DataBase));
     }
 
-    //var collection = db.GetCollection<TestMongoDbModel>("test_collection"){}
-    //collection.InsertOne(new TestMongoDbModel()){}
-    //collection.InsertMany(Enumerable.Range(0, 5).Select(x => new TestMongoDbModel())){}
+    public virtual void OnModelCreating(MongoDBModelBuilder builder)
+    {
+    }
 
     private IMongoCollection<T> GetCollection<T>() where T : class, IPersistent => DataBase.GetCollection<T>(typeof(T).Name);
     public IQueryable<T> Set<T>() where T : class, IPersistent => GetCollection<T>().AsQueryable();
 
-    public Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
+    public async Task CreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
-        throw new NotImplementedException();
+        var collection = GetCollection<T>();
+        collection.Find(x => x.Info == "");
+        await collection.InsertOneAsync(entity);
+        var count = await collection.CountDocumentsAsync(new BsonDocument());
     }
     public async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -51,5 +57,18 @@ public abstract class MongoDBContext
     public Task DeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         throw new NotImplementedException();
+    }
+}
+public sealed class MongoDBModelBuilder
+{
+    private readonly IMongoDatabase _database;
+    public MongoDBModelBuilder(IMongoDatabase database) => _database = database;
+
+    public void SetCollection<T>(CreateCollectionOptions options) where T : class, IPersistent
+    {
+        var collection = _database.GetCollection<T>(typeof(T).Name);
+        
+        if (collection is null)
+            _database.CreateCollection(typeof(T).Name, options);
     }
 }

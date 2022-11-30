@@ -13,10 +13,10 @@ public class IncomingData : IPersistentPayload, IPersistentProcess, IPersistentJ
     public byte ProcessAttempt { get; set; }
     
     public byte[] Payload { get; init; } = Array.Empty<byte>();
-    public byte[] PayloadHash { get; init; } = Array.Empty<byte>();
     public string PayloadSource { get; init; } = null!;
-    public string PayloadContentType { get; init; } = null!;
+    public byte[] PayloadHash { get; init; } = Array.Empty<byte>();
     public string PayloadHashAlgoritm { get; init; } = null!;
+    public string PayloadContentType { get; init; } = null!;
 
     public DateTime Updated { get; set; }
     public DateTime Created { get; init; }

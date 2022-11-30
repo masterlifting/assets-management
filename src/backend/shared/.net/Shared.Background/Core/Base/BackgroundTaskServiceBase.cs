@@ -18,7 +18,7 @@ public abstract class BackgroundTaskServiceBase<TEntity, TStep, TTask> : IBackgr
 
     protected BackgroundTaskServiceBase(IServiceScopeFactory scopeFactory)
     {
-        TaskName = typeof(TEntity).Name + '.' + typeof(TTask).Name;
+        TaskName = typeof(TEntity).Name + '.' + typeof(TTask).Name[..^2];
         _scopeFactory = scopeFactory;
     }
 

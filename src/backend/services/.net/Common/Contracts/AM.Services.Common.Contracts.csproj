@@ -6,10 +6,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Folder Include="Abstractions\Persistense\Entities\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\..\..\..\shared\.net\Shared.Persistence.Abstractions\Shared.Persistence.Abstractions.csproj" />
 	</ItemGroup>
 

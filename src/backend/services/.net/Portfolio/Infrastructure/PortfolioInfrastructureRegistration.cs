@@ -24,15 +24,15 @@ public static class PortfolioInfrastructureRegistration
         services.AddTransient<IPortfolioExcelService, PortfolioExcelService>();
         services.AddTransient<IBcsReportService, BcsReportService>();
     }
-    public static void AddPortfolioPersistance(this IServiceCollection services, IConfiguration configuration)
+    public static void AddPortfolioPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
 
         services.AddScoped<PostgreSQLPortfolioContext>();
-        services.AddScoped<IPostgreSQLRepository, PostgreSQLRepository>();
+        services.AddScoped<IPostgreSQLRepository, PostgreSQLRepository<PostgreSQLPortfolioContext>>();
 
         services.AddScoped<MongoDBPortfolioContext>();
-        services.AddScoped<IMongoDBRepository, MongoDBRepository>();
+        services.AddScoped<IMongoDBRepository, MongoDBRepository<MongoDBPortfolioContext>>();
     }
     public static void AddPortfolioHttpClients(this IServiceCollection services, IConfiguration configuration)
     {

@@ -13,9 +13,9 @@ public abstract class PostgreSQLContext : DbContext
 
     public DbSet<GuidId> GuidIds { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        optionsBuilder.UseNpgsql(_connectionSettings.GetConnectionString());
-        base.OnConfiguring(optionsBuilder);
+        builder.UseNpgsql(_connectionSettings.GetConnectionString());
+        base.OnConfiguring(builder);
     }
 }

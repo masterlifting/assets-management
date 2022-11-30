@@ -10,18 +10,18 @@ using Shared.Persistence.Contexts;
 
 namespace Shared.Persistence.Repositories;
 
-public class MongoDBRepository : IMongoDBRepository
+public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : MongoDBContext
 {
     private readonly string _initiator;
     private readonly ILogger _logger;
-    private readonly MongoDBContext _context;
+    private readonly TContext _context;
 
-    public MongoDBRepository(ILogger logger, MongoDBContext context)
+    public MongoDBRepository(ILogger<MongoDBRepository<TContext>> logger, TContext context)
     {
         _logger = logger;
         _context = context;
         var objectId = base.GetHashCode();
-        _initiator = $"{nameof(MongoDBRepository)} ({objectId})";
+        _initiator = $"{nameof(MongoDBRepository<TContext>)} ({objectId})";
     }
 
     public IQueryable<T> Set<T>() where T : class, IPersistent => _context.Set<T>();
@@ -182,19 +182,19 @@ public class MongoDBRepository : IMongoDBRepository
     public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistentCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
     public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistentCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
 
-    public Task<Guid[]> PrepareProcessableEntityDataAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IProcessableEntity
+    public Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
     {
         throw new NotImplementedException();
     }
-    public Task<Guid[]> PrepareProcessableEntityRetryDataAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IProcessableEntity
+    public Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
     {
         throw new NotImplementedException();
     }
-    public Task<T[]> GetProcessableEntityDataAsync<T>(IProcessStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IProcessableEntity
+    public Task<T[]> GetProcessableEntitiesAsync<T>(IProcessStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IPersistentProcess
     {
         throw new NotImplementedException();
     }
-    public Task SaveProcessableEntityResultAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IProcessableEntity
+    public Task SaveProcessableEntitiesAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess
     {
         throw new NotImplementedException();
     }
