@@ -15,8 +15,6 @@ public sealed class ExceptionDescription
     }
     public ExceptionDescription(SharedException exeption)
     {
-        var model = new ExceptionModel(exeption.Model.Initiator, exeption.Model.Action, exeption.Model.Description);
-
-        Value = model.ToString();
+        Value = $". {exeption.Model.Initiator}. {exeption.Model.Action}. {exeption.Model.Description}";
     }
 }

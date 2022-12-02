@@ -61,8 +61,10 @@ public sealed class BcsReportService : IBcsReportService
     };
     }
 
-    public BcsReportModel GetReportModel(byte[] payload)
+    public BcsReportModel GetReportModel(string fileName, byte[] payload)
     {
+        BcsReportFileStructure.CheckFile(fileName);
+
         var excel = _excelService.GetExcelDocument(payload);
 
         _deals.EnsureCapacity(excel.RowsCount / 2);

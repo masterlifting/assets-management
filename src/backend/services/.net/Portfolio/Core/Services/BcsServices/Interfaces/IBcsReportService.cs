@@ -5,7 +5,7 @@ namespace AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 public interface IBcsReportService
 {
-    BcsReportModel GetReportModel(byte[] payload);
+    BcsReportModel GetReportModel(string fileName, byte[] payload);
     Deal[] GetDeals(BcsReportModel reportModel);
     Event[] GetEvents(BcsReportModel reportModel);
 }

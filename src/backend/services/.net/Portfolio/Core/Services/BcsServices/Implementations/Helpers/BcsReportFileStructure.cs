@@ -1,3 +1,8 @@
+using AM.Services.Portfolio.Core.Exceptions;
+using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
+
+using System.Text.RegularExpressions;
+
 using static AM.Services.Common.Contracts.Constants.Enums;
 using static AM.Services.Portfolio.Core.Constants.Enums;
 
@@ -5,6 +10,13 @@ namespace AM.Services.Portfolio.Core.Services.BcsServices.Implementations.Helper
 
 public static class BcsReportFileStructure
 {
+    public static void CheckFile(string fileName)
+    {
+        var match = Regex.Match(fileName, "^B_k-(.+)_ALL(.+).xls$", RegexOptions.IgnoreCase);
+        if (match.Success)
+            throw new PortfolioCoreException(nameof(BcsReportService), nameof(CheckFile), new($"'File '{fileName}' was not recognized for BCS"));
+    }
+
     public static class Points
     {
         public const string FirstBlock = "1.1.1. Движение денежных средств по совершенным сделкам (иным операциям) с ценными бумагами";

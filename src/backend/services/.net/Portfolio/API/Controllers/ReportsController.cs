@@ -1,22 +1,18 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+﻿using AM.Services.Portfolio.API.Exceptions;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-using Shared.Extensions.Logging;
 using Shared.Persistence.Abstractions.Repositories;
 
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using static Shared.Persistence.Abstractions.Constants.Enums;
-
-using PortfolioCoreException = AM.Services.Portfolio.API.Exceptions.PortfolioHostException;
 
 namespace AM.Services.Portfolio.API.Controllers;
 
@@ -28,10 +24,6 @@ public sealed class ReportsController : ControllerBase
     private readonly ILogger<ReportsController> _logger;
     private readonly IMongoDBRepository _mongoRepository;
     private readonly IPostgreSQLRepository _postgreSQLRepository;
-    private static readonly Dictionary<string, Core.Constants.Enums.Providers> ProviderPatterns = new()
-    {
-        { "^B_k-(.+)_ALL(.+).xls$", Core.Constants.Enums.Providers.Bcs }
-    };
 
     public ReportsController(ILogger<ReportsController> logger, IMongoDBRepository mongoRepository, IPostgreSQLRepository postgreSQLRepository)
     {
@@ -45,7 +37,14 @@ public sealed class ReportsController : ControllerBase
     {
         try
         {
-            await CreateUserAsync();
+            var user = await _postgreSQLRepository.FindAsync<User>(_userId);
+
+            if (user is null)
+                await _postgreSQLRepository.CreateAsync(new User
+                {
+                    Id = _userId,
+                    Name = "Andrey Pestunov"
+                });
 
             foreach (var file in files)
             {
@@ -53,60 +52,30 @@ public sealed class ReportsController : ControllerBase
                 await using var stream = file.OpenReadStream();
                 var _ = await stream.ReadAsync(payload.AsMemory(0, (int)file.Length));
 
-                if (GetProvider(file.FileName) != Core.Constants.Enums.Providers.Bcs)
-                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"File: '{file.FileName}'", new("The provider is notn BCS")));
-
-                var reportData = new IncomingData
+                var createdResult = await _mongoRepository.TryCreateAsync(new IncomingData
                 {
                     Id = Guid.NewGuid(),
-                    UserId = _userId,
+                    UserId = user!.Id,
 
                     Payload = payload,
                     PayloadHash = SHA256.HashData(payload),
                     PayloadHashAlgoritm = nameof(SHA256),
-                    
                     PayloadSource = file.FileName,
                     PayloadContentType = file.ContentType,
-                    
+
                     ProcessStepId = stepId,
                     ProcessStatusId = (int)ProcessStatuses.Ready
-                };
-
-                var createdResult = await _mongoRepository.TryCreateAsync(reportData);
+                });
 
                 if (!createdResult.IsSuccess)
-                    _logger.LogError(new PortfolioCoreException(nameof(ReportsController), $"File: '{file.FileName}'", new(createdResult.Error!)));
+                    throw new PortfolioAPIException(nameof(ReportsController), $"Saving file: '{file.FileName}'", new(createdResult.Error!));
             }
 
-            return Ok();
+            return Ok($"{files.Count} elements were created");
         }
         catch (Exception exception)
         {
             return BadRequest(exception.Message);
         }
-    }
-
-    private static Core.Constants.Enums.Providers GetProvider(string fileName)
-    {
-        foreach (var (pattern, provider) in ProviderPatterns)
-        {
-            var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
-
-            if (match.Success)
-                return provider;
-        }
-
-        throw new PortfolioCoreException(nameof(ReportsController), nameof(GetProvider), new($"Report provider not recognized for '{fileName}'"));
-    }
-    private async Task CreateUserAsync()
-    {
-        var user = await _postgreSQLRepository.FindAsync<User>(_userId);
-
-        if (user is null)
-            await _postgreSQLRepository.CreateAsync(new User
-            {
-                Id = _userId,
-                Name = "Andrey Pestunov"
-            });
     }
 }

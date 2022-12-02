@@ -13,14 +13,12 @@ internal static class Constants
 
         internal const string NoData = "Data for processing not found";
         internal const string Success = "Success";
-        internal static class EntityStates
+        internal static class ProcessableActions
         {
-            internal const string PrepareNewData = ". Preparing new data to processing";
-            internal const string PrepareUnhandledData = ". Repeated preparing data to processing";
-            internal const string PrepareData = ". Preparing data to processing";
-            internal const string GetData = ". Receiving data";
-            internal const string HandleData = ". Processing received data";
-            internal const string UpdateData = ". Updating processed data";
+            internal const string GetProcessableData = ". Getting data to processing";
+            internal const string GetUnprocessableData = ". Repeated getting data to processing";
+            internal const string HandleProcessableData = ". Processing received data";
+            internal const string SaveProcessableData = ". Save processed result";
         }
     }
 }

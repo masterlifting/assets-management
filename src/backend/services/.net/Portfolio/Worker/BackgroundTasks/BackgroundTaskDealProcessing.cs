@@ -1,4 +1,5 @@
 ﻿using AM.Services.Common.Contracts.Abstractions.Persistence.Entities.Catalogs;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 

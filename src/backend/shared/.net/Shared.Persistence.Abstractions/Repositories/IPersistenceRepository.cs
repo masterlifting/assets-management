@@ -30,8 +30,7 @@ public interface IPersistenceRepository
     Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistentCatalog;
     Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistentCatalog;
 
-    Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess;
-    Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess;
-    Task<T[]> GetProcessableEntitiesAsync<T>(IProcessStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IPersistentProcess;
-    Task SaveProcessableEntitiesAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess;
+    Task<T[]> GetProcessableAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess;
+    Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess;
+    Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess;
 }

@@ -31,7 +31,7 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
 
         _taskService = taskService;
         _logger = logger;
-        _action = typeof(IBackgroundTaskService).Name + " process";
+        _action = typeof(T).Name + " background process";
     }
     protected override async Task ExecuteAsync(CancellationToken cToken)
     {

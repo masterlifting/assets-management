@@ -43,46 +43,41 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
             var step = steps.Dequeue();
             var action = step.Info ?? step.Name;
 
-            Guid[]? ids = await GetPreparedIdsAsync(step, taskName, action, taskCount, settings, cToken);
+            TEntity[] processableData = await GetProcessableAsync(step, taskName, action, taskCount, settings, cToken);
 
-            if (ids is null)
+            if (!processableData.Any())
                 continue;
 
-            TEntity[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
-
-            if (entities is null)
-                continue;
-
-            await HandleDataAsync(step, taskName, action, entities, settings.Steps.IsParallelProcessing, cToken);
+            await HandleDataAsync(step, taskName, action, processableData, settings.Steps.IsParallelProcessing, cToken);
 
             var isNextStep = steps.TryPeek(out var nextStep);
 
             try
             {
-                _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
+                _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
 
                 if (isNextStep)
                 {
-                    foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Processed))
+                    foreach (var entity in processableData.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Processed))
                     {
                         entity.ProcessStatusId = (int)ProcessStatuses.Ready;
                         entity.Info = $"Previous step was '{step.Name}'";
                     }
 
-                    await _repository.SaveProcessableEntitiesAsync(nextStep, entities, cToken);
+                    await _repository.SaveProcessableAsync(nextStep, processableData, cToken);
 
-                    _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
+                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
                 }
                 else
                 {
-                    await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
+                    await _repository.SaveProcessableAsync(null, processableData, cToken);
 
-                    _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
+                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
                 }
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.UpdateData, new(exception)));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
             }
         }
     }
@@ -101,138 +96,98 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
 
         var action = step!.Info ?? step.Name;
 
-        Guid[]? ids = await GetPreparedIdsAsync(step, taskName, action, taskCount, settings, cToken);
+        var processableData = await GetProcessableAsync(step, taskName, action, taskCount, settings, cToken);
 
-        if (ids is null)
+        if (!processableData.Any())
             return;
 
-        TEntity[]? entities = await GetEntitiesAsync(step, taskName, action, ids, settings.Steps.IsParallelProcessing, cToken);
-
-        if (entities is null)
-            return;
-
-        await HandleDataAsync(step, taskName, action, entities, settings.Steps.IsParallelProcessing, cToken);
+        await HandleDataAsync(step, taskName, action, processableData, settings.Steps.IsParallelProcessing, cToken);
 
         try
         {
-            _logger.LogTrace(taskName, action + Actions.EntityStates.UpdateData, Actions.Start);
+            _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
 
             await _semaphore.WaitAsync();
-            await _repository.SaveProcessableEntitiesAsync(null, entities, cToken);
+            await _repository.SaveProcessableAsync(null, processableData, cToken);
             _semaphore.Release();
 
-            _logger.LogDebug(taskName, action + Actions.EntityStates.UpdateData, Actions.Success);
+            _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.UpdateData, new(exception)));
+            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
         }
     }
 
-    private async Task<Guid[]?> GetPreparedIdsAsync(TStep step, string taskName, string action, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
+    private async Task<TEntity[]> GetProcessableAsync(TStep step, string taskName, string action, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
-        Guid[]? ids = null;
         try
         {
-            _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Start);
+            _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.Start);
 
-            if (!settings.Steps.IsParallelProcessing)
-                ids = await _repository.GetPreparedProcessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
-            else
-            {
-                await _semaphore.WaitAsync();
-                ids = await _repository.GetPreparedProcessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
-                _semaphore.Release();
-            }
+            var result = await _repository.GetProcessableAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
 
-            if (ids.Any())
-                _logger.LogDebug(taskName, action + Actions.EntityStates.PrepareNewData, Actions.Success, ids.Length);
+            if (result.Any())
+                _logger.LogDebug(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.Success, result.Length);
 
             if (settings.RetryPolicy is not null && taskCount % settings.RetryPolicy.EveryTime == 0)
             {
-                _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareUnhandledData, Actions.Start);
+                _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetUnprocessableData, Actions.Start);
 
                 var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.RetryPolicy.EveryTime;
                 var retryDate = DateTime.UtcNow.Add(-retryTime);
 
-                var retryIds = await _repository.GetPrepareUnprocessableIdsAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
+                var unprocessableResult = await _repository.GetUnprocessableAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
 
-                if (retryIds.Any())
+                if (unprocessableResult.Any())
                 {
-                    ids = ids.Concat(retryIds).ToArray();
-                    _logger.LogDebug(taskName, action + Actions.EntityStates.PrepareUnhandledData, Actions.Success, retryIds.Length);
+                    result = result.Concat(unprocessableResult).ToArray();
+                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.GetUnprocessableData, Actions.Success, unprocessableResult.Length);
                 }
             }
+
+            if (!result.Any())
+                _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.NoData);
+
+            return result;
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.PrepareData, new(exception)));
+            throw new SharedBackgroundException(taskName, action + Actions.ProcessableActions.GetProcessableData, new(exception));
         }
-
-        if (ids is not null && !ids.Any())
-        {
-            _logger.LogTrace(taskName, action + Actions.EntityStates.PrepareData, Actions.NoData);
-        }
-
-        return ids;
     }
-    private async Task<TEntity[]?> GetEntitiesAsync(TStep step, string taskName, string action, Guid[] ids, bool isParallel, CancellationToken cToken)
-    {
-        TEntity[]? entities = null;
-        try
-        {
-            _logger.LogTrace(taskName, action + Actions.EntityStates.GetData, Actions.Start);
-
-            if (!isParallel)
-                entities = await _repository.GetProcessableEntitiesAsync<TEntity>(step, ids, cToken);
-            else
-            {
-                await _semaphore.WaitAsync();
-                entities = await _repository.GetProcessableEntitiesAsync<TEntity>(step, ids, cToken);
-                _semaphore.Release();
-            }
-
-            _logger.LogDebug(taskName, action + Actions.EntityStates.GetData, Actions.Success);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.GetData, new(exception)));
-        }
-
-        return entities;
-    }
-    private async Task HandleDataAsync(TStep step, string taskName, string action, TEntity[] entities, bool isParallel, CancellationToken cToken)
+    private async Task HandleDataAsync(TStep step, string taskName, string action, TEntity[] data, bool isParallel, CancellationToken cToken)
     {
         try
         {
-            _logger.LogTrace(taskName, action + Actions.EntityStates.HandleData, Actions.Start);
+            _logger.LogTrace(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Start);
 
             if (!isParallel)
-                await _handler.HandleAsync(step, entities, cToken);
+                await _handler.HandleProcessableStepAsync(step, data, cToken);
             else
             {
                 await _semaphore.WaitAsync();
-                await _handler.HandleAsync(step, entities, cToken);
+                await _handler.HandleProcessableStepAsync(step, data, cToken);
                 _semaphore.Release();
             }
 
-            foreach (var entity in entities.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
+            foreach (var entity in data.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
                 entity.ProcessStatusId = (int)ProcessStatuses.Processed;
 
-            foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, new(entity.Info ?? "Error has not description")));
+            foreach (var entity in data.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Info ?? "Error has not description")));
 
-            _logger.LogDebug(taskName, action + Actions.EntityStates.HandleData, Actions.Success);
+            _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
         }
         catch (Exception exception)
         {
-            foreach (var entity in entities)
+            foreach (var entity in data)
             {
                 entity.ProcessStatusId = (int)ProcessStatuses.Error;
                 entity.Info = exception.Message;
             }
 
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.EntityStates.HandleData, new(exception)));
+            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(exception)));
         }
     }
 }

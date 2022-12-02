@@ -6,9 +6,9 @@ public static class Constants
     {
         internal const string Success = "Success";
 
-        public const string Create = "Creating";
-        public const string Update = "Updating";
-        public const string Delete = "Deleting";
+        public const string Created = "Created";
+        public const string Updated = "Updated";
+        public const string Deleted = "Deleted";
         public const string NoData = "Data not found";
     }
     public static class Enums

@@ -1,6 +1,4 @@
-﻿using AM.Services.Common.Contracts.Abstractions.Persistence.Entities.Catalogs;
-using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
+﻿using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 
 using Microsoft.Extensions.Options;
 
@@ -9,7 +7,7 @@ using Shared.Background.Settings.Sections;
 
 namespace AM.Services.Portfolio.Worker.BackgroundServices;
 
-public sealed class BackgroundServiceIncomingDataProcessing : BackgroundServiceProcessing<IncomingData, ProcessStep>
+public sealed class BackgroundServiceIncomingDataProcessing : BackgroundServiceProcessing<IncomingData, ProcessSteps>
 {
     public BackgroundServiceIncomingDataProcessing(
         IServiceScopeFactory scopeFactory,

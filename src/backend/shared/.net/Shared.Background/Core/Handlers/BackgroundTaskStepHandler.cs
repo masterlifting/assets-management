@@ -10,10 +10,10 @@ public sealed class BackgroundTaskStepHandler<T> where T : class, IPersistentPro
     private readonly Dictionary<int, IProcessStepHandler<T>> _handlers;
     public BackgroundTaskStepHandler(Dictionary<int, IProcessStepHandler<T>> handlers) => _handlers = handlers;
 
-    public Task HandleAsync(IProcessStep step, IEnumerable<T> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+    public Task HandleProcessableStepAsync(IProcessStep step, IEnumerable<T> data, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
         ? _handlers[step.Id].HandleStepAsync(data, cToken)
-        : throw new SharedBackgroundException(typeof(T).Name + "Handler", nameof(HandleAsync), new($"Step: '{step.Name}' not implemented'"));
-    public Task<IReadOnlyCollection<T>> HandleAsync(IProcessStep step, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
+        : throw new SharedBackgroundException(typeof(T).Name + "Handler", nameof(HandleProcessableStepAsync), new($"Step: '{step.Name}' is not implemented'"));
+    public Task<IReadOnlyCollection<T>> HandleProcessableStepAsync(IProcessStep step, CancellationToken cToken) => _handlers.ContainsKey(step.Id)
         ? _handlers[step.Id].HandleStepAsync(cToken)
-        : throw new SharedBackgroundException(typeof(T).Name + "Handler", nameof(HandleAsync), new($"Step: '{step.Name}' not implemented'"));
+        : throw new SharedBackgroundException(typeof(T).Name + "Handler", nameof(HandleProcessableStepAsync), new($"Step: '{step.Name}' is not implemented'"));
 }

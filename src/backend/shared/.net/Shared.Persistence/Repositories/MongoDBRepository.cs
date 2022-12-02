@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+
+using MongoDB.Driver;
 
 using Shared.Contracts.Models.Results;
 using Shared.Extensions.Logging;
@@ -7,6 +8,8 @@ using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
 using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Contexts;
+
+using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
 
@@ -24,8 +27,6 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         _initiator = $"{nameof(MongoDBRepository<TContext>)} ({objectId})";
     }
 
-    public IQueryable<T> Set<T>() where T : class, IPersistent => _context.Set<T>();
-
     public virtual async Task CreateAsync<T>(T entity, CancellationToken? ctToken = null) where T : class, IPersistent
     {
         if (!ctToken.HasValue)
@@ -33,7 +34,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             await _context.CreateAsync(entity, ctToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, typeof(T).Name + ' ' + Constants.Actions.Created, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -51,7 +52,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.NoData);
             return;
         }
 
@@ -60,7 +61,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             await _context.CreateRangeAsync(entities, cToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -82,7 +83,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             await _context.UpdateAsync(id, entity, ctToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -100,7 +101,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.NoData);
             return;
         }
 
@@ -109,7 +110,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             await _context.UpdateRangeAsync(entities, cToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -132,7 +133,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             entity = await _context.DeleteAsync<T>(id, cToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success);
 
         return entity;
     }
@@ -152,7 +153,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.NoData);
             return;
         }
 
@@ -161,7 +162,7 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         else
             await _context.DeleteRangeAsync(entities, cToken.Value);
 
-        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success);
     }
     public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -176,35 +177,89 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         }
     }
 
-    public Task<T[]> GetCatalogsAsync<T>() where T : class, IPersistentCatalog => _context.Set<T>().ToArrayAsync();
-    public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IPersistentCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Id);
-    public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IPersistentCatalog => _context.Set<T>().ToDictionaryAsync(x => x.Name);
-    public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistentCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
-    public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistentCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
+    public Task<T[]> GetCatalogsAsync<T>() where T : class, IPersistentCatalog => Task.Run(() => 
+        _context.SetCollection<T>().ToArray());
+    public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>() where T : class, IPersistentCatalog => 
+            Task.Run(() => _context.SetCollection<T>().ToDictionary(x => x.Id));
+    public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>() where T : class, IPersistentCatalog => 
+            Task.Run(() => _context.SetCollection<T>().ToDictionary(x => x.Name));
+    public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistentCatalog => 
+        Task.Run(() => _context.SetCollection<T>().FirstOrDefault(x => x.Id == id));
+    public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistentCatalog => 
+        Task.Run(() => _context.SetCollection<T>().FirstOrDefault(x => x.Name.Equals(name)));
 
-    public Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
+    public async Task<T[]> GetProcessableAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
     {
-        throw new NotImplementedException();
+        var collection = _context.GetCollection<T>();
+
+        var builder = Builders<T>.Update
+            .Set(x => x.Updated, DateTime.UtcNow)
+            .Set(x => x.ProcessStatusId, (int)ProcessStatuses.Processing)
+            .Inc(x => x.ProcessAttempt, 1);
+        
+        List<T> result = new(limit);
+        
+        foreach (var item in Enumerable.Range(0, limit))
+        {
+            var entity = await collection.FindOneAndUpdateAsync(x => 
+            x.ProcessStepId == step.Id 
+            && x.ProcessStatusId == (int)ProcessStatuses.Ready
+            , builder);
+            
+            if (entity is null)
+                break;
+            
+            result.Add(entity);
+        }
+        
+        return result.ToArray();
     }
-    public Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
+    public async Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
     {
-        throw new NotImplementedException();
+        var collection = _context.GetCollection<T>();
+
+        var builder = Builders<T>.Update
+            .Set(x => x.Updated, DateTime.UtcNow)
+            .Set(x => x.ProcessStatusId, (int)ProcessStatuses.Processing)
+            .Inc(x => x.ProcessAttempt, 1);
+
+        List<T> result = new(limit);
+
+        foreach (var item in Enumerable.Range(0, limit))
+        {
+            var entity = await collection.FindOneAndUpdateAsync(x => 
+            x.ProcessStepId == step.Id 
+            && ((x.ProcessStatusId == (int)ProcessStatuses.Processing && x.Updated < updateTime) || (x.ProcessStatusId == (int)ProcessStatuses.Error))
+            && (x.ProcessAttempt < maxAttempts)
+            , builder);
+
+            if (entity is null)
+                break;
+
+            result.Add(entity);
+        }
+
+        return result.ToArray();
     }
-    public Task<T[]> GetProcessableEntitiesAsync<T>(IProcessStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IPersistentProcess
+    public Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess
     {
-        throw new NotImplementedException();
-    }
-    public Task SaveProcessableEntitiesAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess
-    {
-        throw new NotImplementedException();
+        var array = entities.ToArray();
+
+        if (step is null)
+            return UpdateRangeAsync(array, cToken);
+
+        foreach (var entity in array.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
+            entity.ProcessStepId = step.Id;
+
+        return UpdateRangeAsync(array, cToken);
     }
 
     public Task<T?> FindAsync<T>(params object[] id) where T : class, IPersistent
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException(nameof(FindAsync));
     }
     public Task<T?> FindAsync<T, TId>(TId id) where T : class, IPersistent where TId : struct
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException(nameof(FindAsync));
     }
 }

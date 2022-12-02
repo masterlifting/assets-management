@@ -18,8 +18,8 @@ public class IncomingData : IPersistentPayload, IPersistentProcess, IPersistentJ
     public string PayloadHashAlgoritm { get; init; } = null!;
     public string PayloadContentType { get; init; } = null!;
 
-    public DateTime Updated { get; set; }
-    public DateTime Created { get; init; }
+    public DateTime Updated { get; set; } = DateTime.UtcNow;
+    public DateTime Created { get; init; } = DateTime.UtcNow;
     public string? Info { get; set; }
 
     public string JsonVersion { get; init; } = "1.0.0";

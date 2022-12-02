@@ -42,13 +42,13 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.Success);
     }
     public virtual async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.NoData);
             return;
         }
 
@@ -64,7 +64,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             result = await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Create, Constants.Actions.Success, result);
+        _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -94,7 +94,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
     public virtual async Task UpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         if (await _context.Set<T>().FindAsync(id) is null)
-            throw new SharedPersistenceException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+            throw new SharedPersistenceException(_initiator, Constants.Actions.Updated, new($"Entity by Id: '{id}' not found"));
 
         if (!cToken.HasValue)
         {
@@ -107,13 +107,13 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
     }
     public virtual async Task UpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.NoData);
             return;
         }
 
@@ -129,7 +129,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             result = await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.Success, result);
+        _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -161,7 +161,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
         var entity = await _context.Set<T>().FindAsync(id);
 
         if (entity is null)
-            throw new SharedPersistenceException(_initiator, Constants.Actions.Update, new($"Entity by Id: '{id}' not found"));
+            throw new SharedPersistenceException(_initiator, Constants.Actions.Updated, new($"Entity by Id: '{id}' not found"));
 
         if (!cToken.HasValue)
         {
@@ -174,7 +174,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success);
+        _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success);
 
         return entity;
     }
@@ -182,7 +182,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
     {
         if (!entities.Any())
         {
-            _logger.LogTrace(_initiator, Constants.Actions.Update, Constants.Actions.NoData);
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.NoData);
             return;
         }
 
@@ -198,7 +198,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
             result = await _context.SaveChangesAsync(cToken.Value);
         }
 
-        _logger.LogTrace(_initiator, Constants.Actions.Delete, Constants.Actions.Success, result);
+        _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success, result);
     }
     public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -231,7 +231,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
     public Task<T?> GetCatalogByIdAsync<T>(int id) where T : class, IPersistentCatalog => _context.Set<T>().FindAsync(id).AsTask();
     public Task<T?> GetCatalogByNameAsync<T>(string name) where T : class, IPersistentCatalog => _context.Set<T>().FirstOrDefaultAsync(x => x.Name.Equals(name));
 
-    public async Task<Guid[]> GetPreparedProcessableIdsAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
+    public async Task<T[]> GetProcessableAsync<T>(IProcessStep step, int limit, CancellationToken cToken) where T : class, IPersistentProcess
     {
         var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
             ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
@@ -239,7 +239,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
         var query = @$"
                 UPDATE ""{tableName}"" SET
 	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
-	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistentProcess.ProcessAttempt)}"" END
+	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
 	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
                 WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
 	                ( SELECT ""{nameof(IPersistentProcess.Id)}""
@@ -251,9 +251,11 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
 
         var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
 
-        return result.Select(x => x.Id).ToArray();
+        var ids = result.Select(x => x.Id).ToArray();
+
+        return await _context.Set<T>().Where(x => ids.Contains(x.Id)).ToArrayAsync(cToken);
     }
-    public async Task<Guid[]> GetPrepareUnprocessableIdsAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
+    public async Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where T : class, IPersistentProcess
     {
         var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
             ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
@@ -261,7 +263,7 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
         var query = @$"
                 UPDATE ""{tableName}"" SET
 	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
-	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = CASE WHEN ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} THEN ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1 ELSE ""{nameof(IPersistentProcess.ProcessAttempt)}"" END
+	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
 	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
                 WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
 	                ( SELECT ""{nameof(IPersistentProcess.Id)}""
@@ -275,12 +277,12 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
                 RETURNING ""{nameof(IPersistentProcess.Id)}"";";
 
         var result = await _context.GuidIds.FromSqlRaw(query).ToArrayAsync(cToken);
-
-        return result.Select(x => x.Id).ToArray();
+        
+        var ids = result.Select(x => x.Id).ToArray();
+        
+        return await _context.Set<T>().Where(x => ids.Contains(x.Id)).ToArrayAsync(cToken);
     }
-    public Task<T[]> GetProcessableEntitiesAsync<T>(IProcessStep step, IEnumerable<Guid> ids, CancellationToken cToken) where T : class, IPersistentProcess =>
-    _context.Set<T>().Where(x => x.ProcessStepId == step.Id && ids.Contains(x.Id)).ToArrayAsync(cToken);
-    public Task SaveProcessableEntitiesAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess
+    public Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess
     {
         var array = entities.ToArray();
 

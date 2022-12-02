@@ -26,7 +26,7 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
         {
             try
             {
-                var reportModel = _service.GetReportModel(x.Payload);
+                var reportModel = _service.GetReportModel(x.PayloadSource, x.Payload);
 
                 var deals = _service.GetDeals(reportModel);
                 var events = _service.GetEvents(reportModel);
@@ -39,7 +39,7 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
             catch (Exception exception)
             {
                 x.ProcessStatusId = (int)ProcessStatuses.Error;
-                x.Info = $"File: {x.PayloadSource}. " + exception.Message;
+                x.Info = $"Exception in the file: {x.PayloadSource}. Error: " + exception.Message;
             }
             finally
             {
