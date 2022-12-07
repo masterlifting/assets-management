@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  am.services.portfolio.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+  # am.services.portfolio.worker:
+  #   environment:
+      

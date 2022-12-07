@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\shared\exceptions\Shared.Exceptions.csproj" />
+	  <ProjectReference Include="..\..\shared\persistence.abstractions\Shared.Persistence.Abstractions.csproj" />
+	</ItemGroup>
+
+</Project>
