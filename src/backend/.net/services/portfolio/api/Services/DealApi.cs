@@ -1,6 +1,7 @@
 ﻿using AM.Services.Portfolio.API.Models;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using Shared.Models.Pagination;
+using Shared.Models.Results;
 using System;
 using System.Threading.Tasks;
 

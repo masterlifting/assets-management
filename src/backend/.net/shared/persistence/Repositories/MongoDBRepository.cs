@@ -38,16 +38,16 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
 
         _logger.LogTrace(_initiator, typeof(T).Name + ' ' + Constants.Actions.Created, Constants.Actions.Success);
     }
-    public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await CreateAsync(entity, cToken);
-            return new Result(true);
+            return new TryResult<T>(entity);
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T>(exception);
         }
     }
     public virtual async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
@@ -65,16 +65,16 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
 
         _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.Success);
     }
-    public virtual async Task<Result> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T[]>> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await CreateRangeAsync(entities, cToken);
-            return new Result(true);
+            return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T[]>(exception);
         }
     }
 
@@ -87,16 +87,16 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
 
         _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
     }
-    public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await UpdateAsync(id, entity, cToken);
-            return new Result(true);
+            return new TryResult<T>(entity);
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T>(exception);
         }
     }
     public virtual async Task UpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
@@ -114,16 +114,16 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
 
         _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
     }
-    public virtual async Task<Result> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T[]>> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await UpdateRangeAsync(entities, cToken);
-            return new Result(true);
+            return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T[]>(exception);
         }
     }
 
@@ -138,18 +138,6 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
         _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success);
 
         return entity;
-    }
-    public virtual async Task<ResultData<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistent
-    {
-        try
-        {
-            var entity = await DeleteAsync<T>(id, cToken);
-            return new ResultData<T>(new(true), entity);
-        }
-        catch (Exception exception)
-        {
-            return new ResultData<T>(new(false, exception.InnerException?.Message ?? exception.Message), null);
-        }
     }
     public virtual async Task DeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
@@ -166,16 +154,28 @@ public class MongoDBRepository<TContext> : IMongoDBRepository where TContext : M
 
         _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success);
     }
-    public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistent
+    {
+        try
+        {
+            var entity = await DeleteAsync<T>(id, cToken);
+            return new TryResult<T>(entity);
+        }
+        catch (Exception exception)
+        {
+            return new TryResult<T>(exception);
+        }
+    }
+    public virtual async Task<TryResult<T[]>> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await DeleteRangeAsync(entities, cToken);
-            return new Result(true);
+            return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T[]>(exception);
         }
     }
 

@@ -1,4 +1,4 @@
-namespace Shared.Models.Pagination;
+namespace Shared.Models.Results;
 
 public record PaginatedResult<T> where T : class
 {

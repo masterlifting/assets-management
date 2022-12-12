@@ -1,3 +1,5 @@
+using AM.Services.Portfolio.API.Services;
+using AM.Services.Portfolio.API.Services.Interfaces;
 using AM.Services.Portfolio.Infrastructure;
 
 using Microsoft.AspNetCore.Builder;
@@ -29,6 +31,8 @@ public sealed class Startup
             x.JsonSerializerOptions.Converters.Add(new JsonExtensions.TimeOnlyConverter());
             x.JsonSerializerOptions.Converters.Add(new JsonExtensions.DateOnlyConverter());
         });
+
+        services.AddTransient<IReportApi, ReportApi>();
 
         //services.AddRabbitMq(Configuration);
     }
