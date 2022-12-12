@@ -1,5 +1,4 @@
 version: '3.7'
-#name: asset-management-infractructure
 
 services:
   postgresql:
@@ -12,8 +11,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
         - postgresql_data_container:/var/lib/postgresql/data
-      # - /var/lib/docker/volumes/postgres_data:/var/lib/postgresql/data
-      # - .volumes/postgres/data:/var/lib/docker/volumes/postgres_data
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -25,11 +22,8 @@ services:
       RABBITMQ_DEFAULT_USER: Ponkorn
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
     volumes:
-      #- rabbitmq_data_container:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
       - rabbitmq_data_container:/var/log/rabbitmq/log
       - rabbitmq_data_container:/var/lib/rabbitmq
-      # - /var/lib/docker/volumes/rabbitmq_data:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq
-      # - /var/lib/docker/volumes/rabbitmq_log:/var/log/rabbitmq/log
   mongodb:
     image: mongo:latest
     container_name: mongodb
