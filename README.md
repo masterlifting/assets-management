@@ -27,7 +27,7 @@ But completed services you can run with the docker-compose file. You also need t
     * It processes this collected data, computes coefficients, and builds asset ratings from this.
     * I can get information about collected data and ratings with the REST API.
     * It sends rating data to the recommendations service for recommendations for me.
-* ##### Recommendations (DDEPRECATED. TOWARD REWRITING)
+* ##### Recommendations (DEPRECATED. TOWARD REWRITING)
     * This service receives data from other services and computes it. Then it builds recommendations for me. 
     * For example, I can get information about that, which shares of public companies I need to buy or sell.
     * I can get this information with the REST API.
