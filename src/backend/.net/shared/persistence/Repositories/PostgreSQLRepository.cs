@@ -9,6 +9,8 @@ using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Contexts;
 using Shared.Persistence.Exceptions;
 
+using SharpCompress.Common;
+
 using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
@@ -66,28 +68,28 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
 
         _logger.LogTrace(_initiator, Constants.Actions.Created, Constants.Actions.Success, result);
     }
-    public virtual async Task<Result> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryCreateAsync<T>(T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await CreateAsync(entity, cToken);
-            return new Result(true);
+            return new TryResult<T>(entity);
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T>(exception);
         }
     }
-    public virtual async Task<Result> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T[]>> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await CreateRangeAsync(entities, cToken);
-            return new Result(true);
+            return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T[]>(exception);
         }
     }
 
@@ -131,28 +133,28 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
 
         _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success, result);
     }
-    public virtual async Task<Result> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryUpdateAsync<T>(object[] id, T entity, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await UpdateAsync(id, entity, cToken);
-            return new Result(true);
+            return new TryResult<T>(entity);
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T>(exception);
         }
     }
-    public virtual async Task<Result> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T[]>> TryUpdateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             await UpdateRangeAsync(entities, cToken);
-            return new Result(true);
+            return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)
         {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
+            return new TryResult<T[]>(exception);
         }
     }
 
@@ -200,28 +202,28 @@ public class PostgreSQLRepository<TContext> : IPostgreSQLRepository where TConte
 
         _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success, result);
     }
-    public virtual async Task<Result> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
-    {
-        try
-        {
-            await DeleteRangeAsync(entities, cToken);
-            return new Result(true);
-        }
-        catch (Exception exception)
-        {
-            return new Result(false, exception.InnerException?.Message ?? exception.Message);
-        }
-    }
-    public virtual async Task<ResultData<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistent
+    public virtual async Task<TryResult<T>> TryDeleteAsync<T>(object[] id, CancellationToken? cToken = null) where T : class, IPersistent
     {
         try
         {
             var entity = await DeleteAsync<T>(id, cToken);
-            return new ResultData<T>(new(true), entity);
+            return new TryResult<T>(entity);
         }
         catch (Exception exception)
         {
-            return new ResultData<T>(new(false, exception.InnerException?.Message ?? exception.Message), null);
+            return new TryResult<T>(exception);
+        }
+    }
+    public virtual async Task<TryResult<T[]>> TryDeleteRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken? cToken = null) where T : class, IPersistent
+    {
+        try
+        {
+            await DeleteRangeAsync(entities, cToken);
+            return new TryResult<T[]>(entities.ToArray());
+        }
+        catch (Exception exception)
+        {
+            return new TryResult<T[]>(exception);
         }
     }
 
