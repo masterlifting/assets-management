@@ -6,5 +6,6 @@ public interface IPersistentProcess : IPersistent
     int ProcessStatusId { get; set; }
     int ProcessStepId { get; set; }
     byte ProcessAttempt { get; set; }
+    string? Error { get; set; }
     DateTime Updated { get; set; }
 }

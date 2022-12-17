@@ -5,5 +5,5 @@ public abstract class PersistentCatalog : IPersistentCatalog
     public int Id { get; init; }
     public string Name { get; init; } = null!;
     public DateTime Created { get; init; } = DateTime.UtcNow;
-    public string? Info { get; set; }
+    public string? Description { get; init; }
 }

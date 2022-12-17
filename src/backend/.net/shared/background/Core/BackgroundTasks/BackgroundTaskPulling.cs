@@ -17,22 +17,23 @@ using static Shared.Persistence.Abstractions.Constants.Enums;
 namespace Shared.Background.Core.BackgroundTasks;
 
 public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase<TStep>
-    where TEntity : class, IPersistentProcess
+    where TEntity : class,IPersistentProcess
     where TStep : class, IProcessStep
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
-    private readonly ILogger<TEntity> _logger;
-    private readonly IPersistenceRepository _repository;
+    private readonly ILogger _logger;
+    private readonly IPersistenceRepository<TEntity> _repository;
     private readonly BackgroundTaskStepHandler<TEntity> _handler;
 
     public BackgroundTaskPulling(
-        ILogger<TEntity> logger
-        , IPersistenceRepository repository
-        , BackgroundTaskStepHandler<TEntity> handler) : base(logger, repository)
+        ILogger logger
+        , IPersistenceRepository<TEntity> processRepository
+        , IPersistenceRepository<TStep> catalogRepository
+        , BackgroundTaskStepHandler<TEntity> handler) : base(logger, catalogRepository)
     {
         _logger = logger;
-        _repository = repository;
+        _repository = processRepository;
         _handler = handler;
     }
 
@@ -41,7 +42,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
         for (var i = 0; i <= steps.Count; i++)
         {
             var step = steps.Dequeue();
-            var action = step.Info ?? step.Name;
+            var action = step.Description ?? step.Name;
 
             var entities = await HandleDataAsync(step, taskName, action, settings.Steps.IsParallelProcessing, cToken);
 
@@ -49,7 +50,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
             {
                 _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
 
-                await _repository.SaveProcessableAsync(null, entities, cToken);
+                await _repository.Writer.SaveProcessableAsync(null, entities, cToken);
 
                 _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
             }
@@ -72,7 +73,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
         if (steps.Any() && !isDequeue)
             await ParallelHandleStepAsync(steps, taskName, taskCount, settings, cToken);
 
-        var action = step!.Info ?? step.Name;
+        var action = step!.Description ?? step.Name;
 
         var entities = await HandleDataAsync(step, taskName, action, settings.Steps.IsParallelProcessing, cToken);
 
@@ -81,7 +82,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
             _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
 
             await _semaphore.WaitAsync();
-            await _repository.SaveProcessableAsync(null, entities, cToken);
+            await _repository.Writer.SaveProcessableAsync(null, entities, cToken);
             _semaphore.Release();
 
             _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
@@ -109,7 +110,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
             }
 
             foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Info ?? "Error has not description")));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "Error has not description")));
 
             _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
 

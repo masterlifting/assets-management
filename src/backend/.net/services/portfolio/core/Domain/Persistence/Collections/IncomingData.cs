@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 
-public class IncomingData : IPersistentPayload, IPersistentProcess, IPersistentJson
+public class IncomingData : IPersistentNoSql, IPersistentPayload, IPersistentProcess
 {
     public Guid Id { get; init; }
 
@@ -11,6 +11,7 @@ public class IncomingData : IPersistentPayload, IPersistentProcess, IPersistentJ
     public int ProcessStatusId { get; set; }
     public int ProcessStepId { get; set; }
     public byte ProcessAttempt { get; set; }
+    public string? Error { get; set; }
 
     public byte[] Payload { get; init; } = Array.Empty<byte>();
     public string PayloadSource { get; init; } = null!;
@@ -20,7 +21,7 @@ public class IncomingData : IPersistentPayload, IPersistentProcess, IPersistentJ
 
     public DateTime Updated { get; set; } = DateTime.UtcNow;
     public DateTime Created { get; init; } = DateTime.UtcNow;
-    public string? Info { get; set; }
 
     public string JsonVersion { get; init; } = "1.0.0";
+    public string? Description { get; init; }
 }

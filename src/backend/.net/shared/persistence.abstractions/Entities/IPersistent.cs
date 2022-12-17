@@ -3,5 +3,5 @@
 public interface IPersistent
 {
     DateTime Created { get; init; }
-    string? Info { get; set; }
+    public string? Description { get; init; }
 }

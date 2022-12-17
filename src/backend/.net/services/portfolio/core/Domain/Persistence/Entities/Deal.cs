@@ -4,7 +4,7 @@ using Shared.Persistence.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
-public sealed class Deal : IPersistentProcess
+public sealed class Deal : IPersistentSql, IPersistentProcess
 {
     public Guid Id { get; init; }
 
@@ -16,10 +16,10 @@ public sealed class Deal : IPersistentProcess
     public ProcessStatus ProcessStatus { get; set; } = null!;
     public int ProcessStatusId { get; set; }
     public byte ProcessAttempt { get; set; }
+    public string? Error { get; set; }
 
     public DateTime Created { get; init; }
     public DateTime Updated { get; set; }
-    public string? Info { get; set; }
 
     public Income Income { get; init; } = null!;
     public Expense Expense { get; init; } = null!;
@@ -35,4 +35,6 @@ public sealed class Deal : IPersistentProcess
 
     public Exchange Exchange { get; set; } = null!;
     public int ExchangeId { get; set; }
+    
+    public string? Description { get; init; }
 }

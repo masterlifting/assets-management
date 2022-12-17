@@ -39,7 +39,7 @@ public sealed class ReportsController : ControllerBase
         }
 
         return result.Status == TryResultStatuses.PartialSuccess
-            ? Ok($"We saved files count: {result.Data!.Length} but had some problems: {string.Join("\n", result.Errors)}")
-            : Ok($"We saved files count: {result.Data!.Length}");
+            ? Ok($"Files count: {result.Data!.Length} was saved to database. It had folowing problems: {string.Join("\n", result.Errors)}")
+            : Ok($"Files count: {result.Data!.Length} was saved to database");
     }
 }

@@ -1,23 +1,20 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistence;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Worker.BackgroundTasksSteps;
 
 using Shared.Background.Core.BackgroundTasks;
 using Shared.Background.Core.Handlers;
-using Shared.Persistence.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Worker.BackgroundTasks;
 
-public sealed class BackgroundTaskIncomingDataProcessing : BackgroundTaskProcessing<IncomingData, ProcessSteps>
+public sealed class BackgroundTaskIncomingDataProcessing : BackgroundTaskProcessing<IncomingData, ProcessStep>
 {
-    public BackgroundTaskIncomingDataProcessing(
-        ILogger<BackgroundTaskIncomingDataProcessing> logger
-        , IBcsReportService service
-        , IPostgreSQLRepository postgreSQLRepository
-        , IMongoDBRepository mongoDBRepository)
-        : base(logger, mongoDBRepository, new BackgroundTaskStepHandler<IncomingData>(new()
+    public BackgroundTaskIncomingDataProcessing(ILogger<BackgroundTaskIncomingDataProcessing> logger, IBcsReportService service, IUnitOfWorkRepository uow)
+        : base(logger, uow.IncomingData, uow.ProcessStep, new BackgroundTaskStepHandler<IncomingData>(new()
         {
-        {(int)Core.Constants.Enums.ProcessSteps.ParseBcsReport, new BcsReportParser(service, postgreSQLRepository)}
+        {(int)Core.Constants.Enums.ProcessSteps.ParseBcsReport, new BcsReportParser(service, uow)}
         }))
     { }
 }

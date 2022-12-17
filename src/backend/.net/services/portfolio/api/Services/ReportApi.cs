@@ -1,11 +1,10 @@
 ﻿using AM.Services.Portfolio.API.Services.Interfaces;
+using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
 using Microsoft.AspNetCore.Http;
 
 using Shared.Models.Results;
-using Shared.Persistence.Abstractions.Repositories;
 
 using System;
 using System.Collections.Generic;
@@ -20,13 +19,11 @@ namespace AM.Services.Portfolio.API.Services
 {
     public class ReportApi : IReportApi
     {
-        private readonly IMongoDBRepository _mongoRepository;
-        private readonly IPostgreSQLRepository _postgreSQLRepository;
+        private readonly IUnitOfWorkRepository _unitOfWork;
 
-        public ReportApi(IMongoDBRepository mongoRepository, IPostgreSQLRepository postgreSQLRepository)
+        public ReportApi(IUnitOfWorkRepository unitOfWork)
         {
-            _mongoRepository = mongoRepository;
-            _postgreSQLRepository = postgreSQLRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<TryResult<IncomingData[]>> TrySaveFilesAsync(Guid userId, int stepId, IFormFileCollection files)
@@ -75,7 +72,7 @@ namespace AM.Services.Portfolio.API.Services
                 }
             }
 
-            var savedResult = await _mongoRepository.TryCreateRangeAsync(reports);
+            var savedResult = await _unitOfWork.IncomingData.Writer.TryCreateRangeAsync(reports);
 
             return savedResult.Status != TryResultStatuses.FullSuccess
                 ? savedResult

@@ -5,7 +5,7 @@ using Shared.Persistence.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
-public sealed class Derivative : IPersistentProcess, IBalance
+public sealed class Derivative : IPersistentSql, IPersistentProcess, IBalance
 {
     public Guid Id { get; init; }
 
@@ -21,10 +21,10 @@ public sealed class Derivative : IPersistentProcess, IBalance
     public ProcessStatus ProcessStatus { get; set; } = null!;
     public int ProcessStatusId { get; set; }
     public byte ProcessAttempt { get; set; }
+    public string? Error { get; set; }
 
     public DateTime Created { get; init; }
     public DateTime Updated { get; set; }
-    public string? Info { get; set; }
 
     public Asset Asset { get; set; } = null!;
     public string AssetId { get; init; } = null!;
@@ -33,4 +33,6 @@ public sealed class Derivative : IPersistentProcess, IBalance
     public IEnumerable<Income>? Incomes { get; set; }
     public IEnumerable<Expense>? Expenses { get; set; }
     public IEnumerable<Event>? Events { get; set; }
+    
+    public string? Description { get; init; }
 }

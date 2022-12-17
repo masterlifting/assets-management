@@ -2,7 +2,7 @@
 
 public interface IAsset
 {
-    string Name { get; set; }
+    string Name { get; init; }
     int TypeId { get; init; }
-    int CountryId { get; set; }
+    int CountryId { get; init; }
 }

@@ -1,8 +1,13 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.ExcelService;
+using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Abstractions.WebServices;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
+using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Infrastructure.ExcelServices;
+using AM.Services.Portfolio.Infrastructure.Persistence;
 using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 using AM.Services.Portfolio.Infrastructure.Settings;
 using AM.Services.Portfolio.Infrastructure.WebClients;
@@ -27,12 +32,19 @@ public static class PortfolioInfrastructureRegistration
     public static void AddPortfolioPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
+        
+        services.AddScoped<PostgrePortfolioContext>();
+        services.AddSingleton<MongoPortfolioContext>();
 
-        services.AddScoped<PostgreSQLPortfolioContext>();
-        services.AddScoped<IPostgreSQLRepository, PostgreSQLRepository<PostgreSQLPortfolioContext>>();
+        services.AddScoped<IPersistenceNoSqlRepository<IncomingData>, MongoRepository<IncomingData, MongoPortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<ProcessStep>, PostgreRepository<ProcessStep, PostgrePortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<Asset>, PostgreRepository<Asset, PostgrePortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<Deal>, PostgreRepository<Deal, PostgrePortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<Event>, PostgreRepository<Event, PostgrePortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<Derivative>, PostgreRepository<Derivative, PostgrePortfolioContext>>();
+        services.AddScoped<IPersistenceSqlRepository<User>, PostgreRepository<User, PostgrePortfolioContext>>();
 
-        services.AddScoped<MongoDBPortfolioContext>();
-        services.AddScoped<IMongoDBRepository, MongoDBRepository<MongoDBPortfolioContext>>();
+        services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
     }
     public static void AddPortfolioHttpClients(this IServiceCollection services, IConfiguration configuration)
     {

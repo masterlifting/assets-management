@@ -4,13 +4,13 @@ using Shared.Persistence.Abstractions.Entities;
 
 namespace AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
-public sealed class Account : IPersistent
+public sealed class Account : IPersistentSql
 {
     public int Id { get; set; }
 
     public string Name { get; init; } = null!;
     public DateTime Created { get; init; }
-    public string? Info { get; set; }
+    public string? Description { get; init; }
 
     public User User { get; init; } = null!;
     public Guid UserId { get; init; }

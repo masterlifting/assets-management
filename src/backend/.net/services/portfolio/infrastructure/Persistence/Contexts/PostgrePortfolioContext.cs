@@ -1,17 +1,18 @@
 ﻿using AM.Services.Common;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Infrastructure.Settings;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Contexts;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 
-public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
+public sealed class PostgrePortfolioContext : PostgreContext
 {
     #region Catalogs
     public DbSet<AssetType> AssetTypes { get; set; } = null!;
@@ -33,7 +34,7 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
     public DbSet<Income> Incomes { get; set; } = null!;
     public DbSet<Expense> Expenses { get; set; } = null!;
 
-    public PostgreSQLPortfolioContext(IOptions<DatabaseConnectionSection> options) : base(options.Value.PostgreSQL)
+    public PostgrePortfolioContext(ILoggerFactory loggerFactory, IOptions<DatabaseConnectionSection> options) : base(loggerFactory, options.Value.PostgreSQL)
     {
         //Database.EnsureDeleted();
         //Database.EnsureCreated();
@@ -43,20 +44,18 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
     {
         builder.UseSerialColumns();
 
-        builder.Entity<GuidId>().HasNoKey();
-
         builder.Entity<User>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired().HasMaxLength(100);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
         });
         builder.Entity<Account>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired().HasMaxLength(200);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
 
             e.HasIndex(x => new { x.Name, x.UserId, x.ProviderId }).IsUnique();
@@ -65,7 +64,8 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Value).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Error).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
             e.Property(x => x.Updated).HasDefaultValue(DateTime.UtcNow);
         });
@@ -73,7 +73,8 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Cost).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Error).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
             e.Property(x => x.Updated).HasDefaultValue(DateTime.UtcNow);
         });
@@ -84,7 +85,8 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             e.Property(x => x.BalanceValue).HasPrecision(18, 10);
             e.Property(x => x.BalanceCost).HasPrecision(18, 10);
             e.Property(x => x.LastDealCost).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Error).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
             e.Property(x => x.Updated).HasDefaultValue(DateTime.UtcNow);
 
@@ -98,7 +100,8 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             e.Property(x => x.BalanceValue).HasPrecision(18, 10);
             e.Property(x => x.BalanceCost).HasPrecision(18, 10);
             e.Property(x => x.LastDealCost).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Error).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
             e.Property(x => x.Updated).HasDefaultValue(DateTime.UtcNow);
 
@@ -108,14 +111,14 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Value).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
         });
         builder.Entity<Expense>(e =>
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.Value).HasPrecision(18, 10);
-            e.Property(x => x.Info).HasMaxLength(500);
+            e.Property(x => x.Description).HasMaxLength(500);
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
         });
 
@@ -179,11 +182,11 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         //});
         builder.Entity<ProcessStatus>().HasData(new ProcessStatus[]
         {
-        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Draft, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Draft), Info = "Draft" },
-        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Ready, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Ready), Info = "Ready to processing data" },
-        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processing, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processing), Info = "Processing data" },
-        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processed, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processed), Info = "Processed data" },
-        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Error, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Error), Info = "Error of processing" }
+        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Draft, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Draft), Description = "Draft" },
+        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Ready, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Ready), Description = "Ready to processing data" },
+        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processing, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processing), Description = "Processing data" },
+        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processed, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Processed), Description = "Processed data" },
+        new(){Id = (int)Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Error, Name = nameof(Shared.Persistence.Abstractions.Constants.Enums.ProcessStatuses.Error), Description = "Error of processing" }
         });
         builder.Entity<ProcessStep>().HasData(new ProcessStep[]
         {
@@ -191,25 +194,25 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         });
         builder.Entity<AssetType>().HasData(new AssetType[]
         {
-        new() {Id = (int) Constants.Enums.AssetTypes.Valuable, Name = nameof(Constants.Enums.AssetTypes.Valuable), Info = "Valuable" },
-        new() {Id = (int) Constants.Enums.AssetTypes.Stock, Name = nameof(Constants.Enums.AssetTypes.Stock), Info = "Stocks" },
-        new() {Id = (int) Constants.Enums.AssetTypes.Bond, Name = nameof(Constants.Enums.AssetTypes.Bond), Info = "Bonds" },
-        new() {Id = (int) Constants.Enums.AssetTypes.Fund, Name = nameof(Constants.Enums.AssetTypes.Fund), Info = "Founds" },
-        new() {Id = (int) Constants.Enums.AssetTypes.CurrencyFiat, Name = nameof(Constants.Enums.AssetTypes.CurrencyFiat), Info = "Fiat currencies" },
-        new() {Id = (int) Constants.Enums.AssetTypes.CurrencyToken, Name = nameof(Constants.Enums.AssetTypes.CurrencyToken), Info = "Crypto currencies" },
-        new() {Id = (int) Constants.Enums.AssetTypes.NftToken, Name = nameof(Constants.Enums.AssetTypes.NftToken), Info = "NFT tokens"},
-        new() {Id = (int) Constants.Enums.AssetTypes.RealEstate, Name = nameof(Constants.Enums.AssetTypes.RealEstate), Info = "Real estates"},
-        new() {Id = (int) Constants.Enums.AssetTypes.PersonalEstate, Name = nameof(Constants.Enums.AssetTypes.PersonalEstate), Info = "Personal estates"}
+        new() {Id = (int) Constants.Enums.AssetTypes.Valuable, Name = nameof(Constants.Enums.AssetTypes.Valuable), Description = "Valuable" },
+        new() {Id = (int) Constants.Enums.AssetTypes.Stock, Name = nameof(Constants.Enums.AssetTypes.Stock), Description = "Stocks" },
+        new() {Id = (int) Constants.Enums.AssetTypes.Bond, Name = nameof(Constants.Enums.AssetTypes.Bond), Description = "Bonds" },
+        new() {Id = (int) Constants.Enums.AssetTypes.Fund, Name = nameof(Constants.Enums.AssetTypes.Fund), Description = "Founds" },
+        new() {Id = (int) Constants.Enums.AssetTypes.CurrencyFiat, Name = nameof(Constants.Enums.AssetTypes.CurrencyFiat), Description = "Fiat currencies" },
+        new() {Id = (int) Constants.Enums.AssetTypes.CurrencyToken, Name = nameof(Constants.Enums.AssetTypes.CurrencyToken), Description = "Crypto currencies" },
+        new() {Id = (int) Constants.Enums.AssetTypes.NftToken, Name = nameof(Constants.Enums.AssetTypes.NftToken), Description = "NFT tokens"},
+        new() {Id = (int) Constants.Enums.AssetTypes.RealEstate, Name = nameof(Constants.Enums.AssetTypes.RealEstate), Description = "Real estates"},
+        new() {Id = (int) Constants.Enums.AssetTypes.PersonalEstate, Name = nameof(Constants.Enums.AssetTypes.PersonalEstate), Description = "Personal estates"}
         });
         builder.Entity<Country>().HasData(new Country[]
         {
-        new() { Id = (int) Constants.Enums.Countries.Rus, Name = nameof(Constants.Enums.Countries.Rus), Info = "Russia" },
-        new() { Id = (int) Constants.Enums.Countries.Usa, Name = nameof(Constants.Enums.Countries.Usa), Info = "USA" },
-        new() { Id = (int) Constants.Enums.Countries.Chn, Name = nameof(Constants.Enums.Countries.Chn), Info = "China" },
-        new() { Id = (int) Constants.Enums.Countries.Deu, Name = nameof(Constants.Enums.Countries.Deu), Info = "Deutschland" },
-        new() { Id = (int) Constants.Enums.Countries.Gbr, Name = nameof(Constants.Enums.Countries.Gbr), Info = "Great Britain" },
-        new() { Id = (int) Constants.Enums.Countries.Che, Name = nameof(Constants.Enums.Countries.Che), Info = "Switzerland" },
-        new() { Id = (int) Constants.Enums.Countries.Jpn, Name = nameof(Constants.Enums.Countries.Jpn), Info = "Japan" }
+        new() { Id = (int) Constants.Enums.Countries.Rus, Name = nameof(Constants.Enums.Countries.Rus), Description = "Russia" },
+        new() { Id = (int) Constants.Enums.Countries.Usa, Name = nameof(Constants.Enums.Countries.Usa), Description = "USA" },
+        new() { Id = (int) Constants.Enums.Countries.Chn, Name = nameof(Constants.Enums.Countries.Chn), Description = "China" },
+        new() { Id = (int) Constants.Enums.Countries.Deu, Name = nameof(Constants.Enums.Countries.Deu), Description = "Deutschland" },
+        new() { Id = (int) Constants.Enums.Countries.Gbr, Name = nameof(Constants.Enums.Countries.Gbr), Description = "Great Britain" },
+        new() { Id = (int) Constants.Enums.Countries.Che, Name = nameof(Constants.Enums.Countries.Che), Description = "Switzerland" },
+        new() { Id = (int) Constants.Enums.Countries.Jpn, Name = nameof(Constants.Enums.Countries.Jpn), Description = "Japan" }
         });
         builder.Entity<Exchange>().HasData(new Exchange[]
         {
@@ -232,13 +235,13 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
         });
         builder.Entity<Provider>().HasData(new Provider[]
         {
-        new() {Id = (int)Core.Constants.Enums.Providers.Safe, Name = nameof(Core.Constants.Enums.Providers.Safe), Info = "Private storage" },
-        new() {Id = (int)Core.Constants.Enums.Providers.Bcs, Name = nameof(Core.Constants.Enums.Providers.Bcs), Info = "Broker/Bank" },
-        new() {Id = (int)Core.Constants.Enums.Providers.Tinkoff, Name = nameof(Core.Constants.Enums.Providers.Tinkoff), Info = "Broker/Bank" },
-        new() {Id = (int)Core.Constants.Enums.Providers.Vtb, Name = nameof(Core.Constants.Enums.Providers.Vtb), Info = "Broker/Bank" },
-        new() {Id = (int)Core.Constants.Enums.Providers.Bitokk, Name = nameof(Core.Constants.Enums.Providers.Bitokk), Info = "Сrypto exchange https://bitokk.biz/" },
-        new() {Id = (int)Core.Constants.Enums.Providers.XChange, Name = nameof(Core.Constants.Enums.Providers.XChange), Info = "Сrypto exchange https://xchange.cash/" },
-        new() {Id = (int)Core.Constants.Enums.Providers.JetLend, Name = nameof(Core.Constants.Enums.Providers.JetLend), Info = "Crowdlending platform https://jetlend.ru/" }
+        new() {Id = (int)Core.Constants.Enums.Providers.Safe, Name = nameof(Core.Constants.Enums.Providers.Safe), Description = "Private storage" },
+        new() {Id = (int)Core.Constants.Enums.Providers.Bcs, Name = nameof(Core.Constants.Enums.Providers.Bcs), Description = "Broker/Bank" },
+        new() {Id = (int)Core.Constants.Enums.Providers.Tinkoff, Name = nameof(Core.Constants.Enums.Providers.Tinkoff), Description = "Broker/Bank" },
+        new() {Id = (int)Core.Constants.Enums.Providers.Vtb, Name = nameof(Core.Constants.Enums.Providers.Vtb), Description = "Broker/Bank" },
+        new() {Id = (int)Core.Constants.Enums.Providers.Bitokk, Name = nameof(Core.Constants.Enums.Providers.Bitokk), Description = "Сrypto exchange https://bitokk.biz/" },
+        new() {Id = (int)Core.Constants.Enums.Providers.XChange, Name = nameof(Core.Constants.Enums.Providers.XChange), Description = "Сrypto exchange https://xchange.cash/" },
+        new() {Id = (int)Core.Constants.Enums.Providers.JetLend, Name = nameof(Core.Constants.Enums.Providers.JetLend), Description = "Crowdlending platform https://jetlend.ru/" }
         });
         builder.Entity<EventType>().HasData(new EventType[]
         {
@@ -247,14 +250,14 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id = (int)Core.Constants.Enums.EventTypes.Adding,
             Name = nameof(Core.Constants.Enums.EventTypes.Adding),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Increasing the asset balance"
+            Description = "Increasing the asset balance"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.Withdrawing,
             Name = nameof(Core.Constants.Enums.EventTypes.Withdrawing),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Decreasing the asset balance"
+            Description = "Decreasing the asset balance"
         },
 
         new()
@@ -262,28 +265,28 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.BankInvestments,
             Name= nameof(Core.Constants.Enums.EventTypes.BankInvestments),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Investing in bank products"
+            Description = "Investing in bank products"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.CrowdfundingInvestments,
             Name= nameof(Core.Constants.Enums.EventTypes.CrowdfundingInvestments),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Investing in crowdfunding"
+            Description = "Investing in crowdfunding"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.CrowdlendingInvestments,
             Name= nameof(Core.Constants.Enums.EventTypes.CrowdlendingInvestments),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Investing in crowdlending"
+            Description = "Investing in crowdlending"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.VentureInvestments,
             Name= nameof(Core.Constants.Enums.EventTypes.VentureInvestments),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Venture investments"
+            Description = "Venture investments"
         },
 
         new()
@@ -291,21 +294,21 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.InterestProfit,
             Name= nameof(Core.Constants.Enums.EventTypes.InterestProfit),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Interest profit"
+            Description = "Interest profit"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.InvestmentProfit,
             Name= nameof(Core.Constants.Enums.EventTypes.InvestmentProfit),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Investment profit"
+            Description = "Investment profit"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.InvestmentBody,
             Name= nameof(Core.Constants.Enums.EventTypes.InvestmentBody),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Returning of investment body"
+            Description = "Returning of investment body"
         },
 
         new()
@@ -313,7 +316,7 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.Splitting,
             Name= nameof(Core.Constants.Enums.EventTypes.Splitting),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Increasing an asset by dividing it"
+            Description = "Increasing an asset by dividing it"
         },
 
         new()
@@ -321,7 +324,7 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.Donation,
             Name= nameof(Core.Constants.Enums.EventTypes.Donation),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Increasing an asset by donation it"
+            Description = "Increasing an asset by donation it"
         },
 
         new()
@@ -329,14 +332,14 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.Coupon,
             Name= nameof(Core.Constants.Enums.EventTypes.Coupon),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Coupons from assets"
+            Description = "Coupons from assets"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.Dividend,
             Name= nameof(Core.Constants.Enums.EventTypes.Dividend),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Income,
-            Info = "Dividends from assets"
+            Description = "Dividends from assets"
         },
 
         new()
@@ -344,70 +347,70 @@ public sealed class PostgreSQLPortfolioContext : PostgreSQLContext
             Id= (int)Core.Constants.Enums.EventTypes.Delisting,
             Name= nameof(Core.Constants.Enums.EventTypes.Delisting),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Excluding an asset from lists"
+            Description = "Excluding an asset from lists"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.Loss,
             Name= nameof(Core.Constants.Enums.EventTypes.Loss),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Loss registration"
+            Description = "Loss registration"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.TaxIncome,
             Name= nameof(Core.Constants.Enums.EventTypes.TaxIncome),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Tax on profit by an asset"
+            Description = "Tax on profit by an asset"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.TaxCountry,
             Name= nameof(Core.Constants.Enums.EventTypes.TaxCountry),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Internal tax of country"
+            Description = "Internal tax of country"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.TaxDeal,
             Name= nameof(Core.Constants.Enums.EventTypes.TaxDeal),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Tax for a deal"
+            Description = "Tax for a deal"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.TaxProvider,
             Name= nameof(Core.Constants.Enums.EventTypes.TaxProvider),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Tax to provider"
+            Description = "Tax to provider"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.TaxDepositary,
             Name= nameof(Core.Constants.Enums.EventTypes.TaxDepositary),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Tax to depositary of an asset"
+            Description = "Tax to depositary of an asset"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.ComissionDeal,
             Name= nameof(Core.Constants.Enums.EventTypes.ComissionDeal),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Commission for a deal"
+            Description = "Commission for a deal"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.ComissionProvider,
             Name= nameof(Core.Constants.Enums.EventTypes.ComissionProvider),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Commission to provider"
+            Description = "Commission to provider"
         },
         new()
         {
             Id= (int)Core.Constants.Enums.EventTypes.ComissionDepositary,
             Name= nameof(Core.Constants.Enums.EventTypes.ComissionDepositary),
             OperationTypeId = (int)Core.Constants.Enums.OperationTypes.Expense,
-            Info = "Commission to depositary of an asset"
+            Description = "Commission to depositary of an asset"
         } });
         #endregion
     }

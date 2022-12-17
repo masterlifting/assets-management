@@ -2,7 +2,7 @@
 
 namespace AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 
-public sealed class Expense : IPersistent
+public sealed class Expense : IPersistentSql
 {
     public long Id { get; init; }
 
@@ -10,7 +10,7 @@ public sealed class Expense : IPersistent
     public decimal Value { get; set; }
 
     public DateTime Created { get; init; }
-    public string? Info { get; set; }
+    public string? Description { get; init; }
 
     public Derivative Derivative { get; set; } = null!;
     public Guid DerivativeId { get; set; }

@@ -1,4 +1,5 @@
-﻿using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
+﻿using AM.Services.Portfolio.Core.Abstractions.Persistence;
+using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Background.Interfaces;
@@ -12,13 +13,13 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
 {
     private readonly SemaphoreSlim _semaphore = new(1);
 
-    private readonly IPostgreSQLRepository _repository;
+    private readonly IUnitOfWorkRepository _uow;
     private readonly IBcsReportService _service;
 
-    public BcsReportParser(IBcsReportService service, IPostgreSQLRepository repository)
+    public BcsReportParser(IBcsReportService service, IUnitOfWorkRepository uow)
     {
         _service = service;
-        _repository = repository;
+        _uow = uow;
     }
 
     public Task HandleStepAsync(IEnumerable<IncomingData> entities, CancellationToken cToken) =>
@@ -33,13 +34,13 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
 
                 await _semaphore.WaitAsync(cToken);
 
-                await _repository.CreateRangeAsync(deals, cToken);
-                await _repository.CreateRangeAsync(events, cToken);
+                await _uow.Deal.Writer.CreateRangeAsync(deals, cToken);
+                await _uow.Event.Writer.CreateRangeAsync(events, cToken);
             }
             catch (Exception exception)
             {
                 x.ProcessStatusId = (int)ProcessStatuses.Error;
-                x.Info = $"Exception in the file: {x.PayloadSource}. Error: " + exception.Message;
+                x.Error = $"Exception in the file: {x.PayloadSource}. Error: " + exception.Message;
             }
             finally
             {
