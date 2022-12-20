@@ -32,7 +32,7 @@ public class MongoRepository<TEntity, TContext> : IPersistenceNoSqlRepository<TE
         var objectId = base.GetHashCode();
         var initiator = $"Mongo repository of '{typeof(TEntity).Name}' by Id {objectId}";
 
-        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new MongoReaderRepository<TEntity, TContext>(logger, context, initiator));
+        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new MongoReaderRepository<TEntity, TContext>(context));
         _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new MongoWriterRepository<TEntity, TContext>(logger, context, initiator));
     }
 }
@@ -40,16 +40,8 @@ internal class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepo
     where TContext : MongoContext
     where TEntity : class, IPersistentNoSql
 {
-    private readonly ILogger _logger;
     private readonly TContext _context;
-    private readonly string _initiator;
-
-    public MongoReaderRepository(ILogger logger, TContext context, string initiator)
-    {
-        _logger = logger;
-        _context = context;
-        _initiator = initiator;
-    }
+    public MongoReaderRepository(TContext context) => _context = context;
 
     public Task<TEntity?> FindSingleAsync(Expression<Func<TEntity, bool>> condition) =>
         _context.Set<TEntity>().SingleOrDefaultAsync(condition);
@@ -257,4 +249,5 @@ internal class MongoWriterRepository<TEntity, TContext> : IPersistenceWriterRepo
 
     public Task SetTransactionAsync(CancellationToken? cToken = null) => _context.SetTransactionAsync(cToken ?? default);
     public Task CommitTransactionAsync(CancellationToken? cToken = null) => _context.CommitTransactionAsync(cToken ?? default);
+    public Task RollbackTransactionAsync(CancellationToken? cToken = null) => _context.RollbackTransactionAsync(cToken ?? default);
 }

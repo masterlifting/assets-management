@@ -10,8 +10,6 @@ using Shared.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-using static Shared.Models.Constants.Enums;
-
 namespace AM.Services.Portfolio.API.Controllers;
 
 [ApiController, Route("[controller]")]
@@ -32,14 +30,12 @@ public sealed class ReportsController : ControllerBase
 
         var result = await _reportApi.TrySaveFilesAsync(userId, stepId, files);
 
-        if (result.Status == TryResultStatuses.Unsuccess)
+        if (!result.IsSuccess)
         {
             _logger.LogError(new PortfolioAPIException(nameof(ReportsController), nameof(Post), new(string.Join(";", result.Errors))));
             return BadRequest("Sorry, some went wrong.");
         }
 
-        return result.Status == TryResultStatuses.PartialSuccess
-            ? Ok($"Files count: {result.Data!.Length} was saved to database. It had folowing problems: {string.Join("\n", result.Errors)}")
-            : Ok($"Files count: {result.Data!.Length} was saved to database");
+        return Ok($"Files count: {result.Data!.Length} was saved to database");
     }
 }

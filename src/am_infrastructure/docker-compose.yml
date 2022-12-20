@@ -36,9 +36,25 @@ services:
     volumes:
       - mongodb_data_container:/data/db
       - mongodb_data_container:/data/configdb
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    container_name: sqlserver
+    restart: always
+    environment:
+      SA_PASSWORD: ${SQLSERVER_PASSWORD}
+      ACCEPT_EULA: Y
+    ports:
+      - 1433:1433
+    volumes:
+      - sqlserver_data_container:/var/opt/mssql
+      - sqlserver_data_container:/var/opt/sqlserver/data
+      - sqlserver_data_container:/var/opt/sqlserver/log
+      - sqlserver_data_container:/var/opt/sqlserver/backup
+
 volumes:
   postgresql_data_container:
   rabbitmq_data_container:
   mongodb_data_container:
+  sqlserver_data_container:
 
 

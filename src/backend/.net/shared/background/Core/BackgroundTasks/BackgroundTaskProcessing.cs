@@ -121,16 +121,16 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
     {
         try
         {
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.Start);
+            _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestData, Actions.Start);
 
             var result = await _repository.Reader.GetProcessableAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
 
             if (result.Any())
-                _logger.LogDebug(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.Success, result.Length);
+                _logger.LogDebug(taskName, action + Actions.ProcessableActions.RequestData, Actions.Success, result.Length);
 
             if (settings.RetryPolicy is not null && taskCount % settings.RetryPolicy.EveryTime == 0)
             {
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetUnprocessableData, Actions.Start);
+                _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestUnprocessableData, Actions.Start);
 
                 var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.RetryPolicy.EveryTime;
                 var retryDate = DateTime.UtcNow.Add(-retryTime);
@@ -140,18 +140,18 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
                 if (unprocessableResult.Any())
                 {
                     result = result.Concat(unprocessableResult).ToArray();
-                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.GetUnprocessableData, Actions.Success, unprocessableResult.Length);
+                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.RequestUnprocessableData, Actions.Success, unprocessableResult.Length);
                 }
             }
 
             if (!result.Any())
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.GetProcessableData, Actions.NoData);
+                _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestData, Actions.NoData);
 
             return result;
         }
         catch (Exception exception)
         {
-            throw new SharedBackgroundException(taskName, action + Actions.ProcessableActions.GetProcessableData, new(exception));
+            throw new SharedBackgroundException(taskName, action + Actions.ProcessableActions.RequestData, new(exception));
         }
     }
     private async Task HandleDataAsync(TStep step, string taskName, string action, TEntity[] data, bool isParallel, CancellationToken cToken)
@@ -173,7 +173,7 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
                 entity.ProcessStatusId = (int)ProcessStatuses.Processed;
 
             foreach (var entity in data.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "Error has not description")));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "The error hasn't description")));
 
             _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
         }

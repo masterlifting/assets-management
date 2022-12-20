@@ -10,6 +10,7 @@ namespace Shared.Persistence.Abstractions.Repositories.BaseParts
     {
         Task SetTransactionAsync(CancellationToken? cToken = null);
         Task CommitTransactionAsync(CancellationToken? cToken = null);
+        Task RollbackTransactionAsync(CancellationToken? cToken = null);
 
         Task CreateAsync(T entity, CancellationToken? cToken = null);
         Task CreateRangeAsync(IReadOnlyCollection<T> entities, CancellationToken? cToken = null);

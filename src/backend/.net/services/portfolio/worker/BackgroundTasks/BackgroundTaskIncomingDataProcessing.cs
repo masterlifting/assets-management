@@ -14,7 +14,7 @@ public sealed class BackgroundTaskIncomingDataProcessing : BackgroundTaskProcess
     public BackgroundTaskIncomingDataProcessing(ILogger<BackgroundTaskIncomingDataProcessing> logger, IBcsReportService service, IUnitOfWorkRepository uow)
         : base(logger, uow.IncomingData, uow.ProcessStep, new BackgroundTaskStepHandler<IncomingData>(new()
         {
-        {(int)Core.Constants.Enums.ProcessSteps.ParseBcsReport, new BcsReportParser(service, uow)}
+            {(int)Core.Constants.Enums.ProcessSteps.ParseBcsReport, new BcsReportParser(service, uow)}
         }))
     { }
 }

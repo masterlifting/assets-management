@@ -8,11 +8,9 @@ using Shared.Models.Results;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-using static Shared.Models.Constants.Enums;
 using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace AM.Services.Portfolio.API.Services
@@ -40,45 +38,30 @@ namespace AM.Services.Portfolio.API.Services
             #endregion
 
             List<IncomingData> reports = new(files.Count);
-            List<string> filesErrors = new(files.Count);
 
             foreach (var file in files)
             {
-                try
+                var payload = new byte[file.Length];
+                await using var stream = file.OpenReadStream();
+                var _ = await stream.ReadAsync(payload.AsMemory(0, (int)file.Length));
+
+                reports.Add(new()
                 {
-                    var payload = new byte[file.Length];
-                    await using var stream = file.OpenReadStream();
-                    var _ = await stream.ReadAsync(payload.AsMemory(0, (int)file.Length));
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
 
-                    reports.Add(new()
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = userId,
+                    Payload = payload,
+                    PayloadHash = SHA256.HashData(payload),
+                    PayloadHashAlgoritm = nameof(SHA256),
+                    PayloadSource = file.FileName,
+                    PayloadContentType = file.ContentType,
 
-                        Payload = payload,
-                        PayloadHash = SHA256.HashData(payload),
-                        PayloadHashAlgoritm = nameof(SHA256),
-                        PayloadSource = file.FileName,
-                        PayloadContentType = file.ContentType,
-
-                        ProcessStepId = stepId,
-                        ProcessStatusId = (int)ProcessStatuses.Ready
-                    });
-                }
-                catch (Exception exception)
-                {
-                    filesErrors.Add(exception.Message);
-                    continue;
-                }
+                    ProcessStepId = stepId,
+                    ProcessStatusId = (int)ProcessStatuses.Ready
+                });
             }
 
-            var savedResult = await _unitOfWork.IncomingData.Writer.TryCreateRangeAsync(reports);
-
-            return savedResult.Status != TryResultStatuses.FullSuccess
-                ? savedResult
-                    : filesErrors.Any()
-                    ? new (savedResult.Data!, filesErrors.ToArray())
-                : new (savedResult.Data!);
+            return await _unitOfWork.IncomingData.Writer.TryCreateRangeAsync(reports);
         }
     }
 }

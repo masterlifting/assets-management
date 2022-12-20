@@ -110,7 +110,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
             }
 
             foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "Error has not description")));
+                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "The error hasn't description")));
 
             _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
 

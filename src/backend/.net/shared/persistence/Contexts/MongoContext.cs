@@ -6,16 +6,14 @@ using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Exceptions;
 using Shared.Persistence.Settings.Connections;
 
-using SharpCompress.Common;
-
-using System.Collections.Immutable;
 using System.Linq.Expressions;
 
 namespace Shared.Persistence.Contexts;
 
-public abstract class MongoContext
+public abstract class MongoContext : IDisposable
 {
     internal IMongoDatabase DataBase { get; }
+    private IClientSession? _clientSession;
 
     protected MongoContext(MongoDBConnectionSettings connectionSettings)
     {
@@ -39,15 +37,35 @@ public abstract class MongoContext
     public async Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken) where T : class, IPersistentNoSql
     {
         var collection = Get<T>();
-        
-        var count = await collection.CountDocumentsAsync(condition, null, cToken);
-        
-        var result = new List<T>((int)count);
-      
-        for (int i = 0; i < count; i++)
-            result.Add(await collection.FindOneAndReplaceAsync(condition, entity));
 
-        return result.ToArray();
+        var entities = await (await collection.FindAsync(condition, null, cToken)).ToListAsync();
+
+        if (!entities.Any())
+            return Array.Empty<T>();
+
+        var entityProperties = typeof(T).GetProperties();
+        var entityPropertiesDictionary = entityProperties.ToDictionary(x => x.Name, x => x.GetValue(entity));
+
+        for (int i = 0; i < entities.Count; i++)
+            for (int j = 0; j < entityProperties.Length; j++)
+            {
+                var newValue = entityPropertiesDictionary[entityProperties[j].Name];
+
+                if (newValue == default)
+                    continue;
+
+                var oldValue = entityProperties[j].GetValue(entities[i]);
+
+                if (oldValue != newValue)
+                    entityProperties[j].SetValue(entities[i], newValue);
+
+                var replacedResult = await collection.FindOneAndReplaceAsync(condition, entities[i]);
+
+                if (replacedResult is null)
+                    throw new SharedPersistenceException(nameof(MongoContext), nameof(UpdateAsync), new("FindAndReplace method does bed request"));
+            }
+
+        return entities.ToArray();
     }
     public async Task<T[]> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken) where T : class, IPersistentNoSql
     {
@@ -63,8 +81,19 @@ public abstract class MongoContext
         return result.ToArray();
     }
 
-    public Task SetTransactionAsync(CancellationToken cToken) => throw new SharedPersistenceException(nameof(MongoContext), nameof(SetTransactionAsync), new(new NotImplementedException()));
-    public Task CommitTransactionAsync(CancellationToken cToken) => throw new SharedPersistenceException(nameof(MongoContext), nameof(CommitTransactionAsync), new(new NotImplementedException()));
+    public async Task SetTransactionAsync(CancellationToken cToken)
+    {
+        _clientSession ??= await DataBase.Client.StartSessionAsync(null, cToken);
+        _clientSession.StartTransaction();
+    }
+    public Task CommitTransactionAsync(CancellationToken cToken) => _clientSession is null
+        ? throw new SharedPersistenceException(nameof(MongoContext), nameof(CommitTransactionAsync), new("Mongo client session was not found"))
+        : _clientSession.CommitTransactionAsync(cToken);
+    public Task RollbackTransactionAsync(CancellationToken cToken) => _clientSession is null
+        ? throw new SharedPersistenceException(nameof(MongoContext), nameof(RollbackTransactionAsync), new("Mongo client session was not found"))
+        : _clientSession.AbortTransactionAsync(cToken);
+
+    public void Dispose() => _clientSession?.Dispose();
 }
 public sealed class MongoModelBuilder
 {

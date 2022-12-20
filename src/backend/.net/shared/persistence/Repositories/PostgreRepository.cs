@@ -29,7 +29,7 @@ public class PostgreRepository<TEntity, TContext> : IPersistenceSqlRepository<TE
         var objectId = base.GetHashCode();
         var initiator = $"Postgre repository of '{typeof(TEntity).Name}' by Id {objectId}";
 
-        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new PostgreReaderRepository<TEntity, TContext>(logger, context, initiator));
+        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new PostgreReaderRepository<TEntity, TContext>(context));
         _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new PostgreWriterRepository<TEntity, TContext>(logger, context, initiator));
     }
 }
@@ -37,16 +37,8 @@ internal class PostgreReaderRepository<TEntity, TContext> : IPersistenceReaderRe
     where TContext : PostgreContext
     where TEntity : class, IPersistentSql
 {
-    private readonly ILogger _logger;
     private readonly TContext _context;
-    private readonly string _initiator;
-
-    public PostgreReaderRepository(ILogger logger, TContext context, string initiator)
-    {
-        _logger = logger;
-        _context = context;
-        _initiator = initiator;
-    }
+    public PostgreReaderRepository(TContext context) => _context = context;
 
     public Task<TEntity[]> FindManyAsync(Expression<Func<TEntity, bool>> condition) =>
         _context.Set<TEntity>().Where(condition).ToArrayAsync();
@@ -175,20 +167,32 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
         var entities = await _context.Set<TEntity>().Where(condition).ToArrayAsync();
 
         if (!entities.Any())
-            throw new SharedPersistenceException(_initiator, Constants.Actions.Updated, new($"{typeof(TEntity).Name}s by condition '{condition}' not found"));
+        {
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success, $"{typeof(TEntity).Name}s by condition '{condition}' not found");
+            return entities;
+        }
+
+        var entityProperties = typeof(TEntity).GetProperties();
+        var entityPropertiesDictionary = entityProperties.ToDictionary(x => x.Name, x => x.GetValue(entity));
+
+        for (int i = 0; i < entities.Length; i++)
+            for (int j = 0; j < entityProperties.Length; j++)
+            {
+                var newValue = entityPropertiesDictionary[entityProperties[j].Name];
+
+                if (newValue == default)
+                    continue;
+
+                var oldValue = entityProperties[j].GetValue(entities[i]);
+
+                if (oldValue != newValue)
+                    entityProperties[j].SetValue(entities[i], newValue);
+            }
 
         if (entities.Length == 1)
-        {
-            entities[0] = entity;
             _context.Set<TEntity>().Update(entities[0]);
-        }
         else
-        {
-            for (int i = 0; i < entities.Length; i++)
-                entities[i] = entity;
-
             _context.Set<TEntity>().UpdateRange(entities);
-        }
 
         await _context.SaveChangesAsync(cToken ?? default);
 
@@ -214,7 +218,10 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
         var entities = await _context.Set<TEntity>().Where(condition).ToArrayAsync();
 
         if (!entities.Any())
-            throw new SharedPersistenceException(_initiator, Constants.Actions.Deleted, new($"{typeof(TEntity).Name}s by condition '{condition}' not found"));
+        {
+            _logger.LogTrace(_initiator, Constants.Actions.Deleted, Constants.Actions.Success, $"{typeof(TEntity).Name}s by condition '{condition}' not found");
+            return entities;
+        }
 
         _context.Set<TEntity>().RemoveRange(entities);
         await _context.SaveChangesAsync(cToken ?? default);
@@ -253,6 +260,7 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
         }
         catch (Exception exception)
         {
+            await RollbackTransactionAsync(cToken);
             throw new SharedPersistenceException("PostgreWriterRepository", nameof(SaveProcessableAsync), new(exception));
         }
         finally
@@ -263,4 +271,5 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
 
     public Task SetTransactionAsync(CancellationToken? cToken = null) => _context.Database.BeginTransactionAsync(cToken ?? default);
     public Task CommitTransactionAsync(CancellationToken? cToken = null) => _context.Database.CommitTransactionAsync(cToken ?? default);
+    public Task RollbackTransactionAsync(CancellationToken? cToken = null) => _context.Database.RollbackTransactionAsync(cToken ?? default);
 }

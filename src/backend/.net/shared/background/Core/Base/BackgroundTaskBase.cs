@@ -24,8 +24,8 @@ public abstract class BackgroundTaskBase<TStep> where TStep : class, IProcessSte
     public async Task StartAsync(string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         var steps = await GetQueueProcessStepsAsync(settings.Steps.Names);
-        _logger.LogTrace(taskName, "Begin processing with the steps", "Start", "Steps count: " + steps.Count);
 
+        _logger.LogTrace(taskName, "Start", $"Steps count '{steps.Count}'");
 
         if (settings.Steps.IsParallelProcessing)
             await ParallelHandleStepsAsync(new ConcurrentQueue<TStep>(steps), taskName, taskCount, settings, cToken);
@@ -42,7 +42,7 @@ public abstract class BackgroundTaskBase<TStep> where TStep : class, IProcessSte
             if (dbStepNames.ContainsKey(configurationStepName))
                 result.Enqueue(dbStepNames[configurationStepName]);
             else
-                throw new SharedBackgroundException(nameof(BackgroundTaskBase<TStep>), nameof(GetQueueProcessStepsAsync), new($"Step from configuration: {configurationStepName} not found"));
+                throw new SharedBackgroundException(nameof(BackgroundTaskBase<TStep>), nameof(GetQueueProcessStepsAsync), new($"The step '{configurationStepName}' from configuration was not found in the database"));
 
         return result;
     }
