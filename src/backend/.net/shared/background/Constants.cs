@@ -11,14 +11,19 @@ internal static class Constants
         internal const string Limit = "Size of data reached the limit for processing";
         internal const string NextStart = "Next start over: ";
 
-        internal const string NoData = "Data for processing not found";
+        internal const string NoData = "No data";
         internal const string Success = "Success";
         internal static class ProcessableActions
         {
-            internal const string RequestData = ". Request data";
-            internal const string RequestUnprocessableData = ". Repeated request data";
-            internal const string HandleProcessableData = ". Processing received data";
-            internal const string SaveProcessableData = ". Save processed result";
+            internal const string StartGettingProcessableData = "Start getting processable data";
+            internal const string StartGettingUnprocessableData = "Start getting processable data";
+            internal const string StopGettingData = "Stop getting data";
+
+            internal const string StartHandlingData = "Start handling data";
+            internal const string StopHandlingData = "Stop handling data";
+
+            internal const string StartSavingData = "Start saving data";
+            internal const string StopSavingData = "Stop saving data";
         }
     }
 }

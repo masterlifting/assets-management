@@ -3,6 +3,7 @@
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
+using Shared.Extensions.Logging;
 using Shared.Models.Results;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
@@ -10,6 +11,8 @@ using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Abstractions.Repositories.BaseParts;
 using Shared.Persistence.Contexts;
 using Shared.Persistence.Exceptions;
+
+using SharpCompress.Common;
 
 using System.Linq.Expressions;
 
@@ -81,7 +84,11 @@ internal class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepo
 
         foreach (var _ in Enumerable.Range(0, limit))
         {
-            var updatedResult = await collection.FindOneAndUpdateAsync(updateFilter, updateBuilder, null, cToken);
+            var updatedResult = await collection.FindOneAndUpdateAsync(updateFilter, updateBuilder, new FindOneAndUpdateOptions<T>
+            {
+                IsUpsert = false,
+                ReturnDocument = ReturnDocument.After
+            }, cToken);
 
             if (updatedResult is null)
                 break;
@@ -112,7 +119,11 @@ internal class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepo
 
         foreach (var _ in Enumerable.Range(0, limit))
         {
-            var updatedResult = await collection.FindOneAndUpdateAsync(updateFilter, updateBuilder, null, cToken);
+            var updatedResult = await collection.FindOneAndUpdateAsync(updateFilter, updateBuilder, new FindOneAndUpdateOptions<T>
+            {
+                IsUpsert = false,
+                ReturnDocument = ReturnDocument.After
+            }, cToken);
 
             if (updatedResult is null)
                 break;
@@ -224,26 +235,28 @@ internal class MongoWriterRepository<TEntity, TContext> : IPersistenceWriterRepo
 
     public async Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess, TEntity
     {
-        var array = entities.ToArray();
-
-        if (step is not null)
-            foreach (var entity in array.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
-                entity.ProcessStepId = step.Id;
-
         try
         {
-            await SetTransactionAsync(cToken);
+            foreach (var entity in entities)
+            {
+                entity.Updated = DateTime.UtcNow;
 
-            foreach (var item in array)
-                await UpdateAsync(x => true, item);
+                if (entity.ProcessStatusId != (int)ProcessStatuses.Error)
+                {
+                    entity.Error = string.Empty;
+                    
+                    if (step is not null)
+                        entity.ProcessStepId = step.Id;
+                }
+
+                await _context.UpdateAsync(x => x.Id == entity.Id, entity, cToken);
+            }
+
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
         }
         catch (Exception exception)
         {
             throw new SharedPersistenceException("MongoWriterRepository", nameof(SaveProcessableAsync), new(exception));
-        }
-        finally
-        {
-            await CommitTransactionAsync(cToken);
         }
     }
 

@@ -55,7 +55,7 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
 
             try
             {
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
+                _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartSavingData);
 
                 if (isNextStep)
                 {
@@ -64,18 +64,18 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
 
                     await _repository.Writer.SaveProcessableAsync(nextStep, processableData, cToken);
 
-                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success, $"Next step: '{nextStep!.Name}' was set");
+                    _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopSavingData, $"The next step: '{nextStep!.Name}'");
                 }
                 else
                 {
                     await _repository.Writer.SaveProcessableAsync(null, processableData, cToken);
 
-                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
+                    _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopSavingData);
                 }
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
+                _logger.LogError(new SharedBackgroundException(taskName, action, new(exception)));
             }
         }
     }
@@ -103,17 +103,17 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
 
         try
         {
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
+            _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartSavingData);
 
             await _semaphore.WaitAsync();
             await _repository.Writer.SaveProcessableAsync(null, processableData, cToken);
             _semaphore.Release();
 
-            _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
+            _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopSavingData);
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
+            _logger.LogError(new SharedBackgroundException(taskName, action, new(exception)));
         }
     }
 
@@ -121,16 +121,13 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
     {
         try
         {
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestData, Actions.Start);
+            _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartGettingProcessableData);
 
             var result = await _repository.Reader.GetProcessableAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, cToken);
 
-            if (result.Any())
-                _logger.LogDebug(taskName, action + Actions.ProcessableActions.RequestData, Actions.Success, result.Length);
-
             if (settings.RetryPolicy is not null && taskCount % settings.RetryPolicy.EveryTime == 0)
             {
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestUnprocessableData, Actions.Start);
+                _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartGettingUnprocessableData);
 
                 var retryTime = TimeOnly.Parse(settings.Scheduler.WorkTime).ToTimeSpan() * settings.RetryPolicy.EveryTime;
                 var retryDate = DateTime.UtcNow.Add(-retryTime);
@@ -138,27 +135,23 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
                 var unprocessableResult = await _repository.Reader.GetUnprocessableAsync<TEntity>(step, settings.Steps.ProcessingMaxCount, retryDate, settings.RetryPolicy.MaxAttempts, cToken);
 
                 if (unprocessableResult.Any())
-                {
                     result = result.Concat(unprocessableResult).ToArray();
-                    _logger.LogDebug(taskName, action + Actions.ProcessableActions.RequestUnprocessableData, Actions.Success, unprocessableResult.Length);
-                }
             }
 
-            if (!result.Any())
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.RequestData, Actions.NoData);
+            _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopGettingData, result.Length);
 
             return result;
         }
         catch (Exception exception)
         {
-            throw new SharedBackgroundException(taskName, action + Actions.ProcessableActions.RequestData, new(exception));
+            throw new SharedBackgroundException(taskName, action, new(exception));
         }
     }
     private async Task HandleDataAsync(TStep step, string taskName, string action, TEntity[] data, bool isParallel, CancellationToken cToken)
     {
         try
         {
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Start);
+            _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartHandlingData);
 
             if (!isParallel)
                 await _handler.HandleProcessableStepAsync(step, data, cToken);
@@ -172,10 +165,7 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
             foreach (var entity in data.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
                 entity.ProcessStatusId = (int)ProcessStatuses.Processed;
 
-            foreach (var entity in data.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "The error hasn't description")));
-
-            _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
+            _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopHandlingData);
         }
         catch (Exception exception)
         {
@@ -185,7 +175,7 @@ public abstract class BackgroundTaskProcessing<TEntity, TStep> : BackgroundTaskB
                 entity.Error = exception.Message;
             }
 
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(exception)));
+            _logger.LogError(new SharedBackgroundException(taskName, action, new(exception)));
         }
     }
 }

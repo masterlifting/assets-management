@@ -34,7 +34,7 @@ public static class PortfolioInfrastructureRegistration
         services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
         
         services.AddScoped<PostgrePortfolioContext>();
-        services.AddSingleton<MongoPortfolioContext>();
+        services.AddScoped<MongoPortfolioContext>();
 
         services.AddScoped<IPersistenceNoSqlRepository<IncomingData>, MongoRepository<IncomingData, MongoPortfolioContext>>();
         services.AddScoped<IPersistenceSqlRepository<ProcessStep>, PostgreRepository<ProcessStep, PostgrePortfolioContext>>();

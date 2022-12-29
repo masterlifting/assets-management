@@ -3,7 +3,6 @@ using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 
 using Shared.Background.Interfaces;
-using Shared.Persistence.Abstractions.Repositories;
 
 using static Shared.Persistence.Abstractions.Constants.Enums;
 
@@ -40,7 +39,7 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
             catch (Exception exception)
             {
                 x.ProcessStatusId = (int)ProcessStatuses.Error;
-                x.Error = $"Exception in the file: {x.PayloadSource}. Error: " + exception.Message;
+                x.Error = $"Source: {x.PayloadSource}. " + exception.Message;
             }
             finally
             {

@@ -12,7 +12,6 @@ using Shared.Persistence.Abstractions.Repositories;
 using System.Collections.Concurrent;
 
 using static Shared.Background.Constants;
-using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Background.Core.BackgroundTasks;
 
@@ -48,15 +47,15 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
 
             try
             {
-                _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
+                _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartSavingData);
 
                 await _repository.Writer.SaveProcessableAsync(null, entities, cToken);
 
-                _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
+                _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopSavingData);
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
+                _logger.LogError(new SharedBackgroundException(taskName, action, new(exception)));
             }
         }
     }
@@ -64,7 +63,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
     {
         var tasks = Enumerable.Range(0, steps.Count).Select(x => ParallelHandleStepAsync(steps, taskName, taskCount, settings, cToken));
         return Task.WhenAll(tasks);
-    }
+    }   
 
     private async Task ParallelHandleStepAsync(ConcurrentQueue<TStep> steps, string taskName, int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
@@ -79,17 +78,17 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
 
         try
         {
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Start);
+            _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartSavingData);
 
             await _semaphore.WaitAsync();
             await _repository.Writer.SaveProcessableAsync(null, entities, cToken);
             _semaphore.Release();
 
-            _logger.LogDebug(taskName, action + Actions.ProcessableActions.SaveProcessableData, Actions.Success);
+            _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopSavingData);
         }
         catch (Exception exception)
         {
-            _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.SaveProcessableData, new(exception)));
+            _logger.LogError(new SharedBackgroundException(taskName, action, new(exception)));
         }
     }
     private async Task<IReadOnlyCollection<TEntity>> HandleDataAsync(TStep step, string taskName, string action, bool isParallel, CancellationToken cToken)
@@ -98,7 +97,7 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
         {
             IReadOnlyCollection<TEntity> entities;
 
-            _logger.LogTrace(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Start);
+            _logger.LogTrace(taskName, action, Actions.ProcessableActions.StartHandlingData);
 
             if (!isParallel)
                 entities = await _handler.HandleProcessableStepAsync(step, cToken);
@@ -109,16 +108,13 @@ public abstract class BackgroundTaskPulling<TEntity, TStep> : BackgroundTaskBase
                 _semaphore.Release();
             }
 
-            foreach (var entity in entities.Where(x => x.ProcessStatusId == (int)ProcessStatuses.Error))
-                _logger.LogError(new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(entity.Error ?? "The error hasn't description")));
-
-            _logger.LogDebug(taskName, action + Actions.ProcessableActions.HandleProcessableData, Actions.Success);
+            _logger.LogDebug(taskName, action, Actions.ProcessableActions.StopHandlingData);
 
             return entities;
         }
         catch (Exception exception)
         {
-            throw new SharedBackgroundException(taskName, action + Actions.ProcessableActions.HandleProcessableData, new(exception));
+            throw new SharedBackgroundException(taskName, action, new(exception));
         }
     }
 }

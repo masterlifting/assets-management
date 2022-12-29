@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Shared.Extensions.Logging;
+
 using Shared.Models.Results;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
@@ -245,27 +247,30 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
 
     public async Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, IPersistentProcess, TEntity
     {
-        var array = entities.ToArray();
-
-        if (step is not null)
-            foreach (var entity in array.Where(x => x.ProcessStatusId != (int)ProcessStatuses.Error))
-                entity.ProcessStepId = step.Id;
-
         try
         {
-            await SetTransactionAsync(cToken);
+            foreach (var entity in entities)
+            {
+                entity.Updated = DateTime.UtcNow;
 
-            foreach (var item in array)
-                await UpdateAsync(x => true, item);
+                if (entity.ProcessStatusId != (int)ProcessStatuses.Error)
+                {
+                    entity.Error = null;
+
+                    if (step is not null)
+                        entity.ProcessStepId = step.Id;
+                }
+
+                _context.Update(entity);
+            }
+
+            await _context.SaveChangesAsync(cToken);
+
+            _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success);
         }
         catch (Exception exception)
         {
-            await RollbackTransactionAsync(cToken);
             throw new SharedPersistenceException("PostgreWriterRepository", nameof(SaveProcessableAsync), new(exception));
-        }
-        finally
-        {
-            await CommitTransactionAsync(cToken);
         }
     }
 

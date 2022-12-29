@@ -25,7 +25,7 @@ public abstract class BackgroundTaskBase<TStep> where TStep : class, IProcessSte
     {
         var steps = await GetQueueProcessStepsAsync(settings.Steps.Names);
 
-        _logger.LogTrace(taskName, "Start", $"Steps count '{steps.Count}'");
+        _logger.LogTrace(taskName, $"Run №{taskCount}", $"Steps: {steps.Count}. As parallel: {settings.Steps.IsParallelProcessing}");
 
         if (settings.Steps.IsParallelProcessing)
             await ParallelHandleStepsAsync(new ConcurrentQueue<TStep>(steps), taskName, taskCount, settings, cToken);

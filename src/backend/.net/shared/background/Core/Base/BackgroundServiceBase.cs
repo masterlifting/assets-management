@@ -15,7 +15,8 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
 {
     private int _count;
     private const int Limit = 5_000;
-    private readonly string _action;
+    private const string Action = "BackgroundService";
+
     private Dictionary<string, BackgroundTaskSettings>? _tasks;
 
     private readonly ILogger _logger;
@@ -31,13 +32,12 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
 
         _taskService = taskService;
         _logger = logger;
-        _action = $"Background process of the '{typeof(T).Name}'";
     }
     protected override async Task ExecuteAsync(CancellationToken cToken)
     {
         if (_tasks is null || !_tasks.ContainsKey(_taskService.TaskName))
         {
-            _logger.LogWarn(_taskService.TaskName, _action, Constants.Actions.NoConfig);
+            _logger.LogWarn(_taskService.TaskName, Action, Constants.Actions.NoConfig);
             await StopAsync(cToken);
             return;
         }
@@ -46,7 +46,7 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
 
         if (!settings.Scheduler.IsReady(out var readyInfo))
         {
-            _logger.LogWarn(_taskService.TaskName, _action, readyInfo);
+            _logger.LogWarn(_taskService.TaskName, Action, readyInfo);
             await StopAsync(cToken);
             return;
         }
@@ -58,14 +58,14 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
         {
             if (settings.Scheduler.IsStop(out var stopInfo))
             {
-                _logger.LogWarn(_taskService.TaskName, _action, stopInfo);
+                _logger.LogWarn(_taskService.TaskName, Action, stopInfo);
                 await StopAsync(cToken);
                 return;
             }
 
             if (!settings.Scheduler.IsStart(out var startInfo))
             {
-                _logger.LogWarn(_taskService.TaskName, _action, startInfo);
+                _logger.LogWarn(_taskService.TaskName, Action, startInfo);
                 continue;
             }
 
@@ -76,26 +76,26 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
 
                 _count++;
 
-                _logger.LogTrace(_taskService.TaskName, _action, Constants.Actions.Start);
+                _logger.LogTrace(_taskService.TaskName, Action, Constants.Actions.Start);
 
                 if (settings.Steps.ProcessingMaxCount > Limit)
                 {
                     settings.Steps.ProcessingMaxCount = Limit;
 
-                    _logger.LogWarn(_taskService.TaskName, _action, Constants.Actions.Limit, Limit);
+                    _logger.LogWarn(_taskService.TaskName, Action, Constants.Actions.Limit, Limit);
                 }
 
                 await _taskService.RunTaskAsync(_count, settings, cToken);
 
-                _logger.LogTrace(_taskService.TaskName, _action, Constants.Actions.Done);
+                _logger.LogTrace(_taskService.TaskName, Action, Constants.Actions.Done);
             }
             catch (Exception exception)
             {
-                _logger.LogError(new SharedBackgroundException(_taskService.TaskName, _action, new(exception)));
+                _logger.LogError(new SharedBackgroundException(_taskService.TaskName, Action, new(exception)));
             }
             finally
             {
-                _logger.LogTrace(_taskService.TaskName, _action, Constants.Actions.NextStart + settings.Scheduler.WorkTime);
+                _logger.LogTrace(_taskService.TaskName, Action, Constants.Actions.NextStart + settings.Scheduler.WorkTime);
 
                 if (settings.Scheduler.IsOnce)
                     settings.Scheduler.SetOnce();
@@ -104,7 +104,7 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
     }
     public override async Task StopAsync(CancellationToken cToken)
     {
-        _logger.LogWarn(_taskService.TaskName, _action, Constants.Actions.Stop);
+        _logger.LogWarn(_taskService.TaskName, Action, Constants.Actions.Stop);
         await base.StopAsync(cToken);
     }
 }

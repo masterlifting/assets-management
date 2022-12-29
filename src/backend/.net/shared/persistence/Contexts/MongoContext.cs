@@ -47,6 +47,7 @@ public abstract class MongoContext : IDisposable
         var entityPropertiesDictionary = entityProperties.ToDictionary(x => x.Name, x => x.GetValue(entity));
 
         for (int i = 0; i < entities.Count; i++)
+        {
             for (int j = 0; j < entityProperties.Length; j++)
             {
                 var newValue = entityPropertiesDictionary[entityProperties[j].Name];
@@ -58,12 +59,17 @@ public abstract class MongoContext : IDisposable
 
                 if (oldValue != newValue)
                     entityProperties[j].SetValue(entities[i], newValue);
-
-                var replacedResult = await collection.FindOneAndReplaceAsync(condition, entities[i]);
-
-                if (replacedResult is null)
-                    throw new SharedPersistenceException(nameof(MongoContext), nameof(UpdateAsync), new("FindAndReplace method does bed request"));
             }
+
+            var replacedResult = await collection.FindOneAndReplaceAsync(condition, entities[i], new FindOneAndReplaceOptions<T>
+            { 
+                IsUpsert = false,
+                ReturnDocument = ReturnDocument.After
+            }, cToken);
+
+            if (replacedResult is null)
+                throw new SharedPersistenceException(nameof(MongoContext), nameof(UpdateAsync), new("FindOneAndReplace method does bed request"));
+        }
 
         return entities.ToArray();
     }
@@ -76,7 +82,7 @@ public abstract class MongoContext : IDisposable
         var result = new List<T>((int)count);
 
         for (int i = 0; i < count; i++)
-            result.Add(await collection.FindOneAndDeleteAsync(condition));
+            result.Add(await collection.FindOneAndDeleteAsync(condition, null, cToken));
 
         return result.ToArray();
     }
