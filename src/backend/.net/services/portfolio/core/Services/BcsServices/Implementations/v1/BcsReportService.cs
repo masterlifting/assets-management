@@ -1,4 +1,5 @@
 using AM.Services.Portfolio.Core.Abstractions.ExcelService;
+using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using AM.Services.Portfolio.Core.Exceptions;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.Helpers;
@@ -7,20 +8,26 @@ using AM.Services.Portfolio.Core.Services.BcsServices.Models;
 
 using static AM.Services.Common.Constants.Enums;
 using static AM.Services.Portfolio.Core.Constants.Enums;
+using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 
 public sealed class BcsReportService : IBcsReportService
 {
+    private const int ProviderId = (int)Providers.Bcs;
+
     private const string Initiator = nameof(BcsReportService);
 
     private readonly IPortfolioExcelService _excelService;
+    private readonly IUnitOfWorkRepository _uow;
+
     private readonly Dictionary<string, Action<int, IPortfolioExcelDocument, string, Currencies?, List<BcsReportEventModel>>> _eventPatterns;
     private readonly Dictionary<string, Func<int, IPortfolioExcelDocument, string, List<BcsReportDealModel>, int>> _dealPatterns;
 
-    public BcsReportService(IPortfolioExcelService excelService)
+    public BcsReportService(IPortfolioExcelService excelService, IUnitOfWorkRepository uow)
     {
         _excelService = excelService;
+        _uow = uow;
         _eventPatterns = new(StringComparer.OrdinalIgnoreCase)
         {
             { "Приход ДС", ParseBalance },
@@ -146,7 +153,7 @@ public sealed class BcsReportService : IBcsReportService
                     && patternKey.Length > 5
                     && !int.TryParse(patternKey[0..3], out _)
                     && !BcsReportFileStructure.LastBlockExceptedWords.Any(x => patternKey.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1))
-
+                {
                     if (_eventPatterns.Keys.Any(x => patternKey.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1))
                     {
                         var keyWord = string.Join(' ', patternKey.Split(' ')[0..2]);
@@ -162,7 +169,8 @@ public sealed class BcsReportService : IBcsReportService
                         _dealPatterns[keyWord](rowId, excel, value, deals);
                     }
                     else
-                        throw new PortfolioCoreException(Initiator, $"Parsing '{lastBlock}'", new($"Keyword '{patternKey}' was not recognezed in the row '{rowId + 1}'"));
+                        throw new PortfolioCoreException(Initiator, $"Parsing '{lastBlock}'", new($"PatternKey '{patternKey}' was not recognezed in the row '{rowId + 1}'"));
+                }
             }
         }
 
@@ -176,92 +184,89 @@ public sealed class BcsReportService : IBcsReportService
         };
     }
 
-    public Event[] GetEvents(BcsReportModel reportModel)
+    public async Task<Event[]> GetEventsAsync(Guid userId, string agreement, IList<BcsReportEventModel> models)
     {
-        //var eventModels = reportModel.Events.ToArray();
+        var result = new List<Event>(models.Count);
 
-        //var result = new List<Event>(eventModels.Length);
+        Account account = await _uow.Account.GetAccountAsync(agreement, userId, ProviderId);
+        Derivative[] derivatives = await _uow.Derivative.GetDerivativesAsync(AssetTypes.Stock);
+        Dictionary<string, IEnumerable<Derivative>> derivativeDictionary = derivatives
+            .GroupBy(x => x.Code)
+            .ToDictionary(x => x.Key, x => x.AsEnumerable());
 
-        //foreach (var item in eventModels)
-        //{
-        //    var derivativeId = new DerivativeId(item.Asset);
-        //    var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+        foreach (var item in models)
+        {
+            if(!derivativeDictionary.ContainsKey(item.Asset))
+                throw new PortfolioCoreException(Initiator, nameof(GetEventsAsync), new($"'Asset '{item.Asset}' was not recognized as derivative"));
 
-        //    var eventTypeId = new EventTypeId(item.EventType);
-        //    var exchangeId = new ExchangeId(item.Exchange);
+            var derivative = derivativeDictionary[item.Asset].First();
 
-        //    var model = new EventModel(
-        //        decimal.Parse(item.Value, _culture)
-        //        , DateOnly.Parse(item.Date, _culture)
-        //        , eventTypeId
-        //        , derivativeId
-        //        , derivativeCode
-        //        , _accountId
-        //        , _userId
-        //        , _providerId
-        //        , exchangeId
-        //        , new StateId(Shared.Persistense.Constants.Enums.Statuses.Ready)
-        //        , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
-        //        , 0
-        //        , item.Info);
+                result.Add(new()
+                {
+                    UserId = userId,
+                    AccountId = account.Id,
+                    TypeId = (int)item.EventType,
+                    ProviderId = ProviderId,
+                    DerivativeId = derivative.Id,
+                    ExchangeId = (int)item.Exchange,
+                    ProcessStatusId = (int)ProcessStatuses.Ready,
+                    ProcessStepId = (int)ProcessSteps.CalculateEvent,
 
-        //    result.Add(model);
-        //}
+                    Date = DateOnly.FromDateTime(item.Date),
+                    Value = item.Value
+                });
+        }
 
-        return Array.Empty<Event>(); //result.ToArray();
+        return result.ToArray();
     }
-    public Deal[] GetDeals(BcsReportModel reportModel)
+    public async Task<Deal[]> GetDealsAsync(Guid userId, string agreement, IList<BcsReportDealModel> models)
     {
-        //var dealModels = reportModel.Deals.ToArray();
+        var result = new List<Deal>(models.Count);
 
-        //var result = new List<Deal>(dealModels.Length);
+        Account account = await _uow.Account.GetAccountAsync(agreement, userId, ProviderId);
+        Derivative[] derivatives = await _uow.Derivative.GetDerivativesAsync();
+        Dictionary<string, IEnumerable<Derivative>> derivativeDictionary = derivatives
+            .GroupBy(x => x.Code)
+            .ToDictionary(x => x.Key, x => x.AsEnumerable());
 
-        //foreach (var item in dealModels)
-        //{
-        //    var derivativeId = new DerivativeId(item.Asset);
-        //    var derivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
+        foreach (var item in models)
+        {
+            if (!derivativeDictionary.ContainsKey(item.IncomeEvent.Asset))
+                throw new PortfolioCoreException(Initiator, nameof(GetDealsAsync), new($"'Income asset '{item.IncomeEvent.Asset}' was not recognized as derivative"));
+            if (!derivativeDictionary.ContainsKey(item.ExpenseEvent.Asset))
+                throw new PortfolioCoreException(Initiator, nameof(GetDealsAsync), new($"'Expense asset '{item.ExpenseEvent.Asset}' was not recognized as derivative"));
 
-        //    var exchangeId = new ExchangeId(item.Exchange);
+            var derivativeIncome = derivativeDictionary[item.IncomeEvent.Asset].First();
+            var derivativeExpense = derivativeDictionary[item.ExpenseEvent.Asset].First();
+            
+            var dealId = Guid.NewGuid();
+            
+            result.Add(new()
+            {
+                Id = dealId,
+                UserId = userId,
+                AccountId = account.Id,
+                Cost = item.IncomeEvent.Value * item.ExpenseEvent.Value,
+                Income = new()
+                { 
+                    DealId = dealId,
+                    DerivativeId = derivativeIncome.Id,
+                    Date = DateOnly.FromDateTime(item.IncomeEvent.Date),
+                    Value = item.IncomeEvent.Value
+                },
+                Expense = new()
+                {
+                    DealId = dealId,
+                    DerivativeId = derivativeExpense.Id,
+                    Date = DateOnly.FromDateTime(item.ExpenseEvent.Date),
+                    Value = item.ExpenseEvent.Value
+                },
+                ProcessStatusId = (int)ProcessStatuses.Ready,
+                ProcessStepId = (int)ProcessSteps.CalculateDeal
+            });
+        }
 
-        //    var cost = decimal.Parse(item.Cost, _culture);
-        //    var value = decimal.Parse(item.Value, _culture);
-
-        //    var date = DateOnly.Parse(item.Date, _culture);
-
-        //    var dealId = new DealId();
-
-        //    var incomederivativeId = new DerivativeId(item.Asset);
-        //    var incomederivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
-
-
-        //    var income = new IncomeModel(dealId, derivativeId, derivativeCode, cost, date);
-
-        //    var expensederivativeId = new DerivativeId(item.Asset);
-        //    var expensederivativeCode = new DerivativeCode(_derivativeDictionary[derivativeId.AsString][0]);
-
-
-        //    var expense = new ExpenseModel(dealId, derivativeId, derivativeCode, cost, date);
-
-        //    var model = new DealModel(
-        //        cost * value
-        //        , date
-        //        , income
-        //        , expense
-        //        , _accountId
-        //        , _userId
-        //        , _providerId
-        //        , exchangeId
-        //        , new StateId(Shared.Persistense.Constants.Enums.Statuses.Ready)
-        //        , new StepId(Shared.Persistense.Constants.Enums.Steps.Computing)
-        //        , 0
-        //        , null);
-
-        //    result.Add(model);
-        //}
-
-        //return result.ToArray();
-
-        return Array.Empty<Deal>();
+        return result.ToArray();
     }
 
     #region Events Parsers

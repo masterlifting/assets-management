@@ -52,7 +52,11 @@ public static class Constants
         }
         public enum ProcessSteps
         {
-            ParseBcsReport = 1
+            ParseBcsReport = 1,
+            CalculateEvent,
+            SendEvent,
+            CalculateDeal,
+            SendDeal
         }
     }
 }

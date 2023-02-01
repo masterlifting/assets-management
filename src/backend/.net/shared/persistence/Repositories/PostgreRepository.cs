@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 
 using Shared.Extensions.Logging;
-
 using Shared.Models.Results;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;

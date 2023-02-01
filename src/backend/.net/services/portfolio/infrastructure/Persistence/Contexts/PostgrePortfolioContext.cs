@@ -105,7 +105,7 @@ public sealed class PostgrePortfolioContext : PostgreContext
             e.Property(x => x.Created).HasDefaultValue(DateTime.UtcNow);
             e.Property(x => x.Updated).HasDefaultValue(DateTime.UtcNow);
 
-            e.HasIndex(x => new { x.Name, x.Code }).IsUnique();
+            e.HasIndex(x => new { x.Code, x.Name}).IsUnique();
         });
         builder.Entity<Income>(e =>
         {

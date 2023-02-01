@@ -1,14 +1,14 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.ExcelService;
 using AM.Services.Portfolio.Core.Abstractions.Persistence;
+using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
 using AM.Services.Portfolio.Core.Abstractions.WebServices;
-using AM.Services.Portfolio.Core.Domain.Persistence.Collections;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Infrastructure.ExcelServices;
 using AM.Services.Portfolio.Infrastructure.Persistence;
 using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
+using AM.Services.Portfolio.Infrastructure.Persistence.Repositories;
 using AM.Services.Portfolio.Infrastructure.Settings;
 using AM.Services.Portfolio.Infrastructure.WebClients;
 
@@ -36,13 +36,17 @@ public static class PortfolioInfrastructureRegistration
         services.AddScoped<PostgrePortfolioContext>();
         services.AddScoped<MongoPortfolioContext>();
 
-        services.AddScoped<IPersistenceNoSqlRepository<IncomingData>, MongoRepository<IncomingData, MongoPortfolioContext>>();
         services.AddScoped<IPersistenceSqlRepository<ProcessStep>, PostgreRepository<ProcessStep, PostgrePortfolioContext>>();
-        services.AddScoped<IPersistenceSqlRepository<Asset>, PostgreRepository<Asset, PostgrePortfolioContext>>();
-        services.AddScoped<IPersistenceSqlRepository<Deal>, PostgreRepository<Deal, PostgrePortfolioContext>>();
-        services.AddScoped<IPersistenceSqlRepository<Event>, PostgreRepository<Event, PostgrePortfolioContext>>();
-        services.AddScoped<IPersistenceSqlRepository<Derivative>, PostgreRepository<Derivative, PostgrePortfolioContext>>();
-        services.AddScoped<IPersistenceSqlRepository<User>, PostgreRepository<User, PostgrePortfolioContext>>();
+        
+        services.AddScoped<IIncomingDataRepository, IncomingDataRepository>();
+        
+        services.AddScoped<IAssetRepository, AssetRepository>();
+        services.AddScoped<IDealRepository, DealRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IDerivativeRepository, DerivativeRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IDerivativeRepository, DerivativeRepository>();
 
         services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
     }

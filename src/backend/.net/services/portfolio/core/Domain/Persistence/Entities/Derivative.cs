@@ -9,8 +9,8 @@ public sealed class Derivative : IPersistentSql, IPersistentProcess, IBalance
 {
     public Guid Id { get; init; }
 
-    public string Name { get; init; } = null!;
     public string Code { get; init; } = null!;
+    public string Name { get; init; } = null!;
 
     public decimal BalanceValue { get; set; }
     public decimal BalanceCost { get; set; }
@@ -27,8 +27,7 @@ public sealed class Derivative : IPersistentSql, IPersistentProcess, IBalance
     public DateTime Updated { get; set; }
 
     public Asset Asset { get; set; } = null!;
-    public string AssetId { get; init; } = null!;
-    public int AssetTypeId { get; init; }
+    public Guid AssetId { get; init; }
 
     public IEnumerable<Income>? Incomes { get; set; }
     public IEnumerable<Expense>? Expenses { get; set; }

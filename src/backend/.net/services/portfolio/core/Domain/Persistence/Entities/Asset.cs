@@ -26,7 +26,7 @@ public sealed class Asset : IPersistentSql, IAsset, IPersistentProcess, IBalance
     public DateTime Created { get; init; }
     public DateTime Updated { get; set; }
 
-    public AssetType AssetType { get; init; } = null!;
+    public AssetType Type { get; init; } = null!;
     public int TypeId { get; init; }
 
     public Country Country { get; set; } = null!;
