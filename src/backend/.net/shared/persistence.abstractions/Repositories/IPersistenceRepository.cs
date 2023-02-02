@@ -1,5 +1,5 @@
 ﻿using Shared.Persistence.Abstractions.Entities;
-using Shared.Persistence.Abstractions.Repositories.BaseParts;
+using Shared.Persistence.Abstractions.Repositories.Parts;
 
 namespace Shared.Persistence.Abstractions.Repositories
 {

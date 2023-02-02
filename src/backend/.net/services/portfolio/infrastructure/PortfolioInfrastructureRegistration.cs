@@ -17,8 +17,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Polly;
 
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Repositories;
+using Shared.Queue.Domain.WorkQueue;
 
 namespace AM.Services.Portfolio.Infrastructure;
 
@@ -33,8 +35,8 @@ public static class PortfolioInfrastructureRegistration
     {
         services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
         
-        services.AddScoped<PostgrePortfolioContext>();
-        services.AddScoped<MongoPortfolioContext>();
+        services.AddScoped<IPostgrePersistenceContext, PostgrePortfolioContext>();
+        services.AddScoped<IMongoPersistenceContext, MongoPortfolioContext>();
 
         services.AddScoped<IPersistenceSqlRepository<ProcessStep>, PostgreRepository<ProcessStep, PostgrePortfolioContext>>();
         
@@ -49,6 +51,8 @@ public static class PortfolioInfrastructureRegistration
         services.AddScoped<IDerivativeRepository, DerivativeRepository>();
 
         services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
+
+        services.AddTransient<IWorkQueue, WorkQueue>();
     }
     public static void AddPortfolioHttpClients(this IServiceCollection services, IConfiguration configuration)
     {

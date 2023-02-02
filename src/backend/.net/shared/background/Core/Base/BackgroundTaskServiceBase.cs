@@ -25,9 +25,8 @@ public abstract class BackgroundTaskServiceBase<TEntity, TStep, TTask> : IBackgr
     public async Task RunTaskAsync(int taskCount, BackgroundTaskSettings settings, CancellationToken cToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var serviceProvider = scope.ServiceProvider;
 
-        var task = serviceProvider.GetRequiredService<TTask>();
+        var task = scope.ServiceProvider.GetRequiredService<TTask>();
 
         await task.StartAsync(TaskName, taskCount, settings, cToken);
     }

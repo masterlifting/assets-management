@@ -4,14 +4,10 @@ using Shared.Persistence.Abstractions.Entities.Catalogs;
 
 using System.Linq.Expressions;
 
-namespace Shared.Persistence.Abstractions.Repositories.BaseParts
+namespace Shared.Persistence.Abstractions.Repositories.Parts
 {
     public interface IPersistenceWriterRepository<T> where T : class, IPersistent
     {
-        Task SetTransactionAsync(CancellationToken? cToken = null);
-        Task CommitTransactionAsync(CancellationToken? cToken = null);
-        Task RollbackTransactionAsync(CancellationToken? cToken = null);
-
         Task CreateAsync(T entity, CancellationToken? cToken = null);
         Task CreateRangeAsync(IReadOnlyCollection<T> entities, CancellationToken? cToken = null);
         Task<TryResult<T>> TryCreateAsync(T entity, CancellationToken? cToken = null);

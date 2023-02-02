@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Exceptions;
 using Shared.Persistence.Settings.Connections;
@@ -10,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace Shared.Persistence.Contexts;
 
-public abstract class MongoContext : IDisposable
+public abstract class MongoContext : IMongoPersistenceContext
 {
     internal IMongoDatabase DataBase { get; }
     private IClientSession? _clientSession;

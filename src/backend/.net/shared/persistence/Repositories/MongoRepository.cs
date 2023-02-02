@@ -8,7 +8,7 @@ using Shared.Models.Results;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
 using Shared.Persistence.Abstractions.Repositories;
-using Shared.Persistence.Abstractions.Repositories.BaseParts;
+using Shared.Persistence.Abstractions.Repositories.Parts;
 using Shared.Persistence.Contexts;
 using Shared.Persistence.Exceptions;
 
@@ -259,8 +259,4 @@ internal class MongoWriterRepository<TEntity, TContext> : IPersistenceWriterRepo
             throw new SharedPersistenceException("MongoWriterRepository", nameof(SaveProcessableAsync), new(exception));
         }
     }
-
-    public Task SetTransactionAsync(CancellationToken? cToken = null) => _context.SetTransactionAsync(cToken ?? default);
-    public Task CommitTransactionAsync(CancellationToken? cToken = null) => _context.CommitTransactionAsync(cToken ?? default);
-    public Task RollbackTransactionAsync(CancellationToken? cToken = null) => _context.RollbackTransactionAsync(cToken ?? default);
 }
