@@ -5,14 +5,12 @@ using MongoDB.Driver.Linq;
 
 using Shared.Extensions.Logging;
 using Shared.Models.Results;
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
 using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Abstractions.Repositories.Parts;
-using Shared.Persistence.Contexts;
 using Shared.Persistence.Exceptions;
-
-using SharpCompress.Common;
 
 using System.Linq.Expressions;
 
@@ -20,9 +18,7 @@ using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
 
-public class MongoRepository<TEntity, TContext> : IPersistenceNoSqlRepository<TEntity>
-    where TContext : MongoContext
-    where TEntity : class, IPersistentNoSql
+public abstract class MongoRepository<TEntity> : IPersistenceNoSqlRepository<TEntity> where TEntity : class, IPersistentNoSql
 {
     private readonly Lazy<IPersistenceReaderRepository<TEntity>> _reader;
     private readonly Lazy<IPersistenceWriterRepository<TEntity>> _writer;
@@ -30,21 +26,19 @@ public class MongoRepository<TEntity, TContext> : IPersistenceNoSqlRepository<TE
     public IPersistenceReaderRepository<TEntity> Reader { get => _reader.Value; }
     public IPersistenceWriterRepository<TEntity> Writer { get => _writer.Value; }
 
-    public MongoRepository(ILogger<TEntity> logger, TContext context)
+    protected MongoRepository(ILogger<TEntity> logger, IMongoPersistenceContext context)
     {
         var objectId = base.GetHashCode();
         var initiator = $"Mongo repository of '{typeof(TEntity).Name}' by Id {objectId}";
 
-        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new MongoReaderRepository<TEntity, TContext>(context));
-        _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new MongoWriterRepository<TEntity, TContext>(logger, context, initiator));
+        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new MongoReaderRepository<TEntity>(context));
+        _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new MongoWriterRepository<TEntity>(logger, context, initiator));
     }
 }
-internal class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepository<TEntity>
-    where TContext : MongoContext
-    where TEntity : class, IPersistentNoSql
+internal sealed class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepository<TEntity> where TEntity : class, IPersistentNoSql
 {
-    private readonly TContext _context;
-    public MongoReaderRepository(TContext context) => _context = context;
+    private readonly IMongoPersistenceContext _context;
+    public MongoReaderRepository(IMongoPersistenceContext context) => _context = context;
 
     public Task<TEntity?> FindSingleAsync(Expression<Func<TEntity, bool>> condition) =>
         _context.Set<TEntity>().SingleOrDefaultAsync(condition);
@@ -135,15 +129,13 @@ internal class MongoReaderRepository<TEntity, TContext> : IPersistenceReaderRepo
     }
 
 }
-internal class MongoWriterRepository<TEntity, TContext> : IPersistenceWriterRepository<TEntity>
-    where TContext : MongoContext
-    where TEntity : class, IPersistentNoSql
+internal sealed class MongoWriterRepository<TEntity, TContext> : IPersistenceWriterRepository<TEntity> where TEntity : class, IPersistentNoSql
 {
     private readonly ILogger _logger;
-    private readonly TContext _context;
+    private readonly IMongoPersistenceContext _context;
     private readonly string _initiator;
 
-    public MongoWriterRepository(ILogger logger, TContext context, string initiator)
+    public MongoWriterRepository(ILogger logger, IMongoPersistenceContext context, string initiator)
     {
         _logger = logger;
         _context = context;

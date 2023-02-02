@@ -1,8 +1,6 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 
 using Shared.Persistence.Abstractions.Contexts;
-using Shared.Persistence.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Core.Abstractions.Persistence
 {
@@ -11,8 +9,7 @@ namespace AM.Services.Portfolio.Core.Abstractions.Persistence
         IPostgrePersistenceContext PostgreContext { get; }
         IMongoPersistenceContext MongoContext { get; }
 
-        IPersistenceSqlRepository<ProcessStep> ProcessStep { get; }
-
+        IProcessStepRepository ProcessStep { get; }
         IIncomingDataRepository IncomingData { get; }
         IAssetRepository Asset { get; }
         IDealRepository Deal { get; }

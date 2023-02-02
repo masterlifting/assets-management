@@ -1,18 +1,17 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
-using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 
 using Microsoft.Extensions.Logging;
-
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Repositories;
 
 using static AM.Services.Common.Constants.Enums;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public sealed class DerivativeRepository : PostgreRepository<Derivative, PostgrePortfolioContext>, IDerivativeRepository
+    public sealed class DerivativeRepository : PostgreRepository<Derivative>, IDerivativeRepository
     {
-        public DerivativeRepository(ILogger<Derivative> logger, PostgrePortfolioContext context) : base(logger, context)
+        public DerivativeRepository(ILogger<Derivative> logger, IPostgrePersistenceContext context) : base(logger, context)
         {
         }
 

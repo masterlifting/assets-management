@@ -2,7 +2,6 @@
 using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
 using AM.Services.Portfolio.Core.Abstractions.WebServices;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 using AM.Services.Portfolio.Core.Services.BcsServices.Implementations.v1;
 using AM.Services.Portfolio.Core.Services.BcsServices.Interfaces;
 using AM.Services.Portfolio.Infrastructure.ExcelServices;
@@ -18,8 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 
 using Shared.Persistence.Abstractions.Contexts;
-using Shared.Persistence.Abstractions.Repositories;
-using Shared.Persistence.Repositories;
 using Shared.Queue.Domain.WorkQueue;
 
 namespace AM.Services.Portfolio.Infrastructure;
@@ -34,14 +31,12 @@ public static class PortfolioInfrastructureRegistration
     public static void AddPortfolioPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseConnectionSection>(configuration.GetSection(DatabaseConnectionSection.Name));
-        
+
         services.AddScoped<IPostgrePersistenceContext, PostgrePortfolioContext>();
         services.AddScoped<IMongoPersistenceContext, MongoPortfolioContext>();
 
-        services.AddScoped<IPersistenceSqlRepository<ProcessStep>, PostgreRepository<ProcessStep, PostgrePortfolioContext>>();
-        
+        services.AddScoped<IProcessStepRepository, ProcessStepRepository>();
         services.AddScoped<IIncomingDataRepository, IncomingDataRepository>();
-        
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IDealRepository, DealRepository>();
         services.AddScoped<IEventRepository, EventRepository>();

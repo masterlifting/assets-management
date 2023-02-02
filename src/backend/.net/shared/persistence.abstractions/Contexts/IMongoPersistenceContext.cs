@@ -1,6 +1,8 @@
-﻿namespace Shared.Persistence.Abstractions.Contexts
+﻿using Shared.Persistence.Abstractions.Entities;
+
+namespace Shared.Persistence.Abstractions.Contexts
 {
-    public interface IMongoPersistenceContext : IPersistenceContext
+    public interface IMongoPersistenceContext : IPersistenceContext<IPersistentNoSql>
     {
     }
 }

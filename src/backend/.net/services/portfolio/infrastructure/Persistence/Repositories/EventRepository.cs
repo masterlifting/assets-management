@@ -1,16 +1,15 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
-using AM.Services.Portfolio.Infrastructure.Persistence.Contexts;
 
 using Microsoft.Extensions.Logging;
-
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence.Repositories
 {
-    public sealed class EventRepository : PostgreRepository<Event, PostgrePortfolioContext>, IEventRepository
+    public sealed class EventRepository : PostgreRepository<Event>, IEventRepository
     {
-        public EventRepository(ILogger<Event> logger, PostgrePortfolioContext context) : base(logger, context)
+        public EventRepository(ILogger<Event> logger, IPostgrePersistenceContext context) : base(logger, context)
         {
         }
     }

@@ -3,11 +3,11 @@ using Microsoft.Extensions.Logging;
 
 using Shared.Extensions.Logging;
 using Shared.Models.Results;
+using Shared.Persistence.Abstractions.Contexts;
 using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Abstractions.Entities.Catalogs;
 using Shared.Persistence.Abstractions.Repositories;
 using Shared.Persistence.Abstractions.Repositories.Parts;
-using Shared.Persistence.Contexts;
 using Shared.Persistence.Exceptions;
 
 using System.Linq.Expressions;
@@ -16,30 +16,28 @@ using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
 
-public class PostgreRepository<TEntity, TContext> : IPersistenceSqlRepository<TEntity>
-    where TContext : PostgreContext
+public abstract class PostgreRepository<TEntity> : IPersistenceSqlRepository<TEntity>
     where TEntity : class, IPersistentSql
 {
     private readonly Lazy<IPersistenceReaderRepository<TEntity>> _reader;
     private readonly Lazy<IPersistenceWriterRepository<TEntity>> _writer;
+
     public IPersistenceReaderRepository<TEntity> Reader { get => _reader.Value; }
     public IPersistenceWriterRepository<TEntity> Writer { get => _writer.Value; }
 
-    public PostgreRepository(ILogger<TEntity> logger, TContext context)
+    protected PostgreRepository(ILogger<TEntity> logger, IPostgrePersistenceContext context)
     {
         var objectId = base.GetHashCode();
         var initiator = $"Postgre repository of '{typeof(TEntity).Name}' by Id {objectId}";
 
-        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new PostgreReaderRepository<TEntity, TContext>(context));
-        _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new PostgreWriterRepository<TEntity, TContext>(logger, context, initiator));
+        _reader = new Lazy<IPersistenceReaderRepository<TEntity>>(() => new PostgreReaderRepository<TEntity>(context));
+        _writer = new Lazy<IPersistenceWriterRepository<TEntity>>(() => new PostgreWriterRepository<TEntity>(logger, context, initiator));
     }
 }
-internal class PostgreReaderRepository<TEntity, TContext> : IPersistenceReaderRepository<TEntity>
-    where TContext : PostgreContext
-    where TEntity : class, IPersistentSql
+internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepository<TEntity> where TEntity : class, IPersistentSql
 {
-    private readonly TContext _context;
-    public PostgreReaderRepository(TContext context) => _context = context;
+    private readonly IPostgrePersistenceContext _context;
+    public PostgreReaderRepository(IPostgrePersistenceContext context) => _context = context;
 
     public Task<TEntity[]> FindManyAsync(Expression<Func<TEntity, bool>> condition) =>
         _context.Set<TEntity>().Where(condition).ToArrayAsync();
@@ -103,15 +101,13 @@ internal class PostgreReaderRepository<TEntity, TContext> : IPersistenceReaderRe
     }
 
 }
-internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRepository<TEntity>
-    where TContext : PostgreContext
-    where TEntity : class, IPersistentSql
+internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepository<TEntity> where TEntity : class, IPersistentSql
 {
     private readonly ILogger _logger;
-    private readonly TContext _context;
+    private readonly IPostgrePersistenceContext _context;
     private readonly string _initiator;
 
-    public PostgreWriterRepository(ILogger logger, TContext context, string initiator)
+    public PostgreWriterRepository(ILogger logger, IPostgrePersistenceContext context, string initiator)
     {
         _logger = logger;
         _context = context;
@@ -177,6 +173,7 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
         var entityPropertiesDictionary = entityProperties.ToDictionary(x => x.Name, x => x.GetValue(entity));
 
         for (int i = 0; i < entities.Length; i++)
+        {
             for (int j = 0; j < entityProperties.Length; j++)
             {
                 var newValue = entityPropertiesDictionary[entityProperties[j].Name];
@@ -189,6 +186,7 @@ internal class PostgreWriterRepository<TEntity, TContext> : IPersistenceWriterRe
                 if (oldValue != newValue)
                     entityProperties[j].SetValue(entities[i], newValue);
             }
+        }
 
         if (entities.Length == 1)
             _context.Set<TEntity>().Update(entities[0]);

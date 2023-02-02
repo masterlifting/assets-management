@@ -1,18 +1,16 @@
 ﻿using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Abstractions.Persistence.Repositories;
-using AM.Services.Portfolio.Core.Domain.Persistence.Entities.Catalogs;
 
 using Shared.Persistence.Abstractions.Contexts;
-using Shared.Persistence.Abstractions.Repositories;
 
 namespace AM.Services.Portfolio.Infrastructure.Persistence
 {
-    public class UnitOfWorkRepository : IUnitOfWorkRepository
+    public sealed class UnitOfWorkRepository : IUnitOfWorkRepository
     {
         public UnitOfWorkRepository(
             IPostgrePersistenceContext postgreContext
             , IMongoPersistenceContext mongoContext
-            , IPersistenceSqlRepository<ProcessStep> processStep
+            , IProcessStepRepository processStep
             , IIncomingDataRepository incomingData
             , IAssetRepository asset
             , IDealRepository deal
@@ -35,7 +33,8 @@ namespace AM.Services.Portfolio.Infrastructure.Persistence
 
         public IPostgrePersistenceContext PostgreContext { get; }
         public IMongoPersistenceContext MongoContext { get; }
-        public IPersistenceSqlRepository<ProcessStep> ProcessStep { get; }
+
+        public IProcessStepRepository ProcessStep { get; }
         public IIncomingDataRepository IncomingData { get; }
         public IAssetRepository Asset { get; }
         public IDealRepository Deal { get; }
