@@ -13,13 +13,12 @@ public class MongoPortfolioContext : MongoContext
 {
     public MongoPortfolioContext(IOptions<DatabaseConnectionSection> options) : base(options.Value.MongoDB)
     {
-
     }
     public override void OnModelCreating(MongoModelBuilder builder)
     {
         //BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
-        builder.SetCollection<IncomingData>().Indexes
+        builder.CreateCollection<IncomingData>().Indexes
         .CreateOne(new CreateIndexModel<IncomingData>(
             Builders<IncomingData>.IndexKeys.Ascending(x => x.PayloadHash)
             , new CreateIndexOptions { Unique = true }));

@@ -14,7 +14,6 @@ using Shared.Persistence.Exceptions;
 using System.Linq.Expressions;
 
 using static Shared.Persistence.Abstractions.Constants.Enums;
-using static Shared.Persistence.Constants.Enums;
 
 namespace Shared.Persistence.Repositories;
 
@@ -48,7 +47,7 @@ internal sealed class MongoReaderRepository<TEntity> : IPersistenceReaderReposit
         _context.FindManyAsync(condition, cToken);
 
     public Task<T[]> GetCatalogsAsync<T>(CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
-        _context.FindManyAsync<T>(x => true, cToken);
+        _context.FindManyAsync<T>(_ => true, cToken);
     public Task<T?> GetCatalogByIdAsync<T>(int id, CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
         _context.FindSingleAsync<T>(x => x.Id == id, cToken);
     public Task<T?> GetCatalogByNameAsync<T>(string name, CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
@@ -64,14 +63,43 @@ internal sealed class MongoReaderRepository<TEntity> : IPersistenceReaderReposit
             x.ProcessStepId == step.Id
             && x.ProcessStatusId == (int)ProcessStatuses.Ready;
 
-        var updater = new Dictionary<ContextCommand, (string Name, object Value)>
+        var updatedDate = DateTime.UtcNow;
+        const int ProcessStatusId = (int)ProcessStatuses.Processing;
+        const int ProcessAttempt = 1;
+
+        var updater = new Dictionary<ContextCommand, (string Name, string Value)>
         {
-            { ContextCommand.Set, (nameof(IPersistentProcess.Updated), DateTime.UtcNow) },
-            { ContextCommand.Set, (nameof(IPersistentProcess.ProcessStatusId), (int)ProcessStatuses.Processing) },
-            { ContextCommand.Inc, (nameof(IPersistentProcess.ProcessAttempt), 1) }
+            { ContextCommand.Set, (nameof(IPersistentProcess.Updated), $"{updatedDate}") },
+            { ContextCommand.Set, (nameof(IPersistentProcess.ProcessStatusId), $"{ProcessStatusId}") },
+            { ContextCommand.Inc, (nameof(IPersistentProcess.ProcessAttempt), $"{ProcessAttempt}") }
         };
 
-        return await _context.UpdateAsync(condition, updater, cToken);
+        try
+        {
+            await _context.StartTransactionAsync(cToken);
+
+            var oldEntities = await FindManyAsync(condition, cToken);
+            var updatedCount = await _context.UpdateAsync(condition, updater, cToken);
+
+            if (oldEntities.Length != updatedCount)
+                throw new MongoException("Updating statuseswas failed!");
+
+            await _context.CommitTransactionAsync(cToken);
+
+            foreach (var item in oldEntities)
+            {
+                item.Updated = updatedDate;
+                item.ProcessStatusId = ProcessStatusId;
+                item.ProcessAttempt += ProcessAttempt;
+            }
+
+            return oldEntities;
+        }
+        catch (Exception exception)
+        {
+            await _context.RollbackTransactionAsync(cToken);
+            throw new SharedPersistenceException(nameof(MongoReaderRepository<TEntity>), nameof(GetProcessableAsync), new(exception));
+        }
     }
     public async Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken = default) where T : class, IPersistentProcess, TEntity
     {
@@ -80,14 +108,43 @@ internal sealed class MongoReaderRepository<TEntity> : IPersistenceReaderReposit
             && ((x.ProcessStatusId == (int)ProcessStatuses.Processing && x.Updated < updateTime) || (x.ProcessStatusId == (int)ProcessStatuses.Error))
             && (x.ProcessAttempt < maxAttempts);
 
-        var updater = new Dictionary<ContextCommand, (string Name, object Value)>
+        var updatedDate = DateTime.UtcNow;
+        const int ProcessStatusId = (int)ProcessStatuses.Processing;
+        const int ProcessAttempt = 1;
+
+        var updater = new Dictionary<ContextCommand, (string Name, string Value)>
         {
-            { ContextCommand.Set, (nameof(IPersistentProcess.Updated), DateTime.UtcNow) },
-            { ContextCommand.Set, (nameof(IPersistentProcess.ProcessStatusId), (int)ProcessStatuses.Processing) },
-            { ContextCommand.Inc, (nameof(IPersistentProcess.ProcessAttempt), 1) }
+            { ContextCommand.Set, (nameof(IPersistentProcess.Updated), $"{updatedDate}") },
+            { ContextCommand.Set, (nameof(IPersistentProcess.ProcessStatusId), $"{ProcessStatusId}") },
+            { ContextCommand.Inc, (nameof(IPersistentProcess.ProcessAttempt), $"{ProcessAttempt}") }
         };
 
-        return await _context.UpdateAsync(condition, updater, cToken);
+        try
+        {
+            await _context.StartTransactionAsync(cToken);
+
+            var oldEntities = await FindManyAsync(condition, cToken);
+            var updatedCount = await _context.UpdateAsync(condition, updater, cToken);
+
+            if (oldEntities.Length != updatedCount)
+                throw new MongoException("Updating statuses was failed!");
+
+            await _context.CommitTransactionAsync(cToken);
+
+            foreach (var item in oldEntities)
+            {
+                item.Updated = updatedDate;
+                item.ProcessStatusId = ProcessStatusId;
+                item.ProcessAttempt += ProcessAttempt;
+            }
+
+            return oldEntities;
+        }
+        catch (Exception exception)
+        {
+            await _context.RollbackTransactionAsync(cToken);
+            throw new SharedPersistenceException(nameof(MongoReaderRepository<TEntity>), nameof(GetUnprocessableAsync), new(exception));
+        }
     }
 }
 internal sealed class MongoWriterRepository<TEntity> : IPersistenceWriterRepository<TEntity> where TEntity : IPersistentNoSql
@@ -192,7 +249,7 @@ internal sealed class MongoWriterRepository<TEntity> : IPersistenceWriterReposit
     {
         try
         {
-            await _context.StartTransactionAsync();
+            await _context.StartTransactionAsync(cToken);
 
             var count = 0;
             foreach (var entity in entities)
@@ -212,13 +269,13 @@ internal sealed class MongoWriterRepository<TEntity> : IPersistenceWriterReposit
                 count++;
             }
 
-            await _context.CommitTransactionAsync();
+            await _context.CommitTransactionAsync(cToken);
 
             _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success, count);
         }
         catch (Exception exception)
         {
-            await _context.RollbackTransactionAsync();
+            await _context.RollbackTransactionAsync(cToken);
 
             throw new SharedPersistenceException(nameof(MongoWriterRepository<TEntity>), nameof(SaveProcessableAsync), new(exception));
         }

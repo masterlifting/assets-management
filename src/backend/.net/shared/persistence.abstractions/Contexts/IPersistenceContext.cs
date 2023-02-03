@@ -13,7 +13,7 @@ namespace Shared.Persistence.Abstractions.Contexts
 
         Task CreateAsync<T>(T entity, CancellationToken cToken = default) where T : class, TEntity;
         Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity;
-        Task<T[]> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<uint> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
 
         Task StartTransactionAsync(CancellationToken cToken = default);
         Task CommitTransactionAsync(CancellationToken cToken = default);

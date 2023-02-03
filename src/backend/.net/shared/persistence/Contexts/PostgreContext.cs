@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 
 using Shared.Persistence.Abstractions.Contexts;
@@ -7,6 +8,7 @@ using Shared.Persistence.Abstractions.Entities;
 using Shared.Persistence.Settings.Connections;
 
 using SharpCompress.Common;
+using static Shared.Persistence.Abstractions.Constants.Enums;
 
 namespace Shared.Persistence.Contexts;
 
@@ -29,6 +31,12 @@ public abstract class PostgreContext : DbContext, IPostgrePersistenceContext
 
     public new IQueryable<T> Set<T>() where T : class, IPersistentSql => base.Set<T>();
 
+    public string GetTableName<T>() where T : class, IPersistentSql
+    {
+        var name =  Model.FindEntityType(typeof(T))?.ShortName();
+        return name ?? throw new NullReferenceException("Table name was not found");
+    }
+
     public Task<T?> FindByIdAsync<T>(CancellationToken cToken, object[] id) where T : class, IPersistentSql =>
         base.Set<T>().FindAsync(id, cToken).AsTask();
     public Task<T[]> FindManyAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, IPersistentSql =>
@@ -41,12 +49,12 @@ public abstract class PostgreContext : DbContext, IPostgrePersistenceContext
     public async Task CreateAsync<T>(T entity, CancellationToken cToken = default) where T : class, IPersistentSql
     {
         await base.Set<T>().AddAsync(entity, cToken);
-        await SaveChangesAsync();
+        await SaveChangesAsync(cToken);
     }
     public async Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, IPersistentSql
     {
         await base.Set<T>().AddRangeAsync(entities, cToken);
-        await SaveChangesAsync();
+        await SaveChangesAsync(cToken);
     }
     public async Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default) where T : class, IPersistentSql
     {
@@ -96,7 +104,8 @@ public abstract class PostgreContext : DbContext, IPostgrePersistenceContext
 
         return entities;
     }
-
+    public Task<T[]> ExecuteQueryAsync<T>(string query, CancellationToken cToken = default) where T : class, IPersistentSql => 
+        base.Set<T>().FromSqlRaw(query).ToArrayAsync(cToken);
     public Task StartTransactionAsync(CancellationToken cToken = default) => Database.BeginTransactionAsync(cToken);
     public Task CommitTransactionAsync(CancellationToken cToken = default) => Database.CommitTransactionAsync(cToken);
     public Task RollbackTransactionAsync(CancellationToken cToken = default) => Database.RollbackTransactionAsync(cToken);

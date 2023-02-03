@@ -47,20 +47,19 @@ internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepos
         _context.FindManyAsync(condition, cToken);
 
     public Task<T[]> GetCatalogsAsync<T>(CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
-        _context.FindManyAsync<T>(x => true, cToken);
+        _context.FindManyAsync<T>(_ => true, cToken);
     public Task<T?> GetCatalogByIdAsync<T>(int id, CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
         _context.FindSingleAsync<T>(x => x.Id == id, cToken);
     public Task<T?> GetCatalogByNameAsync<T>(string name, CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
         _context.FindSingleAsync<T>(x => x.Name.Equals(name), cToken);
     public Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>(CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
-            Task.Run(() => _context.Set<T>().ToDictionary(x => x.Id));
+           => _context.Set<T>().ToDictionaryAsync(x => x.Id, cToken);
     public Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>(CancellationToken cToken = default) where T : class, IPersistentCatalog, TEntity =>
-            Task.Run(() => _context.Set<T>().ToDictionary(x => x.Name));
+        => _context.Set<T>().ToDictionaryAsync(x => x.Name, cToken);
 
     public async Task<T[]> GetProcessableAsync<T>(IProcessStep step, int limit, CancellationToken cToken = default) where T : class, IPersistentProcess, TEntity
     {
-        var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-           ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+        var tableName = _context.GetTableName<T>();
 
         var query = @$"
                 UPDATE ""{tableName}"" SET
@@ -72,17 +71,14 @@ internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepos
 	                  FROM ""{tableName}""
 	                  WHERE ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Ready} 
 	                  LIMIT {limit}
-	                  FOR UPDATE SKIP LOCKED )
-                RETURNING ""{nameof(IPersistentProcess.Id)}"";";
+	                  FOR UPDATE SKIP LOCKED
+                    )";
 
-        var ids = await _context.Set<T>().FromSqlRaw(query).Select(x => x.Id).ToArrayAsync(cToken);
-
-        return await _context.Set<T>().Where(x => ids.Contains(x.Id)).ToArrayAsync(cToken);
+        return await _context.ExecuteQueryAsync<T>(query, cToken);
     }
     public async Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken = default) where T : class, IPersistentProcess, TEntity
     {
-        var tableName = _context.Model.FindEntityType(typeof(T))?.ShortName()
-           ?? throw new SharedPersistenceException(typeof(T).Name, "Searching a table name", new("Table name not found"));
+        var tableName = _context.GetTableName<T>();
 
         var query = @$"
                 UPDATE ""{tableName}"" SET
@@ -97,14 +93,11 @@ internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepos
                             AND ((""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing} AND ""{nameof(IPersistentProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Error}))
 			                AND ""{nameof(IPersistentProcess.ProcessAttempt)}"" < {maxAttempts}
 	                  LIMIT {limit}
-	                  FOR UPDATE SKIP LOCKED )
-                RETURNING ""{nameof(IPersistentProcess.Id)}"";";
+	                  FOR UPDATE SKIP LOCKED 
+                    )";
 
-        var ids = await _context.Set<T>().FromSqlRaw(query).Select(x => x.Id).ToArrayAsync(cToken);
-
-        return await _context.Set<T>().Where(x => ids.Contains(x.Id)).ToArrayAsync(cToken);
+        return await _context.ExecuteQueryAsync<T>(query, cToken);
     }
-
 }
 internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepository<TEntity> where TEntity : IPersistentSql
 {
@@ -126,7 +119,7 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
         _logger.LogTrace(_initiator, typeof(T).Name + ' ' + Constants.Actions.Created, Constants.Actions.Success);
 
     }
-    public async Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity
+    public async Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity
     {
         if (!entities.Any())
         {
@@ -150,11 +143,11 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
             return new TryResult<T>(exception);
         }
     }
-    public async Task<TryResult<T[]>> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity
+    public async Task<TryResult<T[]>> TryCreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity
     {
         try
         {
-            await CreateRangeAsync(entities, cToken);
+            await CreateManyAsync(entities, cToken);
             return new TryResult<T[]>(entities.ToArray());
         }
         catch (Exception exception)

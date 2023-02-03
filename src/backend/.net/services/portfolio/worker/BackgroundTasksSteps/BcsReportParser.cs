@@ -37,8 +37,8 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
                     try
                     {
                         await _uow.PostgreContext.StartTransactionAsync(cToken);
-                        await _uow.Deal.Writer.CreateRangeAsync(deals, cToken);
-                        await _uow.Event.Writer.CreateRangeAsync(events, cToken);
+                        await _uow.Deal.Writer.CreateManyAsync(deals, cToken);
+                        await _uow.Event.Writer.CreateManyAsync(events, cToken);
                         await _uow.PostgreContext.CommitTransactionAsync(cToken);
                     }
                     catch (Exception exeption)
