@@ -62,17 +62,17 @@ internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepos
         var tableName = _context.GetTableName<T>();
 
         var query = @$"
-                UPDATE ""{tableName}"" SET
-	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
-	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
-	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
-                WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
-	                ( SELECT ""{nameof(IPersistentProcess.Id)}""
-	                  FROM ""{tableName}""
-	                  WHERE ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Ready} 
-	                  LIMIT {limit}
-	                  FOR UPDATE SKIP LOCKED
-                    )";
+            UPDATE ""{tableName}"" SET
+                ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
+                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
+                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
+            WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
+                ( SELECT ""{nameof(IPersistentProcess.Id)}""
+                    FROM ""{tableName}""
+                    WHERE ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} AND ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Ready} 
+                    LIMIT {limit}
+                    FOR UPDATE SKIP LOCKED
+                )";
 
         return await _context.ExecuteQueryAsync<T>(query, cToken);
     }
@@ -81,20 +81,20 @@ internal sealed class PostgreReaderRepository<TEntity> : IPersistenceReaderRepos
         var tableName = _context.GetTableName<T>();
 
         var query = @$"
-                UPDATE ""{tableName}"" SET
-	                  ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
-	                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
-	                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
-                WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
-	                ( SELECT ""{nameof(IPersistentProcess.Id)}""
-	                  FROM ""{tableName}""
-	                  WHERE 
-                            ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} 
-                            AND ((""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing} AND ""{nameof(IPersistentProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Error}))
-			                AND ""{nameof(IPersistentProcess.ProcessAttempt)}"" < {maxAttempts}
-	                  LIMIT {limit}
-	                  FOR UPDATE SKIP LOCKED 
-                    )";
+            UPDATE ""{tableName}"" SET
+                ""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing}
+                , ""{nameof(IPersistentProcess.ProcessAttempt)}"" = ""{nameof(IPersistentProcess.ProcessAttempt)}"" + 1
+                , ""{nameof(IPersistentProcess.Updated)}"" = NOW()
+            WHERE ""{nameof(IPersistentProcess.Id)}"" IN 
+                ( SELECT ""{nameof(IPersistentProcess.Id)}""
+                    FROM ""{tableName}""
+                    WHERE 
+                        ""{nameof(IPersistentProcess.ProcessStepId)}"" = {step.Id} 
+                        AND ((""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Processing} AND ""{nameof(IPersistentProcess.Updated)}"" < '{updateTime: yyyy-MM-dd HH:mm:ss}') OR (""{nameof(IPersistentProcess.ProcessStatusId)}"" = {(int)ProcessStatuses.Error}))
+                        AND ""{nameof(IPersistentProcess.ProcessAttempt)}"" < {maxAttempts}
+                    LIMIT {limit}
+                    FOR UPDATE SKIP LOCKED 
+                )";
 
         return await _context.ExecuteQueryAsync<T>(query, cToken);
     }
@@ -117,7 +117,6 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
         await _context.CreateAsync(entity, cToken);
 
         _logger.LogTrace(_initiator, typeof(T).Name + ' ' + Constants.Actions.Created, Constants.Actions.Success);
-
     }
     public async Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity
     {
@@ -204,7 +203,7 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
     {
         try
         {
-            await _context.StartTransactionAsync();
+            await _context.StartTransactionAsync(cToken);
 
             var count = 0;
             foreach (var entity in entities)
@@ -223,13 +222,13 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
                 count++;
             }
 
-            await _context.CommitTransactionAsync();
+            await _context.CommitTransactionAsync(cToken);
 
             _logger.LogTrace(_initiator, Constants.Actions.Updated, Constants.Actions.Success, count);
         }
         catch (Exception exception)
         {
-            await _context.RollbackTransactionAsync();
+            await _context.RollbackTransactionAsync(cToken);
 
             throw new SharedPersistenceException(nameof(PostgreWriterRepository<TEntity>), nameof(SaveProcessableAsync), new(exception));
         }
