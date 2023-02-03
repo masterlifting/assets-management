@@ -211,7 +211,7 @@ internal sealed class PostgreWriterRepository<TEntity> : IPersistenceWriterRepos
     {
         try
         {
-            await _context.SetTransactionAsync();
+            await _context.StartTransactionAsync();
 
             var count = 0;
             foreach (var entity in entities)

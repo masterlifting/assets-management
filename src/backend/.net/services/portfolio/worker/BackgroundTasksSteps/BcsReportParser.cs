@@ -36,7 +36,7 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
                 {
                     try
                     {
-                        await _uow.PostgreContext.SetTransactionAsync(cToken);
+                        await _uow.PostgreContext.StartTransactionAsync(cToken);
                         await _uow.Deal.Writer.CreateRangeAsync(deals, cToken);
                         await _uow.Event.Writer.CreateRangeAsync(events, cToken);
                         await _uow.PostgreContext.CommitTransactionAsync(cToken);

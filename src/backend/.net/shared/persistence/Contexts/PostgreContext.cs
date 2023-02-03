@@ -97,7 +97,7 @@ public abstract class PostgreContext : DbContext, IPostgrePersistenceContext
         return entities;
     }
 
-    public Task SetTransactionAsync(CancellationToken cToken = default) => Database.BeginTransactionAsync(cToken);
+    public Task StartTransactionAsync(CancellationToken cToken = default) => Database.BeginTransactionAsync(cToken);
     public Task CommitTransactionAsync(CancellationToken cToken = default) => Database.CommitTransactionAsync(cToken);
     public Task RollbackTransactionAsync(CancellationToken cToken = default) => Database.RollbackTransactionAsync(cToken);
 }

@@ -12,5 +12,10 @@ public static class Constants
             Processing,
             Processed
         }
+        public enum ContextCommand
+        {
+            Set,
+            Inc
+        }
     }
 }

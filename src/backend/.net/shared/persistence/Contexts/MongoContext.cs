@@ -9,6 +9,8 @@ using Shared.Persistence.Settings.Connections;
 
 using System.Linq.Expressions;
 
+using static Shared.Persistence.Abstractions.Constants.Enums;
+
 namespace Shared.Persistence.Contexts;
 
 public abstract class MongoContext : IMongoPersistenceContext
@@ -44,67 +46,54 @@ public abstract class MongoContext : IMongoPersistenceContext
         GetCollection<T>().InsertOneAsync(entity, null, cToken);
     public Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken) where T : class, IPersistentNoSql =>
         GetCollection<T>().InsertManyAsync(entities, null, cToken);
-    public async Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default) where T : class, IPersistentNoSql
+    public async Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, Dictionary<ContextCommand, (string Name, string Value)> updater, CancellationToken cToken = default) where T : class, IPersistentNoSql
     {
-        var entities = await FindManyAsync(condition, cToken);
+        var updateRules = new BsonDocument();
 
-        if (!entities.Any())
-            return Array.Empty<T>();
-
-        var entityProperties = typeof(T).GetProperties();
-        var entityPropertiesDictionary = entityProperties.ToDictionary(x => x.Name, x => x.GetValue(entity));
-
-        for (int i = 0; i < entities.Length; i++)
+        foreach (var item in updater)
         {
-            for (int j = 0; j < entityProperties.Length; j++)
+            var field = item.Value;
+
+            switch (item.Key)
             {
-                var newValue = entityPropertiesDictionary[entityProperties[j].Name];
-
-                if (newValue == default)
-                    continue;
-
-                var oldValue = entityProperties[j].GetValue(entities[i]);
-
-                if (oldValue != newValue)
-                    entityProperties[j].SetValue(entities[i], newValue);
+                case ContextCommand.Set:
+                    {
+                        updateRules.Add("$set", new BsonDocument(field.Name, field.Value));
+                        break;
+                    }
+                case ContextCommand.Inc:
+                    {
+                        updateRules.Add("$inc", new BsonDocument(field.Name, field.Value));
+                        break;
+                    }
             }
-
-            var replacedResult = GetCollection<T>().FindOneAndReplaceAsync(condition, entities[i], new FindOneAndReplaceOptions<T>
-            {
-                IsUpsert = false,
-                ReturnDocument = ReturnDocument.After
-            }, cToken);
-
-            if (replacedResult is null)
-                throw new SharedPersistenceException(nameof(MongoContext), nameof(UpdateAsync), new("FindOneAndReplace method does bed request"));
         }
 
-        GetCollection<T>().UpdateMany<T>(condition, null, entity,);
+        var result = await GetCollection<T>().UpdateManyAsync<T>(condition, updateRules, null, cToken);
 
-        return entities.ToArray();
+
+       return Array.Empty<T>();
     }
     public async Task<T[]> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, IPersistentNoSql
     {
         var collection = GetCollection<T>();
 
-        var count = await collection.CountDocumentsAsync(condition, null, cToken);
+        var result = await collection.DeleteManyAsync<T>(condition, null, cToken);
 
-        var result = new List<T>((int)count);
-
-        for (int i = 0; i < count; i++)
-            result.Add(await collection.FindOneAndDeleteAsync(condition, null, cToken));
-
-        return result.ToArray();
+        return Array.Empty<T>();   
     }
 
-    public async Task SetTransactionAsync(CancellationToken cToken = default)
+    public async Task StartTransactionAsync(CancellationToken cToken = default)
     {
+        if (_session is not null)
+            throw new SharedPersistenceException(nameof(MongoContext), nameof(StartTransactionAsync), new("The transaction session is already"));
+
         _session = await _client.StartSessionAsync();
         _session.StartTransaction();
     }
     public async Task CommitTransactionAsync(CancellationToken cToken = default)
     {
-        if(_session is null)
+        if (_session is null)
             throw new SharedPersistenceException(nameof(MongoContext), nameof(CommitTransactionAsync), new("The transaction session was not found"));
 
         await _session.CommitTransactionAsync();
