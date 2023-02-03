@@ -1,4 +1,4 @@
-using AM.Services.Portfolio.Core.Abstractions.ExcelService;
+﻿using AM.Services.Portfolio.Core.Abstractions.ExcelService;
 using AM.Services.Portfolio.Core.Abstractions.Persistence;
 using AM.Services.Portfolio.Core.Domain.Persistence.Entities;
 using AM.Services.Portfolio.Core.Exceptions;
@@ -184,7 +184,7 @@ public sealed class BcsReportService : IBcsReportService
         };
     }
 
-    public async Task<Event[]> GetEventsAsync(Guid userId, string agreement, IList<BcsReportEventModel> models)
+    public async Task<Event[]> GetEventsAsync(Guid userId, string agreement, IList<BcsReportEventModel> models, CancellationToken cToken = default)
     {
         var result = new List<Event>(models.Count);
 
@@ -219,7 +219,7 @@ public sealed class BcsReportService : IBcsReportService
 
         return result.ToArray();
     }
-    public async Task<Deal[]> GetDealsAsync(Guid userId, string agreement, IList<BcsReportDealModel> models)
+    public async Task<Deal[]> GetDealsAsync(Guid userId, string agreement, IList<BcsReportDealModel> models, CancellationToken cToken = default)
     {
         var result = new List<Deal>(models.Count);
 

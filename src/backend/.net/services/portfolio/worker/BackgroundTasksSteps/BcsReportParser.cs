@@ -29,10 +29,10 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
             {
                 var reportModel = _service.GetReportModel(x.PayloadSource, x.Payload);
 
-                var deals = await _service.GetDealsAsync(x.UserId, reportModel.Agreement, reportModel.Deals);
-                var events = await _service.GetEventsAsync(x.UserId, reportModel.Agreement, reportModel.Events);
+                var deals = await _service.GetDealsAsync(x.UserId, reportModel.Agreement, reportModel.Deals, cToken);
+                var events = await _service.GetEventsAsync(x.UserId, reportModel.Agreement, reportModel.Events, cToken);
 
-                var saveChanges = async () =>
+                await _workQueue.ProcessAsync(async () =>
                 {
                     try
                     {
@@ -46,9 +46,7 @@ public class BcsReportParser : IProcessStepHandler<IncomingData>
                         await _uow.PostgreContext.RollbackTransactionAsync(cToken);
                         throw new PortfolioInfrastructureException(nameof(UnitOfWorkRepository), "Save to database form the " + nameof(HandleStepAsync), new(exeption));
                     }
-                };
-
-                await _workQueue.ProcessAsync(saveChanges);
+                });
             }
             catch (Exception exception)
             {

@@ -3,17 +3,18 @@ using Shared.Persistence.Abstractions.Entities;
 
 namespace Shared.Persistence.Abstractions.Contexts
 {
-    public interface IPersistenceContext<T> : IDisposable where T : class, IPersistent
+    public interface IPersistenceContext<TEntity> : IDisposable where TEntity : IPersistent
     {
-        IQueryable<T> Set();
+        IQueryable<T> Set<T>() where T : class, TEntity;
 
-        Task<T[]> FindManyAsync(Expression<Func<T, bool>> condition, CancellationToken cToken = default);
-        Task<T?> FindFirstAsync(Expression<Func<T, bool>> condition, CancellationToken cToken = default);
-        Task<T?> FindSingleAsync(Expression<Func<T, bool>> condition, CancellationToken cToken = default);
+        Task<T[]> FindManyAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T?> FindFirstAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T?> FindSingleAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
 
-        Task CreateAsync(T entity, CancellationToken cToken = default);
-        Task<T[]> UpdateAsync(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default);
-        Task<T[]> DeleteAsync(Expression<Func<T, bool>> condition, CancellationToken cToken = default);
+        Task CreateAsync<T>(T entity, CancellationToken cToken = default) where T : class, TEntity;
+        Task CreateManyAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T[]> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
 
         Task SetTransactionAsync(CancellationToken cToken = default);
         Task CommitTransactionAsync(CancellationToken cToken = default);

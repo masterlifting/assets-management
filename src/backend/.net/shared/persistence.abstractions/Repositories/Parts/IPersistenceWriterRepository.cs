@@ -6,19 +6,19 @@ using System.Linq.Expressions;
 
 namespace Shared.Persistence.Abstractions.Repositories.Parts
 {
-    public interface IPersistenceWriterRepository<T> where T : class, IPersistent
+    public interface IPersistenceWriterRepository<TEntity> where TEntity : IPersistent
     {
-        Task CreateAsync(T entity, CancellationToken? cToken = null);
-        Task CreateRangeAsync(IReadOnlyCollection<T> entities, CancellationToken? cToken = null);
-        Task<TryResult<T>> TryCreateAsync(T entity, CancellationToken? cToken = null);
-        Task<TryResult<T[]>> TryCreateRangeAsync(IReadOnlyCollection<T> entities, CancellationToken? cToken = null);
+        Task CreateAsync<T>(T entity, CancellationToken cToken = default) where T : class, TEntity;
+        Task CreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity;
+        Task<TryResult<T>> TryCreateAsync<T>(T entity, CancellationToken cToken = default) where T : class, TEntity;
+        Task<TryResult<T[]>> TryCreateRangeAsync<T>(IReadOnlyCollection<T> entities, CancellationToken cToken = default) where T : class, TEntity;
 
-        Task<T[]> UpdateAsync(Expression<Func<T, bool>> condition, T entity, CancellationToken? cToken = null);
-        Task<TryResult<T[]>> TryUpdateAsync(Expression<Func<T, bool>> condition, T entity, CancellationToken? cToken = null);
+        Task<T[]> UpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default)where T : class, TEntity;
+        Task<TryResult<T[]>> TryUpdateAsync<T>(Expression<Func<T, bool>> condition, T entity, CancellationToken cToken = default) where T : class, TEntity;
 
-        Task<T[]> DeleteAsync(Expression<Func<T, bool>> condition, CancellationToken? cToken = null);
-        Task<TryResult<T[]>> TryDeleteAsync(Expression<Func<T, bool>> condition, CancellationToken? cToken = null);
+        Task<T[]> DeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<TryResult<T[]>> TryDeleteAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
 
-        Task SaveProcessableAsync<TProcessable>(IProcessStep? step, IEnumerable<TProcessable> entities, CancellationToken cToken) where TProcessable : class, T, IPersistentProcess;
+        Task SaveProcessableAsync<T>(IProcessStep? step, IEnumerable<T> entities, CancellationToken cToken) where T : class, TEntity, IPersistentProcess;
     }
 }

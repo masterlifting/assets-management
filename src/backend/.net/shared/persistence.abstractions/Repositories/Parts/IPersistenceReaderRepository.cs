@@ -5,19 +5,19 @@ using System.Linq.Expressions;
 
 namespace Shared.Persistence.Abstractions.Repositories.Parts
 {
-    public interface IPersistenceReaderRepository<T> where T : class, IPersistent
+    public interface IPersistenceReaderRepository<TEntity> where TEntity : IPersistent
     {
-        Task<T?> FindSingleAsync(Expression<Func<T, bool>> condition);
-        Task<T?> FindFirstAsync(Expression<Func<T, bool>> condition);
-        Task<T[]> FindManyAsync(Expression<Func<T, bool>> condition);
+        Task<T?> FindSingleAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T?> FindFirstAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
+        Task<T[]> FindManyAsync<T>(Expression<Func<T, bool>> condition, CancellationToken cToken = default) where T : class, TEntity;
 
-        Task<TCatalog[]> GetCatalogsAsync<TCatalog>() where TCatalog : class, T, IPersistentCatalog;
-        Task<Dictionary<int, TCatalog>> GetCatalogsDictionaryByIdAsync<TCatalog>() where TCatalog : class, T, IPersistentCatalog;
-        Task<Dictionary<string, TCatalog>> GetCatalogsDictionaryByNameAsync<TCatalog>() where TCatalog : class, T, IPersistentCatalog;
-        Task<TCatalog?> GetCatalogByIdAsync<TCatalog>(int id) where TCatalog : class, T, IPersistentCatalog;
-        Task<TCatalog?> GetCatalogByNameAsync<TCatalog>(string name) where TCatalog : class, T, IPersistentCatalog;
+        Task<T[]> GetCatalogsAsync<T>(CancellationToken cToken = default) where T : class, TEntity, IPersistentCatalog;
+        Task<Dictionary<int, T>> GetCatalogsDictionaryByIdAsync<T>(CancellationToken cToken = default) where T : class, TEntity, IPersistentCatalog;
+        Task<Dictionary<string, T>> GetCatalogsDictionaryByNameAsync<T>(CancellationToken cToken = default) where T : class, TEntity, IPersistentCatalog;
+        Task<T?> GetCatalogByIdAsync<T>(int id, CancellationToken cToken = default) where T : class, TEntity, IPersistentCatalog;
+        Task<T?> GetCatalogByNameAsync<T>(string name, CancellationToken cToken = default) where T : class, TEntity, IPersistentCatalog;
 
-        Task<TProcessable[]> GetProcessableAsync<TProcessable>(IProcessStep step, int limit, CancellationToken cToken) where TProcessable : class, T, IPersistentProcess;
-        Task<TProcessable[]> GetUnprocessableAsync<TProcessable>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken) where TProcessable : class, T, IPersistentProcess;
+        Task<T[]> GetProcessableAsync<T>(IProcessStep step, int limit, CancellationToken cToken = default) where T : class, TEntity, IPersistentProcess;
+        Task<T[]> GetUnprocessableAsync<T>(IProcessStep step, int limit, DateTime updateTime, int maxAttempts, CancellationToken cToken = default) where T : class, TEntity, IPersistentProcess;
     }
 }
