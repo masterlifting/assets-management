@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a6fb7aad-65d8-404b-afbf-797a0ef1f9e4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AM.Portfolio.Infrastructure\AM.Portfolio.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\submodules\Net.Shared.Background\src\Net.Shared.Background\Net.Shared.Background.csproj" />
+  </ItemGroup>
+</Project>
