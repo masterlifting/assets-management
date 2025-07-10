@@ -1,0 +1,44 @@
+/** @format */
+
+use('Portfolio');
+db.DataHeap.countDocuments({
+  StatusId: 6,
+});
+
+use('Portfolio');
+db.DataHeap.find(
+  {
+    StatusId: -1,
+  },
+  {
+    _id: 0,
+    StepId: 1,
+    StatusId: 1,
+    PayloadSource: 1,
+    Error: 1,
+  },
+);
+
+use('Portfolio');
+db.DataHeap.updateMany(
+  {
+    //Created: { $lt: new Date('2023-06-04T23:14:54.573Z') },
+  },
+  {
+    $set: {
+      HostId: null,
+      StatusId: 2,
+      Error: null,
+      StepId: 4,
+    },
+  },
+);
+
+use('Portfolio');
+db.ProcessSteps.find(
+  {},
+  {
+    _id: 1,
+    Name: 1,
+  },
+);

@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  am.portfolio.api:
+    image: ${DOCKER_REGISTRY-}am.portfolio.api:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: am.portfolio.api
+    build:
+      context: ./../
+      dockerfile: ./src/AM.Portfolio.Api/Dockerfile
+    networks:
+      - infrastructurenet
+    ports:
+      - 8090:8090
+    env_file:
+      - ./../.env
+    environment:
+      ASPNETCORE_URLS: http://+:8090
+      SeqConnection__Host: seq
+      SeqConnection__Port: 80
+      DatabaseConnections__PostgreSql__Host: postgresql
+      DatabaseConnections__PostgreSql__Port: 5432
+      DatabaseConnections__MongoDb__Host: mongodb
+      DatabaseConnections__MongoDb__Port: 27017
+  am.portfolio.worker:
+    image: ${DOCKER_REGISTRY-}am.portfolio.worker:${PLATFORM:-linux}-${TAG:-latest}
+    container_name: am.portfolio.worker
+    build:
+      context: ./../
+      dockerfile: ./src/AM.Portfolio.Worker/Dockerfile
+    networks:
+      - infrastructurenet
+    env_file:
+      - ./../.env
+    environment:
+      SeqConnection__Host: seq
+      SeqConnection__Port: 80
+      DatabaseConnections__PostgreSql__Host: postgresql
+      DatabaseConnections__PostgreSql__Port: 5432
+      DatabaseConnections__MongoDb__Host: mongodb
+      DatabaseConnections__MongoDb__Port: 27017
+
+networks:
+  infrastructurenet:
+    external: true
+    name: am-infrastructure_infrastructurenet

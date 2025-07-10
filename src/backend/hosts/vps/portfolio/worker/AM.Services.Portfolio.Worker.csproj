@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-AM.Services.Portfolio.Worker-3a169da6-cd87-4681-a064-616d80615077</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\core\AM.Services.Portfolio.Core.csproj" />
+    <ProjectReference Include="..\infrastructure\AM.Services.Portfolio.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
